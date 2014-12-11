@@ -1,6 +1,6 @@
 #import "asphaleiaTVC.h"
 // #import "Globals.h"
-#define bundlePath @"/Library/PreferenceBundles/Asphaleia.bundle"
+#define bundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
 
 #define SELF_WIDTH self.contentView.frame.size.width
 #define SELF_HEIGHT self.contentView.frame.size.height
@@ -45,7 +45,7 @@
 		[self.contentView addSubview:profileView];
 		
 		birdView = [[UIImageView alloc] init];
-		birdView.image = [UIImage imageNamed:@"Twitter.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+		birdView.image = [UIImage imageNamed:@"Twitter.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath] compatibleWithTraitCollection:nil];
 		[self.contentView addSubview:birdView];
 		
 		nameLabel = [[UILabel alloc] init];

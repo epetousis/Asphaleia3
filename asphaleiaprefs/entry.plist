@@ -1,0 +1,10 @@
+{
+    entry = {
+	bundle = AsphaleiaPrefs;
+	cell = PSLinkCell;
+	detail = AsphaleiaPrefsListController;
+	icon = AsphaleiaPrefs.png;
+	isController = 1;
+	label = Asphaleia;
+    };
+}
