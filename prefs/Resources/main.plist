@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Secured Apps</string>
+			<key>icon</key>
+			<string>SecuredApps@2x.png</string>
+			<key>action</key>
+			<string>showSecurity</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>Passcode Options</string>
+			<key>icon</key>
+			<string>PasscodeOptions@2x.png</string>
+			<key>action</key>
+			<string>showPasscodeOptions</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>The Creators</string>
+			<key>icon</key>
+			<string>TheCreators@2x.png</string>
+			<key>action</key>
+			<string>showCreators</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Asphaleia &#169; 2014 A Cubed</string>
+		</dict>
+		<dict> 
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>label</key>
+			<string>A3tweaks Support </string>
+			<key>icon</key>
+			<string>A3tweaksSupport@2x.png</string>
+			<key>action</key>
+			<string>showMailDialog</string>
+		</dict>
+	</array>
+</dict>
+</plist>

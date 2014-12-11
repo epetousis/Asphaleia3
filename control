@@ -1,0 +1,9 @@
+Package: com.a3tweaks.asphaleia
+Name: Asphaleia
+Depends: firmware (>= 8.0), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist, libactivator 
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: customizable locking system for apps & more
+Maintainer: A3tweaks <asphaleia@a3tweaks.com>
+Author: A3tweaks <asphaleia@a3tweaks.com>
+Section: Tweaks
