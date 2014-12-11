@@ -66,7 +66,7 @@
         NSMutableArray *overallAray = [[NSMutableArray alloc]init];
         NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
         for (int k = 1; k < 5; k++) {
-            UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+            UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
             dashView.frame = CGRectMake(86+((k-1)*43), ((_altView.frame.size.height-20)/2)-9, 18, 19);
             [_altView addSubview:dashView];
             [pageArray addObject:dashView];
@@ -122,7 +122,7 @@
         for (int i = 1; i < 3; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
             for (int k = 1; k < 5; k++) {
-                UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                 dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*320), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
                 [_scrollView addSubview:dashView];
                 [pageArray addObject:dashView];
@@ -176,7 +176,7 @@
         for (int i = 1; i < 4; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
             for (int k = 1; k < 5; k++) {
-                UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                 dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*320), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
                 [_scrollView addSubview:dashView];
                 [pageArray addObject:dashView];
@@ -240,9 +240,9 @@
         int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
             if (i <= textField.text.length) {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dot.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dot.png"]];
             } else {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
             }
             i++;
         }
@@ -256,7 +256,7 @@
                 textField.text = @"";
                 i = 1;
                 for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
-                    [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]]; 
+                    [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
                     i++;
                 }
             }
@@ -265,9 +265,9 @@
         int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
             if (i <= textField.text.length) {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dot.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dot.png"]];
             } else {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
             }
             i++;
         }
@@ -302,12 +302,12 @@
                     textField.text = @"";
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-2)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                     [self scrollToPage:(_currentPage-2)];
@@ -319,9 +319,9 @@
         int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
             if (i <= textField.text.length) {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dot.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dot.png"]];
             } else {
-                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
             }
             i++;
         }
@@ -337,7 +337,7 @@
                     textField.text = @"";
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]]; 
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
                         i++;
                     }
                 }
@@ -360,12 +360,12 @@
                     textField.text = @"";
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-2)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/Asphaleia.bundle/dash.png"]];
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                     [self scrollToPage:(_currentPage-2)];

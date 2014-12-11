@@ -7,8 +7,8 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>label</key>
-			<string></string>
+			<key>headerCellClass</key>
+			<string>AsphaleiaTitleCell</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -60,7 +60,7 @@
 			<key>cell</key>
 			<string>PSLinkCell</string>
 			<key>label</key>
-			<string>A3tweaks Support </string>
+			<string>A³tweaks Support </string>
 			<key>icon</key>
 			<string>A3tweaksSupport@2x.png</string>
 			<key>action</key>

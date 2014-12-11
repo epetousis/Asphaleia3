@@ -53,7 +53,7 @@ SBIconView *currentIconView;
 	//[iconView bringSubviewToFront:containerView];
 
 	fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
-	[UIView animateWithDuration:0.2f animations:^{
+	[UIView animateWithDuration:0.3f animations:^{
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
@@ -87,7 +87,8 @@ SBIconView *currentIconView;
 	}
 }
 
--(void)iconHandleLongPress:(SBIconView *)iconView {
+// editing hook
+/*-(void)iconHandleLongPress:(SBIconView *)iconView {
 	if (self.isEditing) {
 		%orig;
 		return;
@@ -97,6 +98,6 @@ SBIconView *currentIconView;
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	//[self setIsEditing:YES];
-}
+}*/
 
 %end

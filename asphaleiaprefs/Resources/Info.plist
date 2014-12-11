@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>Asphaleia</string>
+	<string>AsphaleiaPrefs</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.a3tweaks.asphaleia</string>
+	<string>com.a3tweaks.asphaleiaprefs</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -23,6 +23,6 @@
 	<key>MinimumOSVersion</key>
 	<string>3.0</string>
 	<key>NSPrincipalClass</key>
-	<string>Asphaleia</string>
+	<string>AsphaleiaPrefsListController</string>
 </dict>
 </plist>
