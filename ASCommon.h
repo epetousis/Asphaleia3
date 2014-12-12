@@ -4,5 +4,6 @@
 @interface ASCommon : NSObject
 +(ASCommon *)sharedInstance;
 -(UIAlertView *)createAppAuthenticationAlertWithIcon:(SBIcon *)icon;
+-(BOOL)isTouchIDDevice;
 
 @end
