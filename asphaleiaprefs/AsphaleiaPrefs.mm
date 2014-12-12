@@ -2,6 +2,7 @@
 #import <Preferences/PSTableCell.h>
 #import <Twitter/Twitter.h>
 #import "modalPinVC.h"
+#import "TouchIDInfo.h"
 #import "AsphaleiaPrefsViewControllers.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)

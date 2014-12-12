@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TouchIDInfo.h"
 
 @interface modalPinVC : UIViewController <UITextFieldDelegate,UIScrollViewDelegate> {
     UIScrollView *_scrollView;
