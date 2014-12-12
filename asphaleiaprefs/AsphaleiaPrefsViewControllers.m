@@ -1486,7 +1486,43 @@ static NSArray *hiddenDisplayIdentifiers; static NSMutableArray *iconsToLoad; st
 {
     if (self == [asphaleiaTableSectionSource class]) {
         defaultImage = [[ALApplicationList sharedApplicationList] iconOfSize:ALApplicationIconSizeSmall forDisplayIdentifier:@"com.apple.WebSheet"];
-        hiddenDisplayIdentifiers = [[NSArray alloc] initWithObjects:@"com.apple.AdSheet",@"com.apple.AdSheetPhone",@"com.apple.AdSheetPad",@"com.apple.DataActivation",@"com.apple.DemoApp",@"com.apple.fieldtest",@"com.apple.iosdiagnostics",@"com.apple.iphoneos.iPodOut",@"com.apple.TrustMe",@"com.apple.WebSheet",@"com.apple.springboard",@"com.apple.purplebuddy",@"com.apple.datadetectors.DDActionsService",@"com.apple.FacebookAccountMigrationDialog",@"com.apple.iad.iAdOptOut",@"com.apple.ios.StoreKitUIService",@"com.apple.TextInput.kbd",@"com.apple.MailCompositionService",@"com.apple.mobilesms.compose",@"com.apple.quicklook.quicklookd",@"com.apple.ShoeboxUIService",@"com.apple.social.remoteui.SocialUIService",@"com.apple.WebViewService",@"com.apple.gamecenter.GameCenterUIService",@"com.apple.appleaccount.AACredentialRecoveryDialog",@"com.apple.CompassCalibrationViewService",@"com.apple.WebContentFilter.remoteUI.WebContentAnalysisUI",@"com.apple.PassbookUIService",@"com.apple.uikit.PrintStatus",@"com.apple.Copilot",@"com.apple.MusicUIService",@"com.apple.AccountAuthenticationDialog",@"com.apple.MobileReplayer",@"com.apple.SiriViewService",nil];
+        hiddenDisplayIdentifiers = [[NSArray alloc] initWithObjects:
+                                    @"com.apple.AdSheet",
+                                    @"com.apple.AdSheetPhone",
+                                    @"com.apple.AdSheetPad",
+                                    @"com.apple.DataActivation",
+                                    @"com.apple.DemoApp",
+                                    @"com.apple.fieldtest",
+                                    @"com.apple.iosdiagnostics",
+                                    @"com.apple.iphoneos.iPodOut",
+                                    @"com.apple.TrustMe",
+                                    @"com.apple.WebSheet",
+                                    @"com.apple.springboard",
+                                    @"com.apple.purplebuddy",
+                                    @"com.apple.datadetectors.DDActionsService",
+                                    @"com.apple.FacebookAccountMigrationDialog",
+                                    @"com.apple.iad.iAdOptOut",
+                                    @"com.apple.ios.StoreKitUIService",
+                                    @"com.apple.TextInput.kbd",
+                                    @"com.apple.MailCompositionService",
+                                    @"com.apple.mobilesms.compose",
+                                    @"com.apple.quicklook.quicklookd",
+                                    @"com.apple.ShoeboxUIService",
+                                    @"com.apple.social.remoteui.SocialUIService",
+                                    @"com.apple.WebViewService",
+                                    @"com.apple.gamecenter.GameCenterUIService",
+                                    @"com.apple.appleaccount.AACredentialRecoveryDialog",
+                                    @"com.apple.CompassCalibrationViewService",
+                                    @"com.apple.WebContentFilter.remoteUI.WebContentAnalysisUI",
+                                    @"com.apple.PassbookUIService",
+                                    @"com.apple.uikit.PrintStatus",
+                                    @"com.apple.Copilot",
+                                    @"com.apple.MusicUIService",
+                                    @"com.apple.AccountAuthenticationDialog",
+                                    @"com.apple.MobileReplayer",
+                                    @"com.apple.SiriViewService",
+                                    @"com.apple.TencentWeiboAccountMigrationDialog",
+                                    nil];
     }
 }
 + (void)loadIconsFromBackground
@@ -1620,7 +1656,6 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
 {
     return [tableView dequeueReusableCellWithIdentifier:className] ?: [[NSClassFromString(className) alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:className];
 }
-// the method below is causing a crash - fix it.
 #define CellWithClassName(className) \
     CellWithClassName(className, tableView)
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRow:(NSInteger)row
@@ -1650,54 +1685,14 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
     }
     UITableViewCell *cell = CellWithClassName([_descriptor objectForKey:ALSectionDescriptorCellClassNameKey] ?: @"UITableViewCell");
     cell.textLabel.text = [_displayNames objectAtIndex:row];
-    if (iconSize > 0) {
         NSString *displayIdentifier = [_displayIdentifiers objectAtIndex:row];
         ALApplicationList *appList = [ALApplicationList sharedApplicationList];
-        if ([appList hasCachedIconOfSize:iconSize forDisplayIdentifier:displayIdentifier]) {
-            cell.imageView.image = [appList iconOfSize:iconSize forDisplayIdentifier:displayIdentifier];
+        //if ([appList hasCachedIconOfSize:ALApplicationIconSizeSmall forDisplayIdentifier:displayIdentifier]) {
+            cell.imageView.image = [appList iconOfSize:ALApplicationIconSizeSmall forDisplayIdentifier:displayIdentifier];
             cell.indentationWidth = 10.0f;
             cell.indentationLevel = 0;
-        } else {
-            if (defaultImage.size.width == iconSize) {
-                cell.imageView.image = defaultImage;
-                cell.indentationWidth = 10.0f;
-                cell.indentationLevel = 0;
-            } else {
-                cell.indentationWidth = iconSize + 7.0f;
-                cell.indentationLevel = 1;
-                cell.imageView.image = nil;
-            }
-            cell.imageView.image = defaultImage;
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [NSNumber numberWithInteger:iconSize], ALIconSizeKey,
-                                      displayIdentifier, ALDisplayIdentifierKey,
-                                      nil];
-            OSSpinLockLock(&spinLock);
-            if (iconsToLoad)
-                [iconsToLoad insertObject:userInfo atIndex:0];
-            else {
-                iconsToLoad = [[NSMutableArray alloc] initWithObjects:userInfo, nil];
-                [asphaleiaTableSectionSource performSelectorInBackground:@selector(loadIconsFromBackground) withObject:nil];
-            }
-            OSSpinLockUnlock(&spinLock);
-        }
-    } else {
-        cell.imageView.image = nil;
-    }
+        //}
     return cell;
-}
-- (void)updateCell:(UITableViewCell *)cell forRow:(NSInteger)row withLoadedIconOfSize:(CGFloat)newIconSize forDisplayIdentifier:(NSString *)displayIdentifier
-{
-    if ([displayIdentifier isEqual:[_displayIdentifiers objectAtIndex:row]] && newIconSize == iconSize) {
-        UIImageView *imageView = cell.imageView;
-        UIImage *image = imageView.image;
-        if (!image || (image == defaultImage)) {
-            cell.indentationLevel = 0;
-            cell.indentationWidth = 10.0f;
-            imageView.image = [[ALApplicationList sharedApplicationList] iconOfSize:newIconSize forDisplayIdentifier:displayIdentifier];
-            [cell setNeedsLayout];
-        }
-    }
 }
 - (void)detach
 {
@@ -1723,7 +1718,6 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
     if ((self = [super init])) {
         _loadsAsynchronously = YES;
         _sectionDescriptors = [[NSMutableArray alloc] init];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iconLoadedFromNotification:) name:ALIconLoadedNotification object:nil];
         if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
             prefs = [[NSMutableDictionary alloc]initWithContentsOfFile:prefpath];
         } else {
