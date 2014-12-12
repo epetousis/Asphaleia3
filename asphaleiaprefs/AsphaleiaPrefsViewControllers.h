@@ -104,7 +104,6 @@
 - (NSInteger)rowCount;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRow:(NSInteger)row;
 - (id)initWithDescriptor:(NSDictionary *)descriptor dataSource:(ALApplicationTableDataSource *)dataSource loadsAsynchronously:(BOOL)loadsAsynchronously;
-- (void)updateCell:(UITableViewCell *)cell forRow:(NSInteger)row withLoadedIconOfSize:(CGFloat)newIconSize forDisplayIdentifier:(NSString *)displayIdentifier;
 @end
 @interface securedAppsAL : UITableViewController {
 @private

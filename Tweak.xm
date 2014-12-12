@@ -12,6 +12,8 @@
 #define TouchIDMatched     3
 #define TouchIDNotMatched  10 
 
+#define kAsphaleiaSettingsNotification @"com.a3tweaks.asphaleia/ReloadPrefs"
+
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
@@ -88,16 +90,18 @@ SBIconView *currentIconView;
 }
 
 // editing hook
-/*-(void)iconHandleLongPress:(SBIconView *)iconView {
+-(void)iconHandleLongPress:(SBIconView *)iconView {
 	if (self.isEditing) {
 		%orig;
 		return;
 	}
+	UIAlertView *test = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIcon:nil];
+	[test show];
 
 	[iconView setHighlighted:NO];
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	//[self setIsEditing:YES];
-}*/
+}
 
 %end

@@ -58,17 +58,15 @@
 -(void)presentAuthView
 {
 	// NSLog(@"================presentAuthView");
-	if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
-		if([(NSString *)[[[NSDictionary alloc]initWithContentsOfFile:prefpath] objectForKey:@"passcode"] length] == 4) {
-			// NSLog(@"================presentAuthView def");
-			pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
-			[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
-		} else {
-			// NSLog(@"================presentAuthView set");
-			pinVC = [[modalPinVC alloc] initToSetPasscodeFirst:self];
- 			[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
- 		}
-	}
+	if([[NSFileManager defaultManager]fileExistsAtPath:prefpath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:prefpath] objectForKey:@"passcode"] length] == 4) {
+		// NSLog(@"================presentAuthView def");
+		pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
+		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
+	} else {
+		// NSLog(@"================presentAuthView set");
+		pinVC = [[modalPinVC alloc] initToSetPasscodeFirst:self];
+ 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
+ 	}
 }
 
 - (void)goBack

@@ -4,6 +4,26 @@
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 #define bundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
 
+BOOL isTouchIDDevice(void) {
+    int sysctlbyname(const char *, void *, size_t *, void *, size_t);
+
+    size_t size;
+    sysctlbyname(typeSpecifier, NULL, &size, NULL, 0);
+
+    char *answer = malloc(size);
+    sysctlbyname(typeSpecifier, answer, &size, NULL, 0);
+
+    NSString *results = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
+
+    free(answer);
+
+    NSString *model = [self getSysInfoByName:"hw.machine"];
+
+    NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
+
+    return [touchIDModels containsObject:model];
+}
+
 #pragma mark Passcode Options View Controller
 @interface passcodeOptionsVC () {
     NSMutableDictionary *prefs;
@@ -28,7 +48,7 @@
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+        if (isTouchIDDevice()) {
             isIphone5S = YES;
         }
     }
@@ -90,8 +110,8 @@
 }
 - (BOOL)switchStateForTag:(NSInteger)tag
 {
-    if(tag == 1 && [prefs objectForKey:@"simplePassocde"]) {
-        return [[prefs objectForKey:@"simplePassocde"]boolValue];
+    if(tag == 1 && [prefs objectForKey:@"simplePasscode"]) {
+        return [[prefs objectForKey:@"simplePasscode"]boolValue];
     } else if(tag == 2 && [prefs objectForKey:@"touchID"]) {
         return [[prefs objectForKey:@"touchID"]boolValue];
     } else if(tag == 20 && [prefs objectForKey:@"vibrateOnFail"]) {
@@ -173,7 +193,7 @@
 }
 - (void)updateSwitchAtIndexPath:(UISwitch *)selSwitch{
     if (selSwitch.tag == 1) {
-        [prefs setObject:[NSNumber numberWithBool:selSwitch.on] forKey:@"simplePassocde"];
+        [prefs setObject:[NSNumber numberWithBool:selSwitch.on] forKey:@"simplePasscode"];
         if (!selSwitch.on && isIphone5S) {
             [prefs setObject:[NSNumber numberWithBool:NO] forKey:@"touchID"];
             [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -182,7 +202,7 @@
         [prefs setObject:[NSNumber numberWithBool:selSwitch.on] forKey:@"touchID"];
         [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationAutomatic];
         if (selSwitch.on && isIphone5S) {
-            [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"simplePassocde"];
+            [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"simplePasscode"];
             [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationAutomatic];
         }
     } else if (selSwitch.tag == 20) {
@@ -295,7 +315,7 @@
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+        if (isTouchIDDevice()) {
             isIphone5S = YES;
         }
        
@@ -632,7 +652,7 @@
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+        if (isTouchIDDevice()) {
             isIphone5S = YES;
         }
     }
@@ -1132,12 +1152,15 @@
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
             nowSelected = YES;
         }
-        [[dataSource preferences] setObject:[NSNumber numberWithBool:nowSelected] forKey:displayIdentifier]; 
+
+        NSMutableDictionary *securedAppDict = [[[dataSource preferences] objectForKey:@"securedApps"] isKindOfClass:[NSDictionary class]] ? [[dataSource preferences] objectForKey:@"securedApps"] : [[NSMutableDictionary alloc] init];
+        [securedAppDict setObject:[NSNumber numberWithBool:nowSelected] forKey:displayIdentifier]; 
+        [[dataSource preferences] setObject:securedAppDict forKey:@"securedApps"]; 
         [[dataSource preferences] writeToFile:prefpath atomically:YES];
         CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     } else if (indexPath.section == 1) {
         //display something
-        // NSLog(@"========self: %@",self);
+        // NSLog(@"========self: %@",self); 
         [self.navigationController pushViewController:[[securityExtraVC alloc]init] animated:YES];
     }
 }
@@ -1147,6 +1170,7 @@
     if ([self.tableView numberOfSections] == 4) {
         upto = 3;
     }
+    NSMutableDictionary *securedAppDict = [[[dataSource preferences] objectForKey:@"securedApps"] isKindOfClass:[NSDictionary class]] ? [[dataSource preferences] objectForKey:@"securedApps"] : [[NSMutableDictionary alloc] init];
     for (NSInteger j = 3; j <= upto; ++j)
     {
         for (NSInteger i = 0; i < [self.tableView numberOfRowsInSection:j]; ++i)
@@ -1156,10 +1180,11 @@
            NSString *displayIdentifier = [dataSource displayIdentifierForIndexPath:altPath];
            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
            cell.accessoryType = UITableViewCellAccessoryCheckmark;
-           [[dataSource preferences] setObject:[NSNumber numberWithBool:YES] forKey:displayIdentifier];
+           [securedAppDict setObject:[NSNumber numberWithBool:YES] forKey:displayIdentifier];
 
         }
     }
+    [[dataSource preferences] setObject:securedAppDict forKey:@"securedApps"]; 
     [[dataSource preferences] writeToFile:prefpath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select None" style:UIBarButtonItemStylePlain target:self action:@selector(disableAllApps)];
@@ -1171,6 +1196,7 @@
     if ([self.tableView numberOfSections] == 4) {
         upto = 3;
     }
+    NSMutableDictionary *securedAppDict = [[[dataSource preferences] objectForKey:@"securedApps"] isKindOfClass:[NSDictionary class]] ? [[dataSource preferences] objectForKey:@"securedApps"] : [[NSMutableDictionary alloc] init];
     for (NSInteger j = 3; j <= upto; ++j)
     {
         for (NSInteger i = 0; i < [self.tableView numberOfRowsInSection:j]; ++i)
@@ -1184,6 +1210,7 @@
 
         }
     }
+    [[dataSource preferences] setObject:securedAppDict forKey:@"securedApps"]; 
     [[dataSource preferences] writeToFile:prefpath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All" style:UIBarButtonItemStylePlain target:self action:@selector(enableAllApps)];
@@ -1228,7 +1255,7 @@
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+        if (isTouchIDDevice()) {
             isIphone5S = YES;
         }
         free(machine);
@@ -1660,9 +1687,9 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
     CellWithClassName(className, tableView)
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRow:(NSInteger)row
 {
-    NSLog(@"AsphaleiaPrefs -- tableView:cellForRow: was called");
+    //NSLog(@"AsphaleiaPrefs -- tableView:cellForRow: was called");
     if (isStaticSection) {
-        NSLog(@"AsphaleiaPrefs -- isStaticSection was called");
+        //NSLog(@"AsphaleiaPrefs -- isStaticSection was called");
         NSDictionary *itemDescriptor = [_displayNames objectAtIndex:row];
         UITableViewCell *cell = CellWithClassName([itemDescriptor objectForKey:ALSectionDescriptorCellClassNameKey] ?: [_descriptor objectForKey:ALSectionDescriptorCellClassNameKey] ?: @"UITableViewCell");
         cell.textLabel.text = Localize([itemDescriptor objectForKey:ALItemDescriptorTextKey]);
@@ -1680,7 +1707,7 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
         return cell;
     }
     if (loadingState) {
-        NSLog(@"AsphaleiaPrefs -- loadingState was called");
+        //NSLog(@"AsphaleiaPrefs -- loadingState was called");
         return [tableView dequeueReusableCellWithIdentifier:@"aspheliaALTVCell"] ?: [[aspheliaALTVCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"aspheliaALTVCell"];
     }
     UITableViewCell *cell = CellWithClassName([_descriptor objectForKey:ALSectionDescriptorCellClassNameKey] ?: @"UITableViewCell");
@@ -1727,7 +1754,7 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+        if (isTouchIDDevice()) {
             isIphone5S = YES;
         }
         free(machine);
@@ -1799,7 +1826,7 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
 {
     return [[_sectionDescriptors objectAtIndex:[indexPath section]] cellDescriptorForRow:[indexPath row]];
 }
-- (void)iconLoadedFromNotification:(NSNotification *)notification
+/*- (void)iconLoadedFromNotification:(NSNotification *)notification
 {
     NSDictionary *userInfo = notification.userInfo;
     NSString *displayIdentifier = [userInfo objectForKey:ALDisplayIdentifierKey];
@@ -1812,7 +1839,7 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             [sectionObject updateCell:[_tableView cellForRowAtIndexPath:indexPath] forRow:row withLoadedIconOfSize:iconSize forDisplayIdentifier:displayIdentifier];
         }
     }
-}
+}*/
 - (void)sectionRequestedSectionReload:(asphaleiaTableSectionSource *)section animated:(BOOL)animated
 {
     [_tableView reloadData];
