@@ -13,6 +13,26 @@
 #import <sys/sysctl.h>
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 
+BOOL isTouchIDDevice(void) {
+    int sysctlbyname(const char *, void *, size_t *, void *, size_t);
+
+    size_t size;
+    sysctlbyname(typeSpecifier, NULL, &size, NULL, 0);
+
+    char *answer = malloc(size);
+    sysctlbyname(typeSpecifier, answer, &size, NULL, 0);
+
+    NSString *results = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
+
+    free(answer);
+
+    NSString *model = [self getSysInfoByName:"hw.machine"];
+
+    NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
+
+    return [touchIDModels containsObject:model];
+}
+
 @interface asphaleiaMain: PSListController {
 }
 -(void)goBack;
@@ -24,6 +44,7 @@
 
 @interface modalPinVC () {
 }
+@property (retain) NSString *oldPasscode;
 
 @end
 
@@ -94,12 +115,12 @@
         if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
             NSDictionary *prefs=[[NSDictionary alloc]initWithContentsOfFile:prefpath];
             if([prefs objectForKey:@"passcode"]) {
-                _oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
+                self.oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
             } else {
-                _oldPasscode = @"";
+                self.oldPasscode = @"";
             }
         }else{
-            _oldPasscode = @"";
+            self.oldPasscode = @"";
         }
 
     } else if(_isSet) {
@@ -224,12 +245,12 @@
         if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
             NSDictionary *prefs=[[NSDictionary alloc]initWithContentsOfFile:prefpath];
             if([prefs objectForKey:@"passcode"]) {
-                _oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
+                self.oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
             } else {
-                _oldPasscode = @"";
+                self.oldPasscode = @"";
             }
         }else{
-            _oldPasscode = @"";
+            self.oldPasscode = @"";
         }
     }
     
@@ -247,7 +268,8 @@
             i++;
         }
         if (textField.text.length == 4) {
-            if ([textField.text isEqualToString:_oldPasscode]) {
+            NSLog(@"asphaleia - self.oldPasscode : %@",self.oldPasscode);
+            if ([textField.text isEqualToString:self.oldPasscode]) {
                 [(asphaleiaMain *)_delegate authenticated];
                 [self dismissViewControllerAnimated:YES completion:NULL];
             } else {
@@ -280,15 +302,16 @@
             } else if (_currentPage == 2) {
                 if ([textField.text isEqualToString:_newPasscode]) {
                     //set passcode here
-                    NSMutableDictionary *prefs = [[NSMutableDictionary alloc]initWithContentsOfFile:prefpath];
+                    NSMutableDictionary *prefs = [NSMutableDictionary dictionary];
+                    [prefs addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:prefpath]];
                     [prefs setObject:_newPasscode forKey:@"passcode"];
                     if (_first) {
-                        [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"simplePassocde"];
+                        [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"simplePasscode"];
                         size_t size;
                         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
                         char *machine = (char *)malloc(size);
                         sysctlbyname("hw.machine", machine, &size, NULL, 0);
-                        if ([[NSString stringWithCString:machine encoding:NSUTF8StringEncoding] rangeOfString:@"iPhone6"].location != NSNotFound) {
+                        if (isTouchIDDevice()) {
                             [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"touchID"];
                         }
                         [(asphaleiaMain *)_delegate authenticated];
@@ -327,7 +350,7 @@
         }
         if (textField.text.length == 4) {
             if (_currentPage == 1) {
-                if ([textField.text isEqualToString:_oldPasscode]) {
+                if ([textField.text isEqualToString:self.oldPasscode]) {
                     [self scrollToPage:_currentPage];
                     _currentPage++;
                     textField.text = @"";
@@ -349,7 +372,8 @@
             } else if (_currentPage == 3) {
                 if ([textField.text isEqualToString:_newPasscode]) {
                     //set passcode here
-                    NSMutableDictionary *prefs = [[NSMutableDictionary alloc]initWithContentsOfFile:prefpath];
+                    NSMutableDictionary *prefs = [NSMutableDictionary dictionary];
+                    [prefs addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:prefpath]];
                     [prefs setObject:_newPasscode forKey:@"passcode"];
                     [prefs writeToFile:prefpath atomically:YES];
                     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);

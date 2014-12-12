@@ -21,6 +21,8 @@ static ASCommon *sharedCommonObj;
                                 delegate:self
                                 cancelButtonTitle:@"Passcode"
                                 otherButtonTitles:@"Cancel", nil];
+    CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
+    [alertView setTransform: moveUp];
     return alertView;
 }
 

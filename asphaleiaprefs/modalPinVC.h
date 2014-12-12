@@ -14,7 +14,6 @@
     NSArray *_imageViews;
     int _currentPage;
     NSString *_newPasscode;
-    NSString *_oldPasscode;
     BOOL _isAuth;
     BOOL _isSet;
     BOOL _first;
