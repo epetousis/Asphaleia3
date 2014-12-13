@@ -17,4 +17,6 @@
 -(void)setTouchDownInIcon:(BOOL)icon;
 -(BOOL)isTouchDownInIcon;
 -(void)cancelLongPressTimer;
+-(id)initWithDefaultSize;
+-(void)_setIcon:(id)icon animated:(BOOL)animated;
 @end

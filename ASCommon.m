@@ -23,7 +23,10 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
-    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) { handler(alertView,buttonIndex); };
+    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
+    if (buttonIndex != [alertView cancelButtonIndex])
+        handler(alertView,buttonIndex);
+    };
     //CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
     //[alertView setTransform: moveUp];
     return alertView;
@@ -48,7 +51,10 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
-    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) { handler(alertView,buttonIndex); };
+    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
+    if (buttonIndex != [alertView cancelButtonIndex])
+        handler(alertView,buttonIndex);
+    };
 
     return alertView;
 }
