@@ -7,29 +7,20 @@
 #import "SBIconController.h"
 #import "PreferencesHandler.h"
 #import "substrate.h"
+#import "UIImage+ImageEffects.h"
+#import "SBUIController.h"
+#import "SBDisplayLayout.h"
+#import "SBDisplayItem.h"
+#import "SBAppSwitcherIconController.h"
+#import "SBAppSwitcherSnapshotView.h"
+#import "CAFilter.h"
+#import "SBApplication.h"
+#import "SBApplicationIcon.h"
+#import "SpringBoard.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
-
-@interface SBUIController : NSObject
--(BOOL)isAppSwitcherShowing;
-@end
-
-@interface SBDisplayLayout : NSObject
-@property (nonatomic,readonly) long long layoutSize;
-@property (nonatomic,readonly) NSArray * displayItems;
--(NSArray *)displayItems;
-@end
-
-@interface SBDisplayItem : NSObject
-@property (nonatomic,readonly) NSString * displayIdentifier;
-@end
-
-@interface SBAppSwitcherIconController : NSObject
-@property(copy, nonatomic) NSArray* displayLayouts;
-@end
-
 SBAppSwitcherIconController *iconController;
 
 %hook SBIconController
@@ -116,7 +107,7 @@ SBAppSwitcherIconController *iconController;
 	[iconView setTouchDownInIcon:NO];
 	
 	UIAlertView *test = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
-		[self setIsEditing:YES];
+			[self setIsEditing:YES];
 		}];
 	[test show];
 	test.frame = CGRectMake(0,0,200,400);
@@ -130,14 +121,15 @@ SBAppSwitcherIconController *iconController;
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
-	if ([getProtectedApps() containsObject:item.displayIdentifier]) {
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+	if (![getProtectedApps() containsObject:item.displayIdentifier]) {
 		%orig;
-		}];
-		[alertView show];
-	} else {
-		%orig;
+		return;
 	}
+
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		%orig;
+	}];
+	[alertView show];
 }
 
 %end
@@ -156,14 +148,50 @@ SBAppSwitcherIconController *iconController;
 
 %end
 
+%hook SBAppSwitcherSnapshotView
+
+-(void)prepareToBecomeVisibleIfNecessary {
+	%orig;
+	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent()) {
+		return;
+	}
+	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
+	[filter setValue:[NSNumber numberWithFloat:10] forKey:@"inputRadius"];
+	self.layer.filters = [NSArray arrayWithObject:filter];
+}
+
+%end
+
 %hook SBUIController
 
 -(BOOL)_activateAppSwitcher {
+	if (!shouldSecureSwitcher()) {
+		return %orig;
+	}
+
 	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
-		%orig;
+			%orig;
 		}];
 	[alertView show];
 	return NO;
+}
+
+%end
+
+%hook SBLockScreenManager
+
+-(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
+	%orig;
+	SBApplication *frontmostApp = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
+	if ([getProtectedApps() containsObject:frontmostApp]) {
+		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
+		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+		[iconView _setIcon:appIcon animated:YES];
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		%orig;
+		}];
+		[alertView show];
+	}
 }
 
 %end
