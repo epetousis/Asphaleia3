@@ -1,6 +1,7 @@
 #import "ASCommon.h"
 #include <sys/sysctl.h>
 #import "UIAlertView+Blocks.h"
+#import "BTTouchIDController.h"
 
 @implementation ASCommon
 
@@ -15,7 +16,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
@@ -23,16 +24,28 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+
+    __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+        if (event == TouchIDMatched) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            [controller stopMonitoring];
+            handler(NO);
+        }
+    }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-    if (buttonIndex != [alertView cancelButtonIndex])
-        handler(alertView,buttonIndex);
+        [controller stopMonitoring];
+        handler(buttonIndex != [alertView cancelButtonIndex]);
     };
+    alertView.didPresentBlock = ^(UIAlertView *alertView) {
+        [controller startMonitoring];
+    };
+
     //CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
     //[alertView setTransform: moveUp];
     return alertView;
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *message;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
@@ -51,9 +64,20 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+
+    __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+        if (event == TouchIDMatched) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            [controller stopMonitoring];
+            handler(NO);
+        }
+    }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-    if (buttonIndex != [alertView cancelButtonIndex])
-        handler(alertView,buttonIndex);
+        [controller stopMonitoring];
+        handler(buttonIndex != [alertView cancelButtonIndex]);
+    };
+    alertView.didPresentBlock = ^(UIAlertView *alertView) {
+        [controller startMonitoring];
     };
 
     return alertView;

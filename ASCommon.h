@@ -7,10 +7,12 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
   ASAuthenticationAlertSwitcher
 };
 
+typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
+
 @interface ASCommon : NSObject
 +(ASCommon *)sharedInstance;
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler;
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler;
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler;
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)isTouchIDDevice;
 
 @end

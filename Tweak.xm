@@ -22,14 +22,12 @@ PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
+BTTouchIDController *iconTouchIDController;
 
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if (fingerglyph && currentIconView && containerView) {
-		if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID])
-			[iconView.icon launchFromLocation:iconView.location];
-
 		[currentIconView setHighlighted:NO];
 		[iconView setHighlighted:NO];
 		[fingerglyph removeFromSuperview];
@@ -37,7 +35,11 @@ SBAppSwitcherIconController *iconController;
 		fingerglyph = nil;
 		currentIconView = nil;
 		containerView = nil;
-		[[BTTouchIDController sharedInstance] stopMonitoring];
+		[iconTouchIDController stopMonitoring];
+		if ([iconView isEqual:currentIconView]) {
+			// show the passcode view.
+		}
+
 		return;
 	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID]) {
 		[iconView setHighlighted:NO];
@@ -68,7 +70,7 @@ SBAppSwitcherIconController *iconController;
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
-	[[BTTouchIDController sharedInstance] startMonitoringWithEventBlock:^void(id monitor, unsigned event) {
+	iconTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
 		switch (event) {
 		case TouchIDMatched:
 			if (fingerglyph && currentIconView && containerView) {
@@ -79,7 +81,7 @@ SBAppSwitcherIconController *iconController;
 				fingerglyph = nil;
 				currentIconView = nil;
 				containerView = nil;
-				[[BTTouchIDController sharedInstance] stopMonitoring];
+				[controller stopMonitoring];
 			}
 			break;
 		case TouchIDFingerDown:
@@ -91,8 +93,9 @@ SBAppSwitcherIconController *iconController;
 		case TouchIDNotMatched:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 			break;
-	}
-		}];
+		}
+	}];
+	[iconTouchIDController startMonitoring];
 }
 
 // editing hook
@@ -106,11 +109,10 @@ SBAppSwitcherIconController *iconController;
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	UIAlertView *test = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
 			[self setIsEditing:YES];
 		}];
-	[test show];
-	test.frame = CGRectMake(0,0,200,400);
+	[alertView show];
 }
 
 %end
@@ -126,7 +128,7 @@ SBAppSwitcherIconController *iconController;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] dismissedHandler:^(BOOL wasCancelled) {
 		%orig;
 	}];
 	[alertView show];
@@ -169,7 +171,7 @@ SBAppSwitcherIconController *iconController;
 		return %orig;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
 			%orig;
 		}];
 	[alertView show];
@@ -182,14 +184,30 @@ SBAppSwitcherIconController *iconController;
 
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
-	SBApplication *frontmostApp = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
-	if ([getProtectedApps() containsObject:frontmostApp]) {
+	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp()) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
-		%orig;
+
+		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView dismissedHandler:^(BOOL wasCancelled) {
+		blurredWindow.hidden = YES;
+		blurredWindow = nil;
 		}];
+		blurredWindow.backgroundColor = [UIColor clearColor];
+
+		UIVisualEffect *blurEffect;
+		blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+		
+		UIVisualEffectView *visualEffectView;
+		visualEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+		
+		visualEffectView.frame = [[UIScreen mainScreen] bounds];
+
+		blurredWindow.windowLevel = UIWindowLevelAlert-1;
+		[blurredWindow addSubview:visualEffectView];
+		[blurredWindow makeKeyAndVisible];
 		[alertView show];
 	}
 }
