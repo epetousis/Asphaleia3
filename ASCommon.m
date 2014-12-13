@@ -1,5 +1,6 @@
 #import "ASCommon.h"
 #include <sys/sysctl.h>
+#import "UIAlertView+Blocks.h"
 
 @implementation ASCommon
 
@@ -14,16 +15,41 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIcon:(SBIcon *)icon {
+-(UIAlertView *)createAppAuthenticationAlertWithIcon:(SBIcon *)icon completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"[icon name]"
-                                message:@"Scan fingerprint to open."
-                                delegate:self
-                                cancelButtonTitle:@"Cancel"
-                                otherButtonTitles:@"Passcode", nil];
-    CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
-    [alertView setTransform: moveUp];
+                   message:@"Scan fingerprint to open."
+                   delegate:nil
+         cancelButtonTitle:@"Cancel"
+         otherButtonTitles:@"Passcode",nil];
+    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) { handler(alertView,buttonIndex); };
+    //CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
+    //[alertView setTransform: moveUp];
+    return alertView;
+}
+
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
+    NSString *message;
+    switch (alertType) {
+        case ASAuthenticationAlertAppArranging:
+            message = @"Scan fingerprint to arrange apps.";
+            break;
+        case ASAuthenticationAlertSwitcher:
+            message = @"Scan fingerprint to open switcher.";
+            break;
+        default:
+            message = @"Scan fingerprint to continue.";
+            break;
+    }
+
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Asphaleia"
+                   message:message
+                   delegate:nil
+         cancelButtonTitle:@"Cancel"
+         otherButtonTitles:@"Passcode",nil];
+    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) { handler(alertView,buttonIndex); };
+
     return alertView;
 }
 
