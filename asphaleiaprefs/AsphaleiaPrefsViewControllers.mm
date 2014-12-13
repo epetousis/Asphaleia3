@@ -271,9 +271,9 @@
 #pragma mark Advanced T View Controller
 @interface AdvancedTVC ()<UITextFieldDelegate> {
     NSMutableDictionary *prefs;
-    NSArray *times;
     BOOL isIphone5S;
 }
+@property (retain) NSArray *times;
 
 @end
 
@@ -290,7 +290,7 @@
            prefs = [[NSMutableDictionary alloc]init];
        }
         // prefs = [[NSMutableDictionary alloc]initWithDictionary:@{@"removeLSAuth":[NSNumber numberWithBool:NO],@"obscureAppContent":[NSNumber numberWithBool:YES],@"delayAfterLock":[NSNumber numberWithBool:NO],@"timeIntervalLock":[NSNumber numberWithInt:60]}];
-        times = @[@10,@30,@60,@300,@900,@1800];
+        self.times = @[@10,@30,@60,@300,@900,@1800];
         size_t size;
         sysctlbyname("hw.machine", NULL, &size, NULL, 0);
         char *machine = (char *)malloc(size);
@@ -356,7 +356,7 @@
 - (UITableViewCellAccessoryType)accessoryTypeForTag:(NSUInteger)tag
 {
     if ([prefs objectForKey:@"timeIntervalLock"]) {
-        if ([(NSNumber *)[times objectAtIndex:tag-4] intValue] == [(NSNumber *)[prefs objectForKey:@"timeIntervalLock"] intValue]) {
+        if ([(NSNumber *)[self.times objectAtIndex:tag-4] intValue] == [(NSNumber *)[prefs objectForKey:@"timeIntervalLock"] intValue]) {
             return UITableViewCellAccessoryCheckmark;
         }
         
@@ -554,7 +554,7 @@
                 [tableView cellForRowAtIndexPath:loopPath].accessoryType = UITableViewCellAccessoryNone;
             }
         }
-        NSNumber *timeSelected = [times objectAtIndex:cell.tag-4];
+        NSNumber *timeSelected = [self.times objectAtIndex:cell.tag-4];
         [prefs setObject:timeSelected forKey:@"timeIntervalLock"];
         [self updateSettings];
     } else if (indexPath.section == 4) {
@@ -776,8 +776,8 @@
 #pragma mark Time Lock View Controller
 @interface timeLockVC () {
     NSMutableDictionary *prefs;
-    NSArray *times;
 }
+@property (retain) NSArray *times;
 
 @end
 
@@ -794,7 +794,7 @@
             prefs = [[NSMutableDictionary alloc]init];
         }
         // prefs = [[NSMutableDictionary alloc]initWithDictionary:@{@"removeLSAuth":[NSNumber numberWithBool:NO],@"obscureAppContent":[NSNumber numberWithBool:YES],@"delayAfterLock":[NSNumber numberWithBool:NO],@"timeIntervalLock":[NSNumber numberWithInt:60]}];
-        times = @[@0,@10,@30,@60,@300,@900,@1800];
+        self.times = @[@0,@10,@30,@60,@300,@900,@1800];
     }
     return self;
 }
@@ -828,7 +828,7 @@
 - (UITableViewCellAccessoryType)accessoryTypeForTag:(NSUInteger)tag
 {
     if ([prefs objectForKey:@"timeInterval"]) {
-        if ([(NSNumber *)[times objectAtIndex:tag-1] intValue] == [(NSNumber *)[prefs objectForKey:@"timeInterval"] intValue]) {
+        if ([(NSNumber *)[self.times objectAtIndex:tag-1] intValue] == [(NSNumber *)[prefs objectForKey:@"timeInterval"] intValue]) {
             return UITableViewCellAccessoryCheckmark;
         }
         
@@ -915,7 +915,7 @@
                 [tableView cellForRowAtIndexPath:loopPath].accessoryType = UITableViewCellAccessoryNone;
             }
         }
-        NSNumber *timeSelected = [@[@0,@10,@30,@60,@300,@900,@1800] objectAtIndex:cell.tag-1];
+        NSNumber *timeSelected = [self.times objectAtIndex:cell.tag-1];
         [prefs setObject:timeSelected forKey:@"timeInterval"];
         [self updateSettings];
         [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
