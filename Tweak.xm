@@ -11,6 +11,20 @@ PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
 
+@interface SBUIController : NSObject
+-(BOOL)isAppSwitcherShowing;
+@end
+
+@interface SBDisplayLayout : NSObject
+@property (nonatomic,readonly) long long layoutSize;
+@property (nonatomic,readonly) NSArray * displayItems;
+-(NSArray *)displayItems;
+@end
+
+@interface SBDisplayItem : NSObject
+@property (nonatomic,readonly) NSString * displayIdentifier;
+@end
+
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
@@ -32,6 +46,10 @@ SBIconView *currentIconView;
 		[iconView.icon launchFromLocation:iconView.location];
 		return;
 	}
+
+	// need to have a look at using SBIconProgressView instead of just using setHighlighted
+	// use -(id)initWithFrame:(CGRect)frame and -(void)setState:(int)state paused:(BOOL)paused fractionLoaded:(float)loaded animated:(BOOL)animated;
+	// change size of the circle with @property(readonly, assign, nonatomic) CGRect circleBoundingRect;
 
 	currentIconView = iconView;
 	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
@@ -94,6 +112,36 @@ SBIconView *currentIconView;
 		[self setIsEditing:YES];
 		}];
 	[test show];
+	test.frame = CGRectMake(0,0,200,400);
+}
+
+%end
+
+%hook SBAppSwitcherController
+
+-(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
+	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
+
+	if ([getProtectedApps() containsObject:item.displayIdentifier]) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		%orig;
+		}];
+		[alertView show];
+	} else {
+		%orig;
+	}
+}
+
+%end
+
+%hook SBUIController
+
+-(BOOL)_activateAppSwitcher {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		%orig;
+		}];
+	[alertView show];
+	return NO;
 }
 
 %end

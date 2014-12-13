@@ -36,7 +36,7 @@ static ASCommon *sharedCommonObj;
             message = @"Scan fingerprint to arrange apps.";
             break;
         case ASAuthenticationAlertSwitcher:
-            message = @"Scan fingerprint to open switcher.";
+            message = @"Scan fingerprint to open app switcher.";
             break;
         default:
             message = @"Scan fingerprint to continue.";
