@@ -20,8 +20,8 @@ static ASCommon *sharedCommonObj;
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"[icon name]"
                                 message:@"Scan fingerprint to open."
                                 delegate:self
-                                cancelButtonTitle:@"Passcode"
-                                otherButtonTitles:@"Cancel", nil];
+                                cancelButtonTitle:@"Cancel"
+                                otherButtonTitles:@"Passcode", nil];
     CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
     [alertView setTransform: moveUp];
     return alertView;
