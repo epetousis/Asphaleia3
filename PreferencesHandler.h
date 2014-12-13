@@ -11,11 +11,16 @@ static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/c
 #define kSecureSwitcherKey @"secureSwitcher"
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
+#define kUnsecureUnlockToAppKey @"easyUnlockIntoApp"
 
 static NSDictionary *prefs = nil;
 
 static void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	prefs = [[NSDictionary alloc] initWithContentsOfFile:preferencesFilePath];
+}
+
+static BOOL shouldUnsecurelyUnlockIntoApp(void) {
+    return [prefs objectForKey:kUnsecureUnlockToAppKey] ? [[prefs objectForKey:kUnsecureUnlockToAppKey] boolValue] : NO;
 }
 
 static BOOL shouldObscureAppContent(void) {

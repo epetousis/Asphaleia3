@@ -1,13 +1,14 @@
 /* Modified from Sassoty's code
 https://github.com/Sassoty/BioTesting */
+@class BTTouchIDController;
 @protocol SBUIBiometricEventMonitorDelegate
 @required
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
 @end
 
-typedef void (^BTTouchIDEventBlock) (id monitor, unsigned event);
+typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor, unsigned event);
 
-#define log(z) NSLog(@"[BioTesting] %@", z)
+#define log(z) NSLog(@"[Asphaleia] %@", z)
 
 @interface SBUIBiometricEventMonitor : NSObject
 - (void)addObserver:(id)arg1;
@@ -34,7 +35,7 @@ typedef void (^BTTouchIDEventBlock) (id monitor, unsigned event);
 }
 @property BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;
-+(BTTouchIDController *)sharedInstance;
--(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block;
+-(void)startMonitoring;
 -(void)stopMonitoring;
+-(BTTouchIDController *)initWithEventBlock:(BTTouchIDEventBlock)block;
 @end

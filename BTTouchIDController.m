@@ -10,7 +10,7 @@ https://github.com/Sassoty/BioTesting */
 
 @implementation BTTouchIDController
 
-+(BTTouchIDController *)sharedInstance {
+/*+(BTTouchIDController *)sharedInstance {
 	// Setup instance for current class once
 	static id sharedInstance = nil;
 	static dispatch_once_t token = 0;
@@ -19,9 +19,9 @@ https://github.com/Sassoty/BioTesting */
 	});
 	// Provide instance
 	return sharedInstance;
-}
+}*/
 
--(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block {
+-(void)startMonitoring {
 	// If already monitoring, don't start again
 	if(self.isMonitoring) {
 		return;
@@ -38,8 +38,6 @@ https://github.com/Sassoty/BioTesting */
 	{
 		[monitor removeObserver:[_monitorObservers objectAtIndex:i]];
 	}
-
-	self.biometricEventBlock = block;
 
 	// Begin listening :D
 	[monitor addObserver:self];
@@ -72,11 +70,19 @@ https://github.com/Sassoty/BioTesting */
 	log(@"Stopped Monitoring");
 }
 
+-(BTTouchIDController *)initWithEventBlock:(BTTouchIDEventBlock)block {
+	self = [super init];
+    if(self) {
+        self.biometricEventBlock = [block copy]; // very important that you _copy_ the block, otherwise you will cause a crash!
+    }
+    return self;
+}
+
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
 	BTTouchIDEventBlock eventBlock = self.biometricEventBlock;
     
     if (eventBlock) {
-        eventBlock(monitor, event);
+        eventBlock(self, monitor, event);
     }
 }
 
