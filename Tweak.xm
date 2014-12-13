@@ -12,17 +12,30 @@
 #define TouchIDMatched     3
 #define TouchIDNotMatched  10 
 
-#define kAsphaleiaSettingsNotification @"com.a3tweaks.asphaleia/ReloadPrefs"
+#define kPrefsLocation @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
+NSMutableArray *protectedApps;
+
+void GetPreferences(void) {
+	NSDictionary *prefsdict = [NSDictionary dictionaryWithContentsOfFile:kPrefsLocation];
+	NSDictionary *secureDict = [prefsdict objectForKey:@"securedApps"];
+	if (!protectedApps)
+		protectedApps = [[NSMutableArray alloc] init];
+
+	for (NSString *app in secureDict) {
+		if ([[secureDict objectForKey:app] boolValue] == true)
+			[protectedApps addObject:app];
+	}
+}
 
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if (fingerglyph && currentIconView && containerView) {
-		if ([@[@"com.apple.Maps"] containsObject:iconView.icon.applicationBundleID])
+		if (![protectedApps containsObject:iconView.icon.applicationBundleID])
 			[iconView.icon launchFromLocation:iconView.location];
 
 		[currentIconView setHighlighted:NO];
@@ -34,7 +47,7 @@ SBIconView *currentIconView;
 		containerView = nil;
 		[[BTTouchIDController sharedInstance] stopMonitoring:self];
 		return;
-	} else if ([@[@"com.apple.Maps"] containsObject:iconView.icon.applicationBundleID]) {
+	} else if (![protectedApps containsObject:iconView.icon.applicationBundleID]) {
 		[iconView setHighlighted:NO];
 		[iconView.icon launchFromLocation:iconView.location];
 		return;
@@ -105,3 +118,13 @@ SBIconView *currentIconView;
 }
 
 %end
+
+%ctor {
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+                                    NULL,
+                                    (CFNotificationCallback)GetPreferences,
+                                    CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"),
+                                    NULL,
+                                    CFNotificationSuspensionBehaviorCoalesce);
+	GetPreferences();
+}
