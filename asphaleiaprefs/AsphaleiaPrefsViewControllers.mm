@@ -915,13 +915,11 @@
                 [tableView cellForRowAtIndexPath:loopPath].accessoryType = UITableViewCellAccessoryNone;
             }
         }
-        NSNumber *timeSelected = [times objectAtIndex:cell.tag-1];
+        NSNumber *timeSelected = [@[@0,@10,@30,@60,@300,@900,@1800] objectAtIndex:cell.tag-1];
         [prefs setObject:timeSelected forKey:@"timeInterval"];
         [self updateSettings];
         [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
     }
-
-    
 }
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {

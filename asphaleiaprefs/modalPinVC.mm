@@ -248,7 +248,6 @@
             i++;
         }
         if (textField.text.length == 4) {
-            NSLog(@"asphaleia - self.oldPasscode : %@",self.oldPasscode);
             if ([textField.text isEqualToString:self.oldPasscode]) {
                 [(asphaleiaMain *)_delegate authenticated];
                 [self dismissViewControllerAnimated:YES completion:NULL];
