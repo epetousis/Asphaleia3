@@ -4,9 +4,13 @@ https://github.com/Sassoty/BioTesting */
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 
+@interface BTTouchIDController ()
+@property (readwrite) BOOL isMonitoring;
+@end
+
 @implementation BTTouchIDController
 
-+(id)sharedInstance {
++(BTTouchIDController *)sharedInstance {
 	// Setup instance for current class once
 	static id sharedInstance = nil;
 	static dispatch_once_t token = 0;
@@ -19,10 +23,10 @@ https://github.com/Sassoty/BioTesting */
 
 -(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block {
 	// If already monitoring, don't start again
-	if(isMonitoring) {
+	if(self.isMonitoring) {
 		return;
 	}
-	isMonitoring = YES;
+	self.isMonitoring = YES;
 
 	// Get current monitor instance so observer can be added
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
@@ -47,10 +51,10 @@ https://github.com/Sassoty/BioTesting */
 
 -(void)stopMonitoring {
 	// If already stopped, don't stop again
-	if(!isMonitoring) {
+	if(!self.isMonitoring) {
 		return;
 	}
-	isMonitoring = NO;
+	self.isMonitoring = NO;
 
 	// Get current monitor instance so observer can be removed
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];

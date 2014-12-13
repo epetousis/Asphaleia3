@@ -28,13 +28,13 @@ typedef void (^BTTouchIDEventBlock) (id monitor, unsigned event);
 #define TouchIDNotMatched  10
 
 @interface BTTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
-	BOOL isMonitoring;
 	BOOL previousMatchingSetting;
 	id _monitorDelegate;
 	NSArray *_monitorObservers;
 }
 @property BTTouchIDEventBlock biometricEventBlock;
-+(id)sharedInstance;
+@property (readonly) BOOL isMonitoring;
++(BTTouchIDController *)sharedInstance;
 -(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block;
 -(void)stopMonitoring;
 @end
