@@ -5,6 +5,8 @@ https://github.com/Sassoty/BioTesting */
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
 @end
 
+typedef void (^BTTouchIDEventBlock) (id monitor, unsigned event);
+
 #define log(z) NSLog(@"[BioTesting] %@", z)
 
 @interface SBUIBiometricEventMonitor : NSObject
@@ -25,13 +27,14 @@ https://github.com/Sassoty/BioTesting */
 #define TouchIDMatched     3
 #define TouchIDNotMatched  10
 
-@interface BTTouchIDController : NSObject {
+@interface BTTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
 	BOOL isMonitoring;
 	BOOL previousMatchingSetting;
 	id _monitorDelegate;
 	NSArray *_monitorObservers;
 }
+@property BTTouchIDEventBlock biometricEventBlock;
 +(id)sharedInstance;
--(void)startMonitoring:(id)object;
--(void)stopMonitoring:(id)object;
+-(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block;
+-(void)stopMonitoring;
 @end

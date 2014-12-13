@@ -5,37 +5,17 @@
 #import "SBIconView.h"
 #import "SBIcon.h"
 #import "SBIconController.h"
-
-#define TouchIDFingerDown  1
-#define TouchIDFingerUp    0
-#define TouchIDFingerHeld  2
-#define TouchIDMatched     3
-#define TouchIDNotMatched  10 
-
-#define kPrefsLocation @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
+#import "PreferencesHandler.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
-NSMutableArray *protectedApps;
-
-void GetPreferences(void) {
-	NSDictionary *prefsdict = [NSDictionary dictionaryWithContentsOfFile:kPrefsLocation];
-	NSDictionary *secureDict = [prefsdict objectForKey:@"securedApps"];
-	if (!protectedApps)
-		protectedApps = [[NSMutableArray alloc] init];
-
-	for (NSString *app in secureDict) {
-		if ([[secureDict objectForKey:app] boolValue] == true)
-			[protectedApps addObject:app];
-	}
-}
 
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if (fingerglyph && currentIconView && containerView) {
-		if (![protectedApps containsObject:iconView.icon.applicationBundleID])
+		if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID])
 			[iconView.icon launchFromLocation:iconView.location];
 
 		[currentIconView setHighlighted:NO];
@@ -45,9 +25,9 @@ void GetPreferences(void) {
 		fingerglyph = nil;
 		currentIconView = nil;
 		containerView = nil;
-		[[BTTouchIDController sharedInstance] stopMonitoring:self];
+		[[BTTouchIDController sharedInstance] stopMonitoring];
 		return;
-	} else if (![protectedApps containsObject:iconView.icon.applicationBundleID]) {
+	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID]) {
 		[iconView setHighlighted:NO];
 		[iconView.icon launchFromLocation:iconView.location];
 		return;
@@ -72,12 +52,8 @@ void GetPreferences(void) {
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
-	[[BTTouchIDController sharedInstance] startMonitoring:self];
-}
-
-%new
--(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
-	switch (event) {
+	[[BTTouchIDController sharedInstance] startMonitoringWithEventBlock:^void(id monitor, unsigned event) {
+		switch (event) {
 		case TouchIDMatched:
 			if (fingerglyph && currentIconView && containerView) {
 				[currentIconView.icon launchFromLocation:currentIconView.location];
@@ -87,7 +63,7 @@ void GetPreferences(void) {
 				fingerglyph = nil;
 				currentIconView = nil;
 				containerView = nil;
-				[[BTTouchIDController sharedInstance] stopMonitoring:self];
+				[[BTTouchIDController sharedInstance] stopMonitoring];
 			}
 			break;
 		case TouchIDFingerDown:
@@ -100,31 +76,29 @@ void GetPreferences(void) {
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 			break;
 	}
+		}];
 }
 
 // editing hook
 -(void)iconHandleLongPress:(SBIconView *)iconView {
-	if (self.isEditing) {
+	if (self.isEditing || !shouldSecureAppArrangement()) {
 		%orig;
 		return;
 	}
-	UIAlertView *test = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIcon:nil];
-	[test show];
 
 	[iconView setHighlighted:NO];
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
-	//[self setIsEditing:YES];
+	
+	UIAlertView *test = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		[self setIsEditing:YES];
+		}];
+	[test show];
 }
 
 %end
 
 %ctor {
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
-                                    NULL,
-                                    (CFNotificationCallback)GetPreferences,
-                                    CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"),
-                                    NULL,
-                                    CFNotificationSuspensionBehaviorCoalesce);
-	GetPreferences();
+	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
+	loadPreferences();
 }

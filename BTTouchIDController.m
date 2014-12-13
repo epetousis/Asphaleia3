@@ -17,7 +17,7 @@ https://github.com/Sassoty/BioTesting */
 	return sharedInstance;
 }
 
--(void)startMonitoring:(id)object {
+-(void)startMonitoringWithEventBlock:(BTTouchIDEventBlock)block {
 	// If already monitoring, don't start again
 	if(isMonitoring) {
 		return;
@@ -35,15 +35,17 @@ https://github.com/Sassoty/BioTesting */
 		[monitor removeObserver:[_monitorObservers objectAtIndex:i]];
 	}
 
+	self.biometricEventBlock = block;
+
 	// Begin listening :D
-	[monitor addObserver:object];
+	[monitor addObserver:self];
 	[monitor _setMatchingEnabled:YES];
 	[monitor _startMatching];
 
 	log(@"Started monitoring");
 }
 
--(void)stopMonitoring:(id)object {
+-(void)stopMonitoring {
 	// If already stopped, don't stop again
 	if(!isMonitoring) {
 		return;
@@ -54,7 +56,7 @@ https://github.com/Sassoty/BioTesting */
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	
 	// Stop listening
-	[monitor removeObserver:object];
+	[monitor removeObserver:self];
 
 	for (id observer in _monitorObservers)
 	{
@@ -64,6 +66,14 @@ https://github.com/Sassoty/BioTesting */
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
 	log(@"Stopped Monitoring");
+}
+
+-(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
+	BTTouchIDEventBlock eventBlock = self.biometricEventBlock;
+    
+    if (eventBlock) {
+        eventBlock(monitor, event);
+    }
 }
 
 @end
