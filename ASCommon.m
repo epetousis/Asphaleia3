@@ -15,10 +15,10 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIcon:(SBIcon *)icon completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"[icon name]"
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
                    message:@"Scan fingerprint to open."
                    delegate:nil
          cancelButtonTitle:@"Cancel"

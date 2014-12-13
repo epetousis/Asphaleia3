@@ -6,6 +6,7 @@
 #import "SBIcon.h"
 #import "SBIconController.h"
 #import "PreferencesHandler.h"
+#import "substrate.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
@@ -24,6 +25,12 @@ SBIconView *currentIconView;
 @interface SBDisplayItem : NSObject
 @property (nonatomic,readonly) NSString * displayIdentifier;
 @end
+
+@interface SBAppSwitcherIconController : NSObject
+@property(copy, nonatomic) NSArray* displayLayouts;
+@end
+
+SBAppSwitcherIconController *iconController;
 
 %hook SBIconController
 
@@ -121,15 +128,30 @@ SBIconView *currentIconView;
 
 -(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
+	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
 	if ([getProtectedApps() containsObject:item.displayIdentifier]) {
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] completionHandler:^(UIAlertView *alertView, NSInteger buttonIndex) {
 		%orig;
 		}];
 		[alertView show];
 	} else {
 		%orig;
 	}
+}
+
+%end
+
+%hook SBAppSwitcherIconController
+
+-(void)dealloc {
+	iconController = nil;
+	%orig;
+}
+
+-(id)init {
+	iconController = %orig;
+	return iconController;
 }
 
 %end

@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "SBIcon.h"
+#import "SBIconView.h"
 
 typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
   ASAuthenticationAlertAppArranging,
@@ -8,7 +9,7 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
 
 @interface ASCommon : NSObject
 +(ASCommon *)sharedInstance;
--(UIAlertView *)createAppAuthenticationAlertWithIcon:(SBIcon *)icon completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler;
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler;
 -(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType completionHandler:(void (^)(UIAlertView *alertView, NSInteger buttonIndex))handler;
 -(BOOL)isTouchIDDevice;
 
