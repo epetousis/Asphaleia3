@@ -25,6 +25,7 @@
 @interface modalPinVC () {
 }
 @property (retain) NSString *oldPasscode;
+@property CGFloat screenWidth;
 
 @end
 
@@ -33,6 +34,7 @@
 {
     // NSLog(@"========initted");
     [super viewDidLoad];
+    self.screenWidth = [UIScreen mainScreen].bounds.size.width;
     self.modalPresentationStyle = UIModalPresentationCurrentContext;
     self.view = [[UIView alloc]initWithFrame:[[UIScreen mainScreen] bounds]];
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
@@ -62,7 +64,7 @@
         item.hidesBackButton = YES;
         [navBar pushNavigationItem:item animated:NO];
         _altView = [[UIView alloc]init];
-        _altView.frame = CGRectMake(0, 64, 320, [UIScreen mainScreen].bounds.size.height - 216 - 64);
+        _altView.frame = CGRectMake(0, 64, self.screenWidth, [UIScreen mainScreen].bounds.size.height - 216 - 64);
         
         NSMutableArray *overallAray = [[NSMutableArray alloc]init];
         NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
@@ -76,12 +78,12 @@
         
         
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
-        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)-60, 320, 20)];
+        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_altView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)+40, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_altView addSubview:label]; [labelArray addObject:label];//[label release];
@@ -110,7 +112,7 @@
         item.hidesBackButton = YES;
         [navBar pushNavigationItem:item animated:NO];
         _scrollView = [[UIScrollView alloc]init];
-        _scrollView.frame = CGRectMake(0, 64, 320, [UIScreen mainScreen].bounds.size.height - 216 - 64);
+        _scrollView.frame = CGRectMake(0, 64, self.screenWidth, [UIScreen mainScreen].bounds.size.height - 216 - 64);
         //_scrollView.backgroundColor =   [UIColor blueColor];
         _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * 2, _scrollView.frame.size.height);
         _scrollView.scrollEnabled = NO;
@@ -124,7 +126,7 @@
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
             for (int k = 1; k < 5; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*320), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
+                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*self.screenWidth), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
                 [_scrollView addSubview:dashView];
                 [pageArray addObject:dashView];
                 // [dashView release];
@@ -135,17 +137,17 @@
         
         
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
-        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, 320, 20)];
+        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(320, ((_scrollView.frame.size.height-20)/2)-60, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Re-enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
@@ -164,7 +166,7 @@
         item.hidesBackButton = YES;
         [navBar pushNavigationItem:item animated:NO];
         _scrollView = [[UIScrollView alloc]init];
-        _scrollView.frame = CGRectMake(0, 64, 320, [UIScreen mainScreen].bounds.size.height - 216 - 64);
+        _scrollView.frame = CGRectMake(0, 64, self.screenWidth, [UIScreen mainScreen].bounds.size.height - 216 - 64);
         //_scrollView.backgroundColor =   [UIColor blueColor];
         _scrollView.contentSize = CGSizeMake(_scrollView.frame.size.width * 3, _scrollView.frame.size.height);
         _scrollView.scrollEnabled = NO;
@@ -178,7 +180,7 @@
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
             for (int k = 1; k < 5; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*320), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
+                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*self.screenWidth), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
                 [_scrollView addSubview:dashView];
                 [pageArray addObject:dashView];
                 // [dashView release];
@@ -189,27 +191,27 @@
         
         
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
-        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, 320, 20)];
+        UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your old passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(320, ((_scrollView.frame.size.height-20)/2)-60, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(320, ((_scrollView.frame.size.height-20)/2)+40, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(640, ((_scrollView.frame.size.height-20)/2)-60, 320, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(640, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Re-enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
