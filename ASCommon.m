@@ -16,7 +16,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
@@ -36,16 +36,22 @@ static ASCommon *sharedCommonObj;
         [controller stopMonitoring];
         handler(buttonIndex == [alertView cancelButtonIndex]);
     };
-    alertView.didPresentBlock = ^(UIAlertView *alertView) {
+    if (beginMesaMonitoringBeforeShowing) {
+        alertView.willPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
-    };
+        };
+    } else {
+        alertView.didPresentBlock = ^(UIAlertView *alertView) {
+        [controller startMonitoring];
+        };
+    }
 
     //CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
     //[alertView setTransform: moveUp];
     return alertView;
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent {
     NSString *message;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
@@ -76,9 +82,15 @@ static ASCommon *sharedCommonObj;
         [controller stopMonitoring];
         handler(buttonIndex == [alertView cancelButtonIndex]);
     };
-    alertView.didPresentBlock = ^(UIAlertView *alertView) {
+    if (beginMesaMonitoringBeforeShowing) {
+        alertView.willPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
-    };
+        };
+    } else {
+        alertView.didPresentBlock = ^(UIAlertView *alertView) {
+        [controller startMonitoring];
+        };
+    }
 
     return alertView;
 }
