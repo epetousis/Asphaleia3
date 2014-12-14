@@ -1,5 +1,6 @@
 #import <notify.h>
 #import <objc/message.h>
+#import <SystemConfiguration/CaptiveNetwork.h>
 
 static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
 #define kPrefsChangedNotification "com.a3tweaks.asphaleia/ReloadPrefs"
@@ -12,11 +13,26 @@ static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/c
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
 #define kUnsecureUnlockToAppKey @"easyUnlockIntoApp"
+#define kWifiUnlockKey @"wifiUnlock"
+#define kWifiUnlockNetworkKey @"wifiNetwork"
 
 static NSDictionary *prefs = nil;
 
 static void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	prefs = [[NSDictionary alloc] initWithContentsOfFile:preferencesFilePath];
+}
+
+static BOOL shouldRequireAuthorisationOnWifi(void) {
+	BOOL unlockOnWifi = [prefs objectForKey:kWifiUnlockKey] ? [[prefs objectForKey:kWifiUnlockKey] boolValue] : NO;
+	NSString *unlockSSID = [prefs objectForKey:kWifiUnlockNetworkKey] ? [prefs objectForKey:kWifiUnlockNetworkKey] : @"";
+	CFArrayRef interfaceArray = CNCopySupportedInterfaces();
+	CFDictionaryRef networkInfoDictionary = CNCopyCurrentNetworkInfo((CFStringRef)CFArrayGetValueAtIndex(interfaceArray, 0));
+	NSDictionary *ssidList = (__bridge NSDictionary*)networkInfoDictionary;
+	NSString *currentSSID = [ssidList valueForKey:@"SSID"];
+
+	if (unlockOnWifi && [currentSSID isEqualToString:unlockSSID])
+		return NO;
+    return YES;
 }
 
 static BOOL shouldUnsecurelyUnlockIntoApp(void) {
