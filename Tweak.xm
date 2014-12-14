@@ -110,6 +110,7 @@ BTTouchIDController *iconTouchIDController;
 	[iconView setTouchDownInIcon:NO];
 	
 	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
+		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
 	[alertView show];
@@ -129,6 +130,7 @@ BTTouchIDController *iconTouchIDController;
 	}
 
 	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] dismissedHandler:^(BOOL wasCancelled) {
+	if (!wasCancelled)
 		%orig;
 	}];
 	[alertView show];
@@ -172,6 +174,7 @@ BTTouchIDController *iconTouchIDController;
 	}
 
 	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
+		if (!wasCancelled)
 			%orig;
 		}];
 	[alertView show];
@@ -192,8 +195,12 @@ BTTouchIDController *iconTouchIDController;
 
 		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView dismissedHandler:^(BOOL wasCancelled) {
-		blurredWindow.hidden = YES;
-		blurredWindow = nil;
+			blurredWindow.hidden = YES;
+			blurredWindow = nil;
+
+			if (wasCancelled) {
+				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
+			}
 		}];
 		blurredWindow.backgroundColor = [UIColor clearColor];
 
