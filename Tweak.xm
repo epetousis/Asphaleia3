@@ -109,7 +109,7 @@ BTTouchIDController *iconTouchIDController;
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
@@ -129,7 +129,7 @@ BTTouchIDController *iconTouchIDController;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -173,7 +173,7 @@ BTTouchIDController *iconTouchIDController;
 		return %orig;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			%orig;
 		}];
@@ -194,7 +194,7 @@ BTTouchIDController *iconTouchIDController;
 		[iconView _setIcon:appIcon animated:YES];
 
 		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView dismissedHandler:^(BOOL wasCancelled) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			blurredWindow.hidden = YES;
 			blurredWindow = nil;
 
