@@ -34,7 +34,7 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
-        handler(buttonIndex != [alertView cancelButtonIndex]);
+        handler(buttonIndex == [alertView cancelButtonIndex]);
     };
     alertView.didPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
@@ -74,7 +74,7 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
-        handler(buttonIndex != [alertView cancelButtonIndex]);
+        handler(buttonIndex == [alertView cancelButtonIndex]);
     };
     alertView.didPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
