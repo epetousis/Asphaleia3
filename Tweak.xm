@@ -24,9 +24,18 @@ SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
 
+@interface UIAlertView ()
+-(id)_alertController;
+@end
+
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
+	if (!shouldRequireAuthorisationOnWifi()) {
+		%orig;
+		return;
+	}
+
 	if (fingerglyph && currentIconView && containerView) {
 		[currentIconView setHighlighted:NO];
 		[iconView setHighlighted:NO];
@@ -100,7 +109,7 @@ BTTouchIDController *iconTouchIDController;
 
 // editing hook
 -(void)iconHandleLongPress:(SBIconView *)iconView {
-	if (self.isEditing || !shouldSecureAppArrangement()) {
+	if (self.isEditing || !shouldSecureAppArrangement() || !shouldRequireAuthorisationOnWifi()) {
 		%orig;
 		return;
 	}
@@ -114,6 +123,9 @@ BTTouchIDController *iconTouchIDController;
 			[self setIsEditing:YES];
 		}];
 	[alertView show];
+	UIView *obscurityView = [[UIView alloc] initWithFrame:CGRectMake(0,0,40,40)];
+    obscurityView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.9];
+	[[[[alertView _alertController] contentViewController] view] addSubview:obscurityView];
 }
 
 %end
@@ -124,7 +136,7 @@ BTTouchIDController *iconTouchIDController;
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
-	if (![getProtectedApps() containsObject:item.displayIdentifier]) {
+	if (![getProtectedApps() containsObject:item.displayIdentifier] || !shouldRequireAuthorisationOnWifi()) {
 		%orig;
 		return;
 	}
@@ -154,14 +166,25 @@ BTTouchIDController *iconTouchIDController;
 
 %hook SBAppSwitcherSnapshotView
 
--(void)prepareToBecomeVisibleIfNecessary {
+-(void)_layoutStatusBar {
+	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent() || !shouldRequireAuthorisationOnWifi())
+		%orig;
+}
+
+-(void)layoutSubviews {
 	%orig;
-	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent()) {
+	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent() || !shouldRequireAuthorisationOnWifi()) {
 		return;
 	}
-	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
-	[filter setValue:[NSNumber numberWithFloat:10] forKey:@"inputRadius"];
-	self.layer.filters = [NSArray arrayWithObject:filter];
+	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
+	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
+	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
+	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
+	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
+	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];*/
+
+	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewForSnapshotView:self];
+	[self addSubview:obscurityView];
 }
 
 %end
@@ -169,7 +192,7 @@ BTTouchIDController *iconTouchIDController;
 %hook SBUIController
 
 -(BOOL)_activateAppSwitcher {
-	if (!shouldSecureSwitcher()) {
+	if (!shouldSecureSwitcher() || !shouldRequireAuthorisationOnWifi()) {
 		return %orig;
 	}
 
@@ -188,7 +211,7 @@ BTTouchIDController *iconTouchIDController;
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp()) {
+	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp() && shouldRequireAuthorisationOnWifi()) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];

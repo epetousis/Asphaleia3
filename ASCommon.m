@@ -3,6 +3,12 @@
 #import "UIAlertView+Blocks.h"
 #import "BTTouchIDController.h"
 
+#define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
+
+@interface ASCommon ()
+@property (readwrite) NSMutableArray *snapshotViews;
+@end
+
 @implementation ASCommon
 
 static ASCommon *sharedCommonObj;
@@ -111,6 +117,30 @@ static ASCommon *sharedCommonObj;
     NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
 
     return [touchIDModels containsObject:results];
+}
+
+-(BOOL)shouldAddObscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
+    return [self.snapshotViews indexOfObject:snapshotView] == NSNotFound;
+}
+
+-(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
+    NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
+    UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+
+    UIView *obscurityView = [[UIView alloc] initWithFrame:snapshotView.bounds];
+    obscurityView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.9];
+    UIImageView *imageView = [[UIImageView alloc] init];
+    imageView.image = obscurityEye;
+    imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
+    imageView.center = obscurityView.center;
+    [obscurityView addSubview:imageView];
+
+    [self.snapshotViews addObject:snapshotView];
+    return obscurityView;
+}
+
+-(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
+    [self.snapshotViews removeObject:snapshotView];
 }
 
 @end
