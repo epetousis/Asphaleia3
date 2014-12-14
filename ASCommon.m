@@ -36,7 +36,7 @@ static ASCommon *sharedCommonObj;
         [controller stopMonitoring];
         handler(buttonIndex == [alertView cancelButtonIndex]);
     };
-    if (beginMesaMonitoringBeforeShowing) {
+    if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
         };
@@ -82,7 +82,7 @@ static ASCommon *sharedCommonObj;
         [controller stopMonitoring];
         handler(buttonIndex == [alertView cancelButtonIndex]);
     };
-    if (beginMesaMonitoringBeforeShowing) {
+    if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
         [controller startMonitoring];
         };
