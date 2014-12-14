@@ -11,8 +11,8 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject
 +(ASCommon *)sharedInstance;
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent;
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent;
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)isTouchIDDevice;
 
 @end

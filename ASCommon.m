@@ -16,7 +16,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
@@ -51,7 +51,7 @@ static ASCommon *sharedCommonObj;
     return alertView;
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent {
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *message;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
