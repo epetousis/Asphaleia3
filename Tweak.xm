@@ -24,10 +24,6 @@ SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
 
-@interface UIAlertView ()
--(id)_alertController;
-@end
-
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
@@ -123,9 +119,6 @@ BTTouchIDController *iconTouchIDController;
 			[self setIsEditing:YES];
 		}];
 	[alertView show];
-	UIView *obscurityView = [[UIView alloc] initWithFrame:CGRectMake(0,0,40,40)];
-    obscurityView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.9];
-	[[[[alertView _alertController] contentViewController] view] addSubview:obscurityView];
 }
 
 %end

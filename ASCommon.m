@@ -2,8 +2,28 @@
 #include <sys/sysctl.h>
 #import "UIAlertView+Blocks.h"
 #import "BTTouchIDController.h"
+#import <objc/runtime.h>
+#import "PKGlyphView.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
+
+@interface UIAlertView ()
+-(id)_alertController;
+@end
+
+@interface UIAlertController ()
+@property (readonly) UIView * _foregroundView;
+@property (readonly) UIView * _dimmingView;
+-(UIView *)_foregroundView;
+-(UIView *)_dimmingView;
+-(id)_containedAlertController;
+-(id)_alertControllerView;
+-(id)_alertControllerContainer;
+@end
+
+@interface SBIconImageView ()
+@property(assign, nonatomic) float brightness;
+@end
 
 @interface ASCommon ()
 @property (readwrite) NSMutableArray *snapshotViews;
@@ -31,8 +51,50 @@ static ASCommon *sharedCommonObj;
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
+    UIViewController *v = [[UIViewController alloc] init];
+    SBIconView *customIconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
+    [customIconView _setIcon:[iconView icon] animated:YES];
+    // Little hack to get rid of the badge
+    for (UIView *subview in customIconView.subviews) {
+        if (![subview isKindOfClass:[objc_getClass("SBIconImageView") class]])
+            [subview removeFromSuperview];
+    }
+    [customIconView setHighlighted:YES];
+    [customIconView setLabelAccessoryViewHidden:YES];
+    [customIconView setLabelHidden:YES];
+    v.view.frame = CGRectMake(0,0,270,30);
+    customIconView.center = CGPointMake(CGRectGetMidX(v.view.bounds),CGRectGetMidY(v.view.bounds)+20);
+    customIconView.userInteractionEnabled = NO;
+    [v.view addSubview:customIconView];
+
+    __block PKGlyphView *fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+    fingerglyph.secondaryColor = [UIColor redColor];
+    fingerglyph.primaryColor = [UIColor whiteColor];
+    CGRect fingerframe = fingerglyph.frame;
+    fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+    fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+    fingerglyph.frame = fingerframe;
+    UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
+    containerView.center = [iconView _iconImageView].center;
+    [containerView addSubview:fingerglyph];
+    [customIconView addSubview:containerView];
+
+    [[alertView _alertController] setValue:v forKey:@"contentViewController"];
+    [(UIAlertController *)[alertView _alertController]_foregroundView].alpha = 0.0;
+
+
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-        if (event == TouchIDMatched) {
+        switch (event) {
+        case TouchIDFingerDown:
+            [fingerglyph setState:1 animated:YES completionHandler:nil];
+            break;
+        case TouchIDFingerUp:
+            [fingerglyph setState:0 animated:YES completionHandler:nil];
+            break;
+        case TouchIDNotMatched:
+            [fingerglyph setState:0 animated:YES completionHandler:nil];
+            break;
+        case TouchIDMatched:
             [alertView dismissWithClickedButtonIndex:-1 animated:YES];
             [controller stopMonitoring];
             handler(NO);
@@ -52,8 +114,6 @@ static ASCommon *sharedCommonObj;
         };
     }
 
-    //CGAffineTransform moveUp = CGAffineTransformMakeTranslation(0.0, 0.0);
-    //[alertView setTransform: moveUp];
     return alertView;
 }
 
@@ -128,7 +188,7 @@ static ASCommon *sharedCommonObj;
     UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 
     UIView *obscurityView = [[UIView alloc] initWithFrame:snapshotView.bounds];
-    obscurityView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.9];
+    obscurityView.backgroundColor = [UIColor blackColor];
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.image = obscurityEye;
     imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
