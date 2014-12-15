@@ -1,6 +1,7 @@
 #import "SBIcon.h"
 
 @interface SBIconImageView : UIImageView
+@property(assign, nonatomic) float overlayAlpha;
 @end
 
 @interface SBIconView : UIView
@@ -19,4 +20,6 @@
 -(void)cancelLongPressTimer;
 -(id)initWithDefaultSize;
 -(void)_setIcon:(id)icon animated:(BOOL)animated;
+-(void)setLabelAccessoryViewHidden:(BOOL)hidden;
+-(void)setLabelHidden:(BOOL)hidden;
 @end
