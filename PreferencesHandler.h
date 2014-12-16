@@ -15,6 +15,8 @@ static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/c
 #define kUnsecureUnlockToAppKey @"easyUnlockIntoApp"
 #define kWifiUnlockKey @"wifiUnlock"
 #define kWifiUnlockNetworkKey @"wifiNetwork"
+#define kSecureSpotlightKey @"secureSpotlight"
+#define kSecurePowerDownKey @"preventPowerOff"
 
 static NSDictionary *prefs = nil;
 
@@ -35,29 +37,50 @@ static BOOL shouldRequireAuthorisationOnWifi(void) {
     return YES;
 }
 
+static BOOL shouldSecurePowerDownView(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return NO;
+    return [prefs objectForKey:kSecurePowerDownKey] ? [[prefs objectForKey:kSecurePowerDownKey] boolValue] : NO;
+}
+
+static BOOL shouldSecureSpotlight(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return NO;
+    return [prefs objectForKey:kSecureSpotlightKey] ? [[prefs objectForKey:kSecureSpotlightKey] boolValue] : NO;
+}
+
 static BOOL shouldUnsecurelyUnlockIntoApp(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return YES;
+
     return [prefs objectForKey:kUnsecureUnlockToAppKey] ? [[prefs objectForKey:kUnsecureUnlockToAppKey] boolValue] : NO;
 }
 
 static BOOL shouldObscureAppContent(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return NO;
     return [prefs objectForKey:kObscureAppContentKey] ? [[prefs objectForKey:kObscureAppContentKey] boolValue] : YES;
 }
 
 static BOOL shouldSecureSwitcher(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return NO;
     return [prefs objectForKey:kSecureSwitcherKey] ? [[prefs objectForKey:kSecureSwitcherKey] boolValue] : NO;
 }
 
 static BOOL shouldSecureAppArrangement(void) {
+	if (!shouldRequireAuthorisationOnWifi())
+		return NO;
     return [prefs objectForKey:kSecureAppArrangementKey] ? [[prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
 }
 
 static NSArray *getProtectedApps() {
-	if (![prefs objectForKey:kSecuredAppsKey])
+	if (![prefs objectForKey:kSecuredAppsKey] || !shouldRequireAuthorisationOnWifi())
 		return [NSArray array];
 
 	NSMutableArray *protectedApps = [NSMutableArray array];
 	for (NSString *app in [prefs objectForKey:kSecuredAppsKey]) {
-		if ([[[prefs objectForKey:kSecuredAppsKey] objectForKey:app] boolValue] == true)
+		if ([[[prefs objectForKey:kSecuredAppsKey] objectForKey:app] boolValue])
 			[protectedApps addObject:app];
 	}
 	return [NSArray arrayWithArray:protectedApps];

@@ -129,6 +129,9 @@ static ASCommon *sharedCommonObj;
         case ASAuthenticationAlertSpotlight:
             title = @"Spotlight";
             break;
+        case ASAuthenticationAlertPowerDown:
+            title = @"Slide to Power Off";
+            break;
         default:
             title = @"Asphaleia";
             break;
