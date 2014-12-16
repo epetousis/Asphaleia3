@@ -18,6 +18,7 @@
 #import "SBApplicationIcon.h"
 #import "SpringBoard.h"
 #import "SBSearchViewController.h"
+#import "SBControlCenterController.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
@@ -228,27 +229,28 @@ BTTouchIDController *iconTouchIDController;
 %end
 
 %hook SBSearchViewController
-static BOOL hasAuthenticated;
-static BOOL authenticating;
+static BOOL searchControllerHasAuthenticated;
+static BOOL searchControllerAuthenticating;
 
 -(void)_setShowingKeyboard:(BOOL)keyboard {
 	%orig;
-	if (keyboard && !hasAuthenticated && !authenticating && shouldSecureSpotlight()) {
+	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
 		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		searchControllerAuthenticating = NO;
 		if (!wasCancelled)
-			hasAuthenticated = YES;
+			searchControllerHasAuthenticated = YES;
 			[(SpringBoard *)[UIApplication sharedApplication] _revealSpotlight];
 			[self _setShowingKeyboard:YES];
 		}];
 		[alertView show];
-		authenticating = YES;
+		searchControllerAuthenticating = YES;
 	}
 }
 
 -(void)dismiss {
-	hasAuthenticated = NO;
-	authenticating = NO;
+	searchControllerHasAuthenticated = NO;
+	searchControllerAuthenticating = NO;
 	%orig;
 }
 
@@ -267,6 +269,34 @@ static BOOL authenticating;
 		%orig;
 	}];
 	[alertView show];
+}
+
+%end
+
+%hook SBControlCenterController
+static BOOL controlCentreAuthenticating;
+static BOOL controlCentreHasAuthenticated;
+
+-(void)_finishPresenting:(BOOL)presenting completion:(id)completion {
+	%orig;
+	if (!shouldSecureControlCentre() || controlCentreHasAuthenticated || controlCentreAuthenticating || !presenting)
+		return;
+
+	controlCentreAuthenticating = YES;
+	[self dismissAnimated:YES];
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	controlCentreAuthenticating = NO;
+	if (!wasCancelled)
+		controlCentreHasAuthenticated = YES;
+		[self presentAnimated:YES];
+	}];
+	[alertView show];
+}
+
+-(void)_endPresentation {
+	controlCentreHasAuthenticated = NO;
+	controlCentreAuthenticating = NO;
+	%orig;
 }
 
 %end

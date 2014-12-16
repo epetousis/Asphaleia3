@@ -33,7 +33,7 @@
 
 static ASCommon *sharedCommonObj;
 
-+(ASCommon *)sharedInstance {
++(instancetype)sharedInstance {
     @synchronized(self) {
         if (!sharedCommonObj)
             sharedCommonObj = [[ASCommon alloc] init];
