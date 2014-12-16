@@ -17,18 +17,13 @@
 #import "SBApplication.h"
 #import "SBApplicationIcon.h"
 #import "SpringBoard.h"
+#import "SBSearchViewController.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
-
-@interface SBSearchViewController : UIViewController
-+(SBSearchViewController *)sharedInstance;
--(void)cancelButtonPressed;
--(void)_setShowingKeyboard:(BOOL)keyboard;
-@end
 
 %hook SBIconController
 
