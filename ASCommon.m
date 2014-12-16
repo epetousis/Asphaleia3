@@ -87,12 +87,15 @@ static ASCommon *sharedCommonObj;
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown:
+                alertView.title = @"Scanning finger...";
                 [fingerglyph setState:1 animated:YES completionHandler:nil];
                 break;
             case TouchIDFingerUp:
+                alertView.title = iconView.icon.displayName;
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 break;
             case TouchIDNotMatched:
+                alertView.title = @"Incorrect finger.";
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -149,7 +152,14 @@ static ASCommon *sharedCommonObj;
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
+            case TouchIDFingerDown:
+                alertView.title = @"Scanning finger...";
+                break;
+            case TouchIDFingerUp:
+                alertView.title = title;
+                break;
             case TouchIDNotMatched:
+                alertView.title = @"Incorrect finger.";
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 break;
