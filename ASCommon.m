@@ -5,6 +5,7 @@
 #import <objc/runtime.h>
 #import "PKGlyphView.h"
 #import <AudioToolbox/AudioServices.h>
+#import "NSTimer+Blocks.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -83,19 +84,20 @@ static ASCommon *sharedCommonObj;
     [[alertView _alertController] setValue:v forKey:@"contentViewController"];
     [(UIAlertController *)[alertView _alertController]_foregroundView].alpha = 0.0;
 
-
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown:
                 alertView.title = @"Scanning finger...";
+                [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+                    alertView.title = iconView.icon.displayName;
+                } repeats:NO];
                 [fingerglyph setState:1 animated:YES completionHandler:nil];
                 break;
             case TouchIDFingerUp:
-                alertView.title = iconView.icon.displayName;
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 break;
             case TouchIDNotMatched:
-                alertView.title = @"Incorrect finger.";
+                alertView.title = iconView.icon.displayName;
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -154,12 +156,12 @@ static ASCommon *sharedCommonObj;
         switch (event) {
             case TouchIDFingerDown:
                 alertView.title = @"Scanning finger...";
-                break;
-            case TouchIDFingerUp:
-                alertView.title = title;
+                [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+                    alertView.title = title;
+                } repeats:NO];
                 break;
             case TouchIDNotMatched:
-                alertView.title = @"Incorrect finger.";
+                alertView.title = title;
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 break;
