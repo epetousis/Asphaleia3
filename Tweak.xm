@@ -256,14 +256,17 @@ static BOOL authenticating;
 
 %hook SBPowerDownController
 
--(void)activate {
-	if (shouldSecurePowerDownView()) {
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-		if (!wasCancelled)
-			%orig;
-		}];
-		[alertView show];
+-(void)orderFront {
+	if (!shouldSecurePowerDownView()) {
+		%orig;
+		return;
 	}
+
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+	if (!wasCancelled)
+		%orig;
+	}];
+	[alertView show];
 }
 
 %end
