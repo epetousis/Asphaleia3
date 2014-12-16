@@ -28,11 +28,6 @@ BTTouchIDController *iconTouchIDController;
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
-	if (!shouldRequireAuthorisationOnWifi()) {
-		%orig;
-		return;
-	}
-
 	if (fingerglyph && currentIconView && containerView) {
 		[currentIconView setHighlighted:NO];
 		[iconView setHighlighted:NO];
@@ -48,14 +43,9 @@ BTTouchIDController *iconTouchIDController;
 
 		return;
 	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID]) {
-		[iconView setHighlighted:NO];
-		[iconView.icon launchFromLocation:iconView.location];
+		%orig;
 		return;
 	}
-
-	// need to have a look at using SBIconProgressView instead of just using setHighlighted
-	// use -(id)initWithFrame:(CGRect)frame and -(void)setState:(int)state paused:(BOOL)paused fractionLoaded:(float)loaded animated:(BOOL)animated;
-	// change size of the circle with @property(readonly, assign, nonatomic) CGRect circleBoundingRect;
 
 	currentIconView = iconView;
 	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
@@ -104,9 +94,8 @@ BTTouchIDController *iconTouchIDController;
 	[iconTouchIDController startMonitoring];
 }
 
-// editing hook
 -(void)iconHandleLongPress:(SBIconView *)iconView {
-	if (self.isEditing || !shouldSecureAppArrangement() || !shouldRequireAuthorisationOnWifi()) {
+	if (self.isEditing || !shouldSecureAppArrangement()) {
 		%orig;
 		return;
 	}
@@ -130,7 +119,7 @@ BTTouchIDController *iconTouchIDController;
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
-	if (![getProtectedApps() containsObject:item.displayIdentifier] || !shouldRequireAuthorisationOnWifi()) {
+	if (![getProtectedApps() containsObject:item.displayIdentifier]) {
 		%orig;
 		return;
 	}
@@ -161,13 +150,13 @@ BTTouchIDController *iconTouchIDController;
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent() || !shouldRequireAuthorisationOnWifi())
+	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent())
 		%orig;
 }
 
 -(void)layoutSubviews {
 	%orig;
-	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent() || !shouldRequireAuthorisationOnWifi()) {
+	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent()) {
 		return;
 	}
 	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
@@ -186,7 +175,7 @@ BTTouchIDController *iconTouchIDController;
 %hook SBUIController
 
 -(BOOL)_activateAppSwitcher {
-	if (!shouldSecureSwitcher() || !shouldRequireAuthorisationOnWifi()) {
+	if (!shouldSecureSwitcher()) {
 		return %orig;
 	}
 
@@ -205,7 +194,7 @@ BTTouchIDController *iconTouchIDController;
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp() && shouldRequireAuthorisationOnWifi()) {
+	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp()) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
@@ -244,7 +233,7 @@ static BOOL authenticating;
 
 -(void)_setShowingKeyboard:(BOOL)keyboard {
 	%orig;
-	if (keyboard && !hasAuthenticated && !authenticating) {
+	if (keyboard && !hasAuthenticated && !authenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
 		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
@@ -261,6 +250,20 @@ static BOOL authenticating;
 	hasAuthenticated = NO;
 	authenticating = NO;
 	%orig;
+}
+
+%end
+
+%hook SBPowerDownController
+
+-(void)activate {
+	if (shouldSecurePowerDownView()) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+		if (!wasCancelled)
+			%orig;
+		}];
+		[alertView show];
+	}
 }
 
 %end

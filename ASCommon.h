@@ -6,7 +6,8 @@
 typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
   ASAuthenticationAlertAppArranging,
   ASAuthenticationAlertSwitcher,
-  ASAuthenticationAlertSpotlight
+  ASAuthenticationAlertSpotlight,
+  ASAuthenticationAlertPowerDown
 };
 
 typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
