@@ -18,6 +18,7 @@ static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/c
 #define kSecureSpotlightKey @"secureSpotlight"
 #define kSecurePowerDownKey @"preventPowerOff"
 #define kSecureControlCentreKey @"secureCC"
+#define kVibrateOnFailKey @"vibrateOnFail"
 
 static NSDictionary *prefs = nil;
 
@@ -36,6 +37,10 @@ static BOOL shouldRequireAuthorisationOnWifi(void) {
 	if (unlockOnWifi && [currentSSID isEqualToString:unlockSSID])
 		return NO;
     return YES;
+}
+
+static BOOL shouldVibrateOnIncorrectFingerprint(void) {
+    return [prefs objectForKey:kVibrateOnFailKey] ? [[prefs objectForKey:kVibrateOnFailKey] boolValue] : NO;
 }
 
 static BOOL shouldSecureControlCentre(void) {

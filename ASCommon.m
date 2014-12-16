@@ -4,6 +4,7 @@
 #import "BTTouchIDController.h"
 #import <objc/runtime.h>
 #import "PKGlyphView.h"
+#import <AudioToolbox/AudioServices.h>
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -42,7 +43,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
@@ -85,19 +86,22 @@ static ASCommon *sharedCommonObj;
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
-        case TouchIDFingerDown:
-            [fingerglyph setState:1 animated:YES completionHandler:nil];
-            break;
-        case TouchIDFingerUp:
-            [fingerglyph setState:0 animated:YES completionHandler:nil];
-            break;
-        case TouchIDNotMatched:
-            [fingerglyph setState:0 animated:YES completionHandler:nil];
-            break;
-        case TouchIDMatched:
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            [controller stopMonitoring];
-            handler(NO);
+            case TouchIDFingerDown:
+                [fingerglyph setState:1 animated:YES completionHandler:nil];
+                break;
+            case TouchIDFingerUp:
+                [fingerglyph setState:0 animated:YES completionHandler:nil];
+                break;
+            case TouchIDNotMatched:
+                [fingerglyph setState:0 animated:YES completionHandler:nil];
+                if (vibrateOnBadFinger)
+                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+                break;
+            case TouchIDMatched:
+                [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+                [controller stopMonitoring];
+                handler(NO);
+                break;
         }
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
@@ -117,7 +121,7 @@ static ASCommon *sharedCommonObj;
     return alertView;
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *title;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
@@ -144,10 +148,16 @@ static ASCommon *sharedCommonObj;
          otherButtonTitles:@"Passcode",nil];
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-        if (event == TouchIDMatched) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            [controller stopMonitoring];
-            handler(NO);
+        switch (event) {
+            case TouchIDNotMatched:
+                if (vibrateOnBadFinger)
+                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+                break;
+            case TouchIDMatched:
+                [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+                [controller stopMonitoring];
+                handler(NO);
+                break;
         }
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
