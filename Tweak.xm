@@ -44,7 +44,7 @@ BTTouchIDController *iconTouchIDController;
 		}
 
 		return;
-	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID]) {
+	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) {
 		%orig;
 		return;
 	}
@@ -154,13 +154,13 @@ BTTouchIDController *iconTouchIDController;
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent())
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent())
 		%orig;
 }
 
 -(void)layoutSubviews {
 	%orig;
-	if (![getProtectedApps() containsObject:self.displayItem.displayIdentifier] || !shouldObscureAppContent()) {
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent()) {
 		return;
 	}
 	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
@@ -198,7 +198,8 @@ BTTouchIDController *iconTouchIDController;
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if ([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] && !shouldUnsecurelyUnlockIntoApp()) {
+	NSLog(@"ASPHALEIA -- BUNDLEID : %@",frontmostApp.bundleIdentifier);
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
