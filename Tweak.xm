@@ -24,6 +24,12 @@ SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
 
+@interface SBSearchViewController : UIViewController
++(SBSearchViewController *)sharedInstance;
+-(void)cancelButtonPressed;
+-(void)_setShowingKeyboard:(BOOL)keyboard;
+@end
+
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
@@ -233,6 +239,33 @@ BTTouchIDController *iconTouchIDController;
 		[blurredWindow makeKeyAndVisible];
 		[alertView show];
 	}
+}
+
+%end
+
+%hook SBSearchViewController
+static BOOL hasAuthenticated;
+static BOOL authenticating;
+
+-(void)_setShowingKeyboard:(BOOL)keyboard {
+	%orig;
+	if (keyboard && !hasAuthenticated && !authenticating) {
+		[self cancelButtonPressed];
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		if (!wasCancelled)
+			hasAuthenticated = YES;
+			[(SpringBoard *)[UIApplication sharedApplication] _revealSpotlight];
+			[self _setShowingKeyboard:YES];
+		}];
+		[alertView show];
+		authenticating = YES;
+	}
+}
+
+-(void)dismiss {
+	hasAuthenticated = NO;
+	authenticating = NO;
+	%orig;
 }
 
 %end
