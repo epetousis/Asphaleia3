@@ -118,21 +118,24 @@ static ASCommon *sharedCommonObj;
 }
 
 -(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    NSString *message;
+    NSString *title;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
-            message = @"Scan fingerprint to arrange apps.";
+            title = @"Arrange Apps";
             break;
         case ASAuthenticationAlertSwitcher:
-            message = @"Scan fingerprint to open app switcher.";
+            title = @"Multitasking";
+            break;
+        case ASAuthenticationAlertSpotlight:
+            title = @"Spotlight";
             break;
         default:
-            message = @"Scan fingerprint to continue.";
+            title = @"Asphaleia";
             break;
     }
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Asphaleia"
-                   message:message
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
+                   message:@"Scan fingerprint to access."
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
