@@ -258,6 +258,12 @@ static BOOL searchControllerAuthenticating;
 	}
 }
 
+-(void)_handleDismissGesture {
+	searchControllerHasAuthenticated = NO;
+	searchControllerAuthenticating = NO;
+	%orig;
+}
+
 -(void)dismiss {
 	searchControllerHasAuthenticated = NO;
 	searchControllerAuthenticating = NO;
