@@ -15,6 +15,7 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject
 @property (readonly) NSMutableArray *snapshotViews;
+@property (readonly) NSMutableArray *obscurityViews;
 +(instancetype)sharedInstance;
 -(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler;

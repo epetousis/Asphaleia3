@@ -174,6 +174,12 @@ BTTouchIDController *iconTouchIDController;
 	[self addSubview:obscurityView];
 }
 
+-(void)invalidate {
+	%orig;
+	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewForSnapshotView:self];
+	[obscurityView removeFromSuperview];
+}
+
 %end
 
 %hook SBUIController

@@ -29,6 +29,7 @@
 
 @interface ASCommon ()
 @property (readwrite) NSMutableArray *snapshotViews;
+@property (readwrite) NSMutableArray *obscurityViews;
 @end
 
 @implementation ASCommon
@@ -212,6 +213,9 @@ static ASCommon *sharedCommonObj;
 }
 
 -(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
+    if (self.snapshotViews && [self.snapshotViews indexOfObject:snapshotView] != NSNotFound)
+        return [self.obscurityViews objectAtIndex:[self.snapshotViews indexOfObject:snapshotView]];
+
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
     UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 
@@ -224,10 +228,12 @@ static ASCommon *sharedCommonObj;
     [obscurityView addSubview:imageView];
 
     [self.snapshotViews addObject:snapshotView];
+    [self.obscurityViews insertObject:obscurityView atIndex:[self.snapshotViews indexOfObject:snapshotView]];
     return obscurityView;
 }
 
 -(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
+    [self.obscurityViews removeObjectAtIndex:[self.snapshotViews indexOfObject:snapshotView]];
     [self.snapshotViews removeObject:snapshotView];
 }
 
