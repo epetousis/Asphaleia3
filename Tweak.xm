@@ -248,10 +248,11 @@ static BOOL searchControllerAuthenticating;
 		[self cancelButtonPressed];
 		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
-		if (!wasCancelled)
+		if (!wasCancelled) {
 			searchControllerHasAuthenticated = YES;
 			[(SpringBoard *)[UIApplication sharedApplication] _revealSpotlight];
 			[self _setShowingKeyboard:YES];
+		}
 		}];
 		[alertView show];
 		searchControllerAuthenticating = YES;
@@ -293,18 +294,19 @@ static BOOL searchControllerAuthenticating;
 static BOOL controlCentreAuthenticating;
 static BOOL controlCentreHasAuthenticated;
 
--(void)_finishPresenting:(BOOL)presenting completion:(id)completion {
-	%orig;
-	if (!shouldSecureControlCentre() || controlCentreHasAuthenticated || controlCentreAuthenticating || !presenting)
+-(void)beginTransitionWithTouchLocation:(CGPoint)touchLocation {
+	if (!shouldSecureControlCentre() || controlCentreHasAuthenticated || controlCentreAuthenticating) {
+		%orig;
 		return;
+	}
 
 	controlCentreAuthenticating = YES;
-	[self dismissAnimated:YES];
 	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
-	if (!wasCancelled)
+	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		[self presentAnimated:YES];
+	}
 	}];
 	[alertView show];
 }
