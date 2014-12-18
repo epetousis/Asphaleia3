@@ -1115,9 +1115,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    if (indexPath.section == 0 && indexPath.row == 1 && [dataSource is5SfromDS]) {
-        //padding
-    } else if (indexPath.section == 0 && (indexPath.row == 1 || indexPath.row == 2)) {
+    if (indexPath.section == 0 && indexPath.row == 1) {
        [self.navigationController pushViewController:[[activatorListenerVC alloc] initWithListener:@"Dynamic Selection"] animated:YES];
     } else if (indexPath.section == 4 || indexPath.section == 3) {
         NSIndexPath *altPath = [NSIndexPath indexPathForRow:indexPath.row inSection:(indexPath.section-3)];
@@ -1848,9 +1846,6 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
 {
     switch (section) {
         case 0:
-            if (isIphone5S) {
-                return @"Use Activator or Touch ID in an app to add or remove it from your Secured Apps list.";
-            }
             return @"Use Activator in an app to add or remove it from your Secured Apps list.";
             break;
         default:
@@ -1909,9 +1904,6 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
         return [[_sectionDescriptors objectAtIndex:(section-3)] rowCount];
     } else if (section == 0) {
         if ([[prefs objectForKey:@"dynamicSelection"] boolValue]) {
-            if (isIphone5S) {
-                return 3;
-            }
             return 2;
         }
     }
@@ -1945,7 +1937,7 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
             cell.accessoryView = switchview;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        } else if (indexPath.row == 1 && isIphone5S) {
+        } /*else if (indexPath.row == 1 && isIphone5S) {
             UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
             [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
             cell.textLabel.text = @"Via TouchID Hold";
@@ -1953,14 +1945,21 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
             cell.accessoryView = switchview;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        } else if (indexPath.row == 1 || indexPath.row == 2) {
+        }*/ else if (indexPath.row == 1) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"special cell"];
             @try {
                 // NSLog(@"rechecking");
-                cell.detailTextLabel.text = [[LAActivator sharedInstance] localizedTitleForEventName:[[[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Dynamic Selection"] objectAtIndex:0] name]];
+                NSString *detailString = @"No actions";
+                NSInteger eventsAssignedCount = [[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Dynamic Selection"] count];
+                if (eventsAssignedCount == 1) {
+                    detailString = @"1 action";
+                } else if (eventsAssignedCount > 0) {
+                    detailString = [NSString stringWithFormat:@"%ld actions",(long)eventsAssignedCount];
+                }
+                cell.detailTextLabel.text = detailString;
             } @catch (NSException *exception) { }
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-            cell.textLabel.text = @"Activator Action";
+            cell.textLabel.text = @"Activator Actions";
         }
     } else if (indexPath.section == 1) {
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;

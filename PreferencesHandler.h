@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import <SystemConfiguration/CaptiveNetwork.h>
 
-static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
+static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
 #define kPrefsChangedNotification "com.a3tweaks.asphaleia/ReloadPrefs"
  
 #define addObserver(c, n) CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (c), CFSTR(n), NULL, CFNotificationSuspensionBehaviorCoalesce)
@@ -20,11 +20,12 @@ static NSString *const preferencesFilePath = @"/var/mobile/Library/Preferences/c
 #define kSecureControlCentreKey @"secureCC"
 #define kVibrateOnFailKey @"vibrateOnFail"
 #define kProtectAllAppsKey @"globalAppSecurity"
+#define kDynamicSelectionKey @"dynamicSelection"
 
 static NSDictionary *prefs = nil;
 
 static void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	prefs = [[NSDictionary alloc] initWithContentsOfFile:preferencesFilePath];
+	prefs = [[NSDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];
 }
 
 static BOOL shouldRequireAuthorisationOnWifi(void) {
@@ -38,6 +39,10 @@ static BOOL shouldRequireAuthorisationOnWifi(void) {
 	if (unlockOnWifi && [currentSSID isEqualToString:unlockSSID])
 		return NO;
     return YES;
+}
+
+static BOOL shouldUseDynamicSelection(void) {
+    return [prefs objectForKey:kDynamicSelectionKey] ? [[prefs objectForKey:kDynamicSelectionKey] boolValue] : NO;
 }
 
 static BOOL shouldProtectAllApps(void) {

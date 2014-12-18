@@ -20,6 +20,7 @@
 #import "SBSearchViewController.h"
 #import "SBControlCenterController.h"
 #import <AudioToolbox/AudioServices.h>
+#import "ASActivatorListener.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
@@ -91,7 +92,7 @@ BTTouchIDController *iconTouchIDController;
 		case TouchIDNotMatched:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 			if (shouldVibrateOnIncorrectFingerprint())
-                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 		}
 	}];
@@ -204,7 +205,6 @@ BTTouchIDController *iconTouchIDController;
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	NSLog(@"ASPHALEIA -- BUNDLEID : %@",frontmostApp.bundleIdentifier);
 	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
@@ -322,4 +322,19 @@ static BOOL controlCentreHasAuthenticated;
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();
+	[[ASActivatorListener sharedInstance] loadWithEventHandler:^void(LAEvent *event, BOOL abortEventCalled){
+		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+		NSString *bundleID = frontmostApp.bundleIdentifier;
+
+		if (!bundleID || !shouldUseDynamicSelection())
+			return;
+
+		NSNumber *appSecureValue = [NSNumber numberWithBool:![[[prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]];
+		if (abortEventCalled)
+			appSecureValue = [NSNumber numberWithBool:NO];
+
+		[[prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
+		[prefs writeToFile:kPreferencesFilePath atomically:YES];
+		return;
+	}];
 }
