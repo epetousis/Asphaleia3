@@ -55,6 +55,8 @@
 			<string>PSGroupCell</string>
 			<key>footerText</key>
 			<string>Asphaleia &#169; 2014 A Cubed</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
 		</dict>
 		<dict> 
 			<key>cell</key>
