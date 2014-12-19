@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <UIKit/UIApplication2.h>
 #import "PKGlyphView.h"
 #import "BTTouchIDController.h"
 #import "ASCommon.h"
@@ -21,12 +22,16 @@
 #import "SBControlCenterController.h"
 #import <AudioToolbox/AudioServices.h>
 #import "ASActivatorListener.h"
+#import "NSTimer+Blocks.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
+NSString *temporarilyUnlockedAppBundleID;
+NSTimer *currentTempUnlockTimer;
+NSTimer *currentTempGlobalDisableTimer;
 
 %hook SBIconController
 
@@ -45,7 +50,7 @@ BTTouchIDController *iconTouchIDController;
 		}
 
 		return;
-	} else if (![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) {
+	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] || [temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID]) && !shouldProtectAllApps()) {
 		%orig;
 		return;
 	}
@@ -124,7 +129,7 @@ BTTouchIDController *iconTouchIDController;
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
-	if (![getProtectedApps() containsObject:item.displayIdentifier]) {
+	if (![getProtectedApps() containsObject:item.displayIdentifier] || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier]) {
 		%orig;
 		return;
 	}
@@ -155,13 +160,13 @@ BTTouchIDController *iconTouchIDController;
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent())
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier])
 		%orig;
 }
 
 -(void)layoutSubviews {
 	%orig;
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent()) {
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier]) {
 		return;
 	}
 	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
@@ -202,10 +207,26 @@ BTTouchIDController *iconTouchIDController;
 
 %hook SBLockScreenManager
 
+-(void)_lockUI {
+	%orig;
+	if (shouldResetAppExitTimerOnLock() && currentTempUnlockTimer) {
+		[currentTempUnlockTimer fire];
+		[currentTempGlobalDisableTimer fire];
+	}
+}
+
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
+	if (shouldDelayAppSecurity()) {
+		appSecurityDisabled = YES;
+		currentTempGlobalDisableTimer = [NSTimer scheduledTimerWithTimeInterval:appSecurityDelayTimeInterval() block:^{
+                    appSecurityDisabled = NO;
+                } repeats:NO];
+		return;
+	}
+
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp) {
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
@@ -315,6 +336,28 @@ static BOOL controlCentreHasAuthenticated;
 	controlCentreHasAuthenticated = NO;
 	controlCentreAuthenticating = NO;
 	%orig;
+}
+
+%end
+
+%hook SBApplication
+
+-(void)willAnimateDeactivation:(BOOL)deactivation {
+	%orig;
+	if (![getProtectedApps() containsObject:[self bundleIdentifier]])
+		return;
+
+	if (currentTempUnlockTimer)
+		[currentTempUnlockTimer fire];
+
+	if (appExitUnlockTimeInterval() <= 0)
+		return;
+
+	temporarilyUnlockedAppBundleID = [self bundleIdentifier];
+	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
+                    temporarilyUnlockedAppBundleID = nil;
+                    currentTempUnlockTimer = nil;
+                } repeats:NO];
 }
 
 %end
