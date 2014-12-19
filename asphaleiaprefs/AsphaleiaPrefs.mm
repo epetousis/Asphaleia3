@@ -133,13 +133,13 @@
         sysctlbyname("hw.machine", machine, &size, NULL, 0);
         CFStringRef udid = (const __CFString *)MGCopyAnswer(kMGUniqueDeviceID);
         
-        [mailViewController setMessageBody:[NSString stringWithFormat:@"\n\n\n\n\n\n UUID: %@\nDevice: %@\nFirmware: %@",udid, [NSString stringWithCString:machine encoding:NSUTF8StringEncoding], [[UIDevice currentDevice] systemVersion] ] isHTML:NO];
+        [mailViewController setMessageBody:[NSString stringWithFormat:@"\n\n UUID: %@\nDevice: %@\nFirmware: %@",udid, [NSString stringWithCString:machine encoding:NSUTF8StringEncoding], [[UIDevice currentDevice] systemVersion] ] isHTML:NO];
         [(UINavigationController *)self presentViewController:mailViewController animated:YES completion:NULL];
         free(machine);
     }
     else
     {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"Cant send that email, sorry" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"Something went wrong while trying to compose the support email." delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil];
         [alert show];
     }
 }

@@ -392,9 +392,6 @@
         [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
         cell.accessoryView = switchview;
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    } else if(indexPath.section == 4) {
-        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-        cell.textLabel.text = @"Fingerprints";
     } else if(indexPath.section == 3) {
         //wifi names
         if (indexPath.row == 0) {
@@ -525,7 +522,7 @@
         //     return @"Disable Passcode authorization requirements on the Lock Screen.";
         //     break;
         case 0:
-            return @"Blur multitasking previews for secured apps.";
+            return @"Black out multitasking previews for secured apps.";
             break;
         case 2:
             return @"Set a limited amount of time after unlocking before App Security is enabled.";
@@ -557,8 +554,6 @@
         NSNumber *timeSelected = [self.times objectAtIndex:cell.tag-4];
         [prefs setObject:timeSelected forKey:@"timeIntervalLock"];
         [self updateSettings];
-    } else if (indexPath.section == 4) {
-        [self.navigationController pushViewController:[[fingerprintSelection alloc]init] animated:YES];
     } else if (indexPath.section == 3 && indexPath.row == 2) {
         UITableViewCell *textCell = [tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:3]];
         for (UIView *subview in textCell.contentView.subviews) {
