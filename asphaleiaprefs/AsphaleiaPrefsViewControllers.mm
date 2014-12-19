@@ -226,7 +226,7 @@
     } else if (section == 4) {
         [self.navigationController pushViewController:[[controlPanelVC alloc] init] animated:YES];
     } else if (section == 5) {
-        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to Reset all settings?\n(will respring device)" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Yes, I'm sure", nil];
+        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Are you sure you want to reset all settings?\nYou can't undo this, and you will have to reconfigure Asphaleia yourself." delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Yes, I'm sure", nil];
         actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
         [actionSheet showInView:self.view];
     }
@@ -237,7 +237,7 @@
         NSError *error; 
         NSFileManager *fileMgr = [NSFileManager defaultManager];
         if ([fileMgr removeItemAtPath:prefpath error:&error] == YES) {}
-        system("killall -9 backboardd");
+        CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
     }
 }
 @end
@@ -312,8 +312,6 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    if (isIphone5S) 
-        return 5;
     return 4;
 }
 
