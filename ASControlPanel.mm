@@ -20,7 +20,9 @@
 }
  
 -(void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
-    if (false) { //!allowAccessInApps
+    SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+    NSString *bundleID = [frontmostApp bundleIdentifier];
+    if ((bundleID && !shouldAllowControlPanelInApps()) || !shouldEnableControlPanel()) {
         [event setHandled:YES];
         return;
     }
@@ -30,8 +32,6 @@
             NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Apps" : @"Disable My Secured Apps";
             NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
             NSString *addRemoveFromSecureAppsTitle = nil;
-            SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-            NSString *bundleID = [frontmostApp bundleIdentifier];
             if (bundleID) {
                 addRemoveFromSecureAppsTitle = [getProtectedApps() containsObject:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
             }
