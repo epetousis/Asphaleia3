@@ -6,6 +6,7 @@
 #import "PKGlyphView.h"
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"
+#import "PreferencesHandler.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -45,7 +46,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
@@ -53,6 +54,7 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+    BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
     UIViewController *v = [[UIViewController alloc] init];
     SBIconView *customIconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
@@ -127,7 +129,7 @@ static ASCommon *sharedCommonObj;
     return alertView;
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent vibrateOnIncorrectFingerprint:(BOOL)vibrateOnBadFinger dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *title;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
@@ -158,6 +160,7 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+    BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
