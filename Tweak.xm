@@ -115,7 +115,7 @@ NSTimer *currentTempGlobalDisableTimer;
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
@@ -135,7 +135,7 @@ NSTimer *currentTempGlobalDisableTimer;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -196,7 +196,7 @@ NSTimer *currentTempGlobalDisableTimer;
 		return %orig;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			%orig;
 		}];
@@ -221,8 +221,8 @@ NSTimer *currentTempGlobalDisableTimer;
 	if (shouldDelayAppSecurity()) {
 		appSecurityDisabled = YES;
 		currentTempGlobalDisableTimer = [NSTimer scheduledTimerWithTimeInterval:appSecurityDelayTimeInterval() block:^{
-                    appSecurityDisabled = NO;
-                } repeats:NO];
+			appSecurityDisabled = NO;
+		} repeats:NO];
 		return;
 	}
 
@@ -233,7 +233,7 @@ NSTimer *currentTempGlobalDisableTimer;
 		[iconView _setIcon:appIcon animated:YES];
 
 		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			blurredWindow.hidden = YES;
 			blurredWindow = nil;
 
@@ -268,7 +268,7 @@ static BOOL searchControllerAuthenticating;
 	%orig;
 	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
 			searchControllerHasAuthenticated = YES;
@@ -303,7 +303,7 @@ static BOOL searchControllerAuthenticating;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -323,7 +323,7 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
@@ -356,9 +356,9 @@ static BOOL controlCentreHasAuthenticated;
 
 	temporarilyUnlockedAppBundleID = [self bundleIdentifier];
 	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
-                    temporarilyUnlockedAppBundleID = nil;
-                    currentTempUnlockTimer = nil;
-                } repeats:NO];
+		temporarilyUnlockedAppBundleID = nil;
+		currentTempUnlockTimer = nil;
+	} repeats:NO];
 }
 
 %end

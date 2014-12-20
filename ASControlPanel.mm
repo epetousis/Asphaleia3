@@ -20,23 +20,28 @@
 }
  
 -(void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
-    UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES vibrateOnIncorrectFingerprint:shouldVibrateOnIncorrectFingerprint() dismissedHandler:^(BOOL wasCancelled) {
+    UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
             //NSString *mySecuredAppsTitle = @"%@ My Secured Apps"; // Enable/Disable
             //NSString *enableGlobalAppsTitle = @"%@ Global App Security"; // Enable/Disable
             NSString *addRemoveFromSecureAppsTitle = nil; // Remove from/Add to
-            NSString *bundleID = [[(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier];
+            SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+            NSString *bundleID = frontmostApp.bundleIdentifier;
             if (bundleID) {
-                addRemoveFromSecureAppsTitle = getProtectedApps() ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
+                addRemoveFromSecureAppsTitle = [getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
             }
 
             self.alertView = [[UIAlertView alloc] initWithTitle:@"Asphaleia Control Panel"
-                   message:nil
-                   delegate:nil
-         cancelButtonTitle:@"Close"
-         otherButtonTitles:@"Disable My Secured Apps", @"Enable Global App Security",nil];
+                                                        message:nil
+                                                       delegate:nil
+                                              cancelButtonTitle:@"Close"
+                                              otherButtonTitles:@"Disable My Secured Apps", @"Enable Global App Security",nil];
+            if (addRemoveFromSecureAppsTitle)
+                [self.alertView addButtonWithTitle:addRemoveFromSecureAppsTitle];
+
+            [self.alertView show];
         }
-        }];
+    }];
     [alertView show];
  
     [event setHandled:YES];

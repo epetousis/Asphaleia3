@@ -684,12 +684,18 @@
         } else*/ if (indexPath.row == 1 || indexPath.row == 2) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"special cell"];
             @try {
-                cell.detailTextLabel.text = [[LAActivator sharedInstance] localizedTitleForEventName:[[[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Control Panel"] objectAtIndex:0] name]];
+                NSString *detailString = @"No actions";
+                NSInteger eventsAssignedCount = [[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Control Panel"] count];
+                if (eventsAssignedCount == 1) {
+                    detailString = @"1 action";
+                } else if (eventsAssignedCount > 0) {
+                    detailString = [NSString stringWithFormat:@"%ld actions",(long)eventsAssignedCount];
+                }
             } @catch (NSException *exception) {
                 //filler
             }
             cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-            cell.textLabel.text = @"Activator Action";
+            cell.textLabel.text = @"Activator Actions";
         }
     } else {
         UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
@@ -739,9 +745,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    if (indexPath.row == 1 && isIphone5S) {
-        //padding
-    } else if (indexPath.row == 1 || indexPath.row == 2) {
+    if (indexPath.row == 1 || indexPath.row == 2) {
         // NSLog(@"=======selecting row at index path");
         [self.navigationController pushViewController:[[activatorListenerVC alloc]initWithListener:@"Control Panel"] animated:YES];
     }

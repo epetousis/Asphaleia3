@@ -5,7 +5,7 @@ ARCHS = armv7 armv7s arm64
 TARGET = iphone:clang:latest:8.0
 
 TWEAK_NAME = Asphaleia
-Asphaleia_FILES = Tweak.xm BTTouchIDController.m ASCommon.m UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.m
+Asphaleia_FILES = Tweak.xm BTTouchIDController.m ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox
 Asphaleia_LDFLAGS = -lactivator
 SHARED_CFLAGS = -fobjc-arc
