@@ -219,9 +219,9 @@ NSTimer *currentTempGlobalDisableTimer;
 -(void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
 	if (shouldDelayAppSecurity()) {
-		appSecurityDisabled = YES;
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled = YES;
 		currentTempGlobalDisableTimer = [NSTimer scheduledTimerWithTimeInterval:appSecurityDelayTimeInterval() block:^{
-			appSecurityDisabled = NO;
+			[ASPreferencesHandler sharedInstance].appSecurityDisabled = NO;
 		} repeats:NO];
 		return;
 	}
@@ -374,12 +374,12 @@ static BOOL controlCentreHasAuthenticated;
 		if (!bundleID || !shouldUseDynamicSelection())
 			return;
 
-		NSNumber *appSecureValue = [NSNumber numberWithBool:![[[prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]];
+		NSNumber *appSecureValue = [NSNumber numberWithBool:![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]];
 		if (abortEventCalled)
 			appSecureValue = [NSNumber numberWithBool:NO];
 
-		[[prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
-		[prefs writeToFile:kPreferencesFilePath atomically:YES];
+		[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
+		[[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
 		return;
 	}];
 }

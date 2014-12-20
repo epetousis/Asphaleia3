@@ -20,37 +20,48 @@
 }
  
 -(void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
+    if (false) { //!allowAccessInApps
+        [event setHandled:YES];
+        return;
+    }
+
     UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
-            //NSString *mySecuredAppsTitle = @"%@ My Secured Apps"; // Enable/Disable
-            //NSString *enableGlobalAppsTitle = @"%@ Global App Security"; // Enable/Disable
-            NSString *addRemoveFromSecureAppsTitle = nil; // Remove from/Add to
+            NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Apps" : @"Disable My Secured Apps";
+            NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
+            NSString *addRemoveFromSecureAppsTitle = nil;
             SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-            NSString *bundleID = frontmostApp.bundleIdentifier;
+            NSString *bundleID = [frontmostApp bundleIdentifier];
             if (bundleID) {
-                addRemoveFromSecureAppsTitle = [getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
+                addRemoveFromSecureAppsTitle = [getProtectedApps() containsObject:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
             }
-
-            self.alertView = [[UIAlertView alloc] initWithTitle:@"Asphaleia Control Panel"
-                                                        message:nil
-                                                       delegate:nil
-                                              cancelButtonTitle:@"Close"
-                                              otherButtonTitles:@"Disable My Secured Apps", @"Enable Global App Security",nil];
+            NSMutableArray *buttonTitleArray = [NSMutableArray arrayWithObjects:mySecuredAppsTitle, enableGlobalAppsTitle, nil];
             if (addRemoveFromSecureAppsTitle)
-                [self.alertView addButtonWithTitle:addRemoveFromSecureAppsTitle];
+                [buttonTitleArray addObject:addRemoveFromSecureAppsTitle];
 
-            [self.alertView show];
+            self.alertView = [UIAlertView showWithTitle:@"Asphaleia Control Panel"
+                   message:nil
+         cancelButtonTitle:@"Cancel"
+         otherButtonTitles:buttonTitleArray
+                  tapBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
+                    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:addRemoveFromSecureAppsTitle]) {
+                        [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
+                        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+                    } else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:mySecuredAppsTitle]) {
+                        [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
+                    } else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:enableGlobalAppsTitle]) {
+                        NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
+                        [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
+                        [ASPreferencesHandler sharedInstance].prefs = tempPrefs;
+                        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+                    }
+                  }];
         }
     }];
     [alertView show];
  
     [event setHandled:YES];
 }
-
-/*
-[[prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
-        [prefs writeToFile:kPreferencesFilePath atomically:YES];
-*/
  
 -(void)activator:(LAActivator *)activator abortEvent:(LAEvent *)event {
     if (self.alertView) {
