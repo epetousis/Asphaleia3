@@ -644,9 +644,6 @@
     // Return the number of rows in the section.
     if (section == 0 && [CPPrefs objectForKey:@"controlPanel"]) {
         if ([[CPPrefs objectForKey:@"controlPanel"] boolValue]) {
-            if (isIphone5S) {
-                return 3;
-            }
             return 2;
         }
     }
@@ -676,7 +673,7 @@
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     if (indexPath.row == 1 || indexPath.row == 2) {
-        if (indexPath.row == 1 && isIphone5S) {
+        /*if (indexPath.row == 1 && isIphone5S) {
             UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
             [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
             cell.textLabel.text = @"Via TouchID Hold";
@@ -684,7 +681,7 @@
             [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
             cell.accessoryView = switchview;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        } else if (indexPath.row == 1 || indexPath.row == 2) {
+        } else*/ if (indexPath.row == 1 || indexPath.row == 2) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"special cell"];
             @try {
                 cell.detailTextLabel.text = [[LAActivator sharedInstance] localizedTitleForEventName:[[[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Control Panel"] objectAtIndex:0] name]];

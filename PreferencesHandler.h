@@ -30,11 +30,11 @@ static NSDictionary *prefs = nil;
 static BOOL asphaleiaDisabled = NO;
 static BOOL appSecurityDisabled = NO;
 
-static void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	prefs = [[NSDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];
 }
 
-static BOOL shouldRequireAuthorisationOnWifi(void) {
+BOOL shouldRequireAuthorisationOnWifi(void) {
 	BOOL unlockOnWifi = [prefs objectForKey:kWifiUnlockKey] ? [[prefs objectForKey:kWifiUnlockKey] boolValue] : NO;
 	NSString *unlockSSID = [prefs objectForKey:kWifiUnlockNetworkKey] ? [prefs objectForKey:kWifiUnlockNetworkKey] : @"";
 	CFArrayRef interfaceArray = CNCopySupportedInterfaces();
@@ -47,82 +47,82 @@ static BOOL shouldRequireAuthorisationOnWifi(void) {
     return YES;
 }
 
-static NSInteger appSecurityDelayTimeInterval(void) {
+NSInteger appSecurityDelayTimeInterval(void) {
     return [prefs objectForKey:kDelayAfterLockTimeKey] ? [[prefs objectForKey:kDelayAfterLockTimeKey] integerValue] : 10;
 }
 
-static BOOL shouldDelayAppSecurity(void) {
+BOOL shouldDelayAppSecurity(void) {
     return [prefs objectForKey:kDelayAfterLockKey] ? [[prefs objectForKey:kDelayAfterLockKey] boolValue] : NO;
 }
 
-static BOOL shouldResetAppExitTimerOnLock(void) {
+BOOL shouldResetAppExitTimerOnLock(void) {
     return [prefs objectForKey:kResetAppExitTimerOnLockKey] ? [[prefs objectForKey:kResetAppExitTimerOnLockKey] boolValue] : NO;
 }
 
-static NSInteger appExitUnlockTimeInterval(void) {
+NSInteger appExitUnlockTimeInterval(void) {
     return [prefs objectForKey:kAppExitUnlockTimeKey] ? [[prefs objectForKey:kAppExitUnlockTimeKey] integerValue] : 0;
 }
 
-static BOOL shouldUseDynamicSelection(void) {
+BOOL shouldUseDynamicSelection(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled || appSecurityDisabled)
 		return NO;
     return [prefs objectForKey:kDynamicSelectionKey] ? [[prefs objectForKey:kDynamicSelectionKey] boolValue] : NO;
 }
 
-static BOOL shouldProtectAllApps(void) {
+BOOL shouldProtectAllApps(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled || appSecurityDisabled)
 		return NO;
     return [prefs objectForKey:kProtectAllAppsKey] ? [[prefs objectForKey:kProtectAllAppsKey] boolValue] : NO;
 }
 
-static BOOL shouldVibrateOnIncorrectFingerprint(void) {
+BOOL shouldVibrateOnIncorrectFingerprint(void) {
     return [prefs objectForKey:kVibrateOnFailKey] ? [[prefs objectForKey:kVibrateOnFailKey] boolValue] : NO;
 }
 
-static BOOL shouldSecureControlCentre(void) {
+BOOL shouldSecureControlCentre(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled)
 		return NO;
     return [prefs objectForKey:kSecureControlCentreKey] ? [[prefs objectForKey:kSecureControlCentreKey] boolValue] : NO;
 }
 
-static BOOL shouldSecurePowerDownView(void) {
+BOOL shouldSecurePowerDownView(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled)
 		return NO;
     return [prefs objectForKey:kSecurePowerDownKey] ? [[prefs objectForKey:kSecurePowerDownKey] boolValue] : NO;
 }
 
-static BOOL shouldSecureSpotlight(void) {
+BOOL shouldSecureSpotlight(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled)
 		return NO;
     return [prefs objectForKey:kSecureSpotlightKey] ? [[prefs objectForKey:kSecureSpotlightKey] boolValue] : NO;
 }
 
-static BOOL shouldUnsecurelyUnlockIntoApp(void) {
+BOOL shouldUnsecurelyUnlockIntoApp(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled || appSecurityDisabled)
 		return YES;
 
     return [prefs objectForKey:kUnsecureUnlockToAppKey] ? [[prefs objectForKey:kUnsecureUnlockToAppKey] boolValue] : NO;
 }
 
-static BOOL shouldObscureAppContent(void) {
+BOOL shouldObscureAppContent(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled || appSecurityDisabled)
 		return NO;
     return [prefs objectForKey:kObscureAppContentKey] ? [[prefs objectForKey:kObscureAppContentKey] boolValue] : YES;
 }
 
-static BOOL shouldSecureSwitcher(void) {
+BOOL shouldSecureSwitcher(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled)
 		return NO;
     return [prefs objectForKey:kSecureSwitcherKey] ? [[prefs objectForKey:kSecureSwitcherKey] boolValue] : NO;
 }
 
-static BOOL shouldSecureAppArrangement(void) {
+BOOL shouldSecureAppArrangement(void) {
 	if (!shouldRequireAuthorisationOnWifi() || asphaleiaDisabled)
 		return NO;
     return [prefs objectForKey:kSecureAppArrangementKey] ? [[prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
 }
 
-static NSArray *getProtectedApps() {
+NSArray *getProtectedApps() {
 	if (![prefs objectForKey:kSecuredAppsKey] || !shouldRequireAuthorisationOnWifi() || appSecurityDisabled || asphaleiaDisabled)
 		return [NSArray array];
 

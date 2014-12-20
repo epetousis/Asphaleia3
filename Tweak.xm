@@ -22,6 +22,7 @@
 #import "SBControlCenterController.h"
 #import <AudioToolbox/AudioServices.h>
 #import "ASActivatorListener.h"
+#import "ASControlPanel.h"
 #import "NSTimer+Blocks.h"
 
 PKGlyphView *fingerglyph;
@@ -365,6 +366,7 @@ static BOOL controlCentreHasAuthenticated;
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();
+	[[ASControlPanel sharedInstance] load];
 	[[ASActivatorListener sharedInstance] loadWithEventHandler:^void(LAEvent *event, BOOL abortEventCalled){
 		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 		NSString *bundleID = frontmostApp.bundleIdentifier;
