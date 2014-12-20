@@ -23,11 +23,15 @@
 #define kResetAppExitTimerOnLockKey @"ResetTimerOnLock"
 #define kDelayAfterLockKey @"delayAfterLock"
 #define kDelayAfterLockTimeKey @"timeIntervalLock"
+#define kControlPanelInAppsKey @"controlPanelAllowedInApps"
+#define kEnableControlPanelKey @"controlPanel"
 
 static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 BOOL shouldRequireAuthorisationOnWifi(void);
+BOOL shouldEnableControlPanel(void);
+BOOL shouldAllowControlPanelInApps(void);
 NSInteger appSecurityDelayTimeInterval(void);
 BOOL shouldDelayAppSecurity(void);
 BOOL shouldResetAppExitTimerOnLock(void);

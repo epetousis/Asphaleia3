@@ -17,6 +17,14 @@ BOOL shouldRequireAuthorisationOnWifi(void) {
     return YES;
 }
 
+BOOL shouldEnableControlPanel(void) {
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] boolValue] : NO;
+}
+
+BOOL shouldAllowControlPanelInApps(void) {
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] boolValue] : NO;
+}
+
 NSInteger appSecurityDelayTimeInterval(void) {
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] integerValue] : 10;
 }
