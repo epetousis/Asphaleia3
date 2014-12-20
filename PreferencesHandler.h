@@ -25,9 +25,6 @@
 #define kDelayAfterLockTimeKey @"timeIntervalLock"
 
 static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
-static NSDictionary *prefs = nil;
-static BOOL asphaleiaDisabled = NO;
-static BOOL appSecurityDisabled = NO;
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 BOOL shouldRequireAuthorisationOnWifi(void);
@@ -46,3 +43,10 @@ BOOL shouldObscureAppContent(void);
 BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
 NSArray *getProtectedApps();
+
+@interface ASPreferencesHandler : NSObject
+@property (retain) NSMutableDictionary *prefs;
+@property BOOL asphaleiaDisabled;
+@property BOOL appSecurityDisabled;
++(instancetype)sharedInstance;
+@end
