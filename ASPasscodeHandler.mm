@@ -24,16 +24,23 @@
     return sharedInstance;
 }
  
--(void)showInKeyWindowWithEventBlock:(ASPasscodeHandlerEventBlock)eventBlock passcode:(NSString *)passcode {
+-(void)showInKeyWindowWithTitle:(NSString *)title subtitle:(NSString *)subtitle passcode:(NSString *)passcode eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
 	self.passcode = passcode;
 	self.eventBlock = [eventBlock copy];
+
+	if (self.passcodeView && self.passcodeWindow) {
+		[self.passcodeView removeFromSuperview];
+		[self.passcodeWindow setHidden:YES];
+		self.passcodeView = nil;
+		self.passcodeWindow = nil;
+	}
 
 	self.passcodeWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.passcodeWindow.windowLevel = UIWindowLevelAlert;
 	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimple4DigitKeypad") alloc] init];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];
-	[self.passcodeView updateStatusText:@"Enter Passcode" subtitle:nil animated:NO];
+	[self.passcodeView updateStatusText:title subtitle:subtitle animated:NO];
 
 	UIVisualEffect *effect;
 	effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
@@ -64,6 +71,8 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
+						self.passcodeView = nil;
+						self.passcodeWindow = nil;
 						self.eventBlock(YES);
                  	}
                  }];
@@ -80,6 +89,8 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
+						self.passcodeView = nil;
+						self.passcodeWindow = nil;
 						self.eventBlock(NO);
                  	}
                  }];
