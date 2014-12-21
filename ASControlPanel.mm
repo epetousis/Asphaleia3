@@ -27,7 +27,7 @@
         return;
     }
 
-    UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+    [[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
             NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Apps" : @"Disable My Secured Apps";
             NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
@@ -58,7 +58,6 @@
                   }];
         }
     }];
-    [alertView show];
  
     [event setHandled:YES];
 }
