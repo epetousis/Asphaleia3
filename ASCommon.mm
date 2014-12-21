@@ -47,7 +47,7 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
     NSString *message = nil;
@@ -131,53 +131,33 @@ static ASCommon *sharedCommonObj;
     };
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
-        alertView.didPresentBlock = ^(UIAlertView *alertView) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            handler(NO);
-            return;
-        };
-        return alertView;
+        handler(NO);
+        return;
     }
 
     if (!touchIDEnabled()) {
-        alertView.willPresentBlock = ^(UIAlertView *alertView) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
             } passcode:getPasscode()];
-            return;
-        };
-        alertView.didPresentBlock = ^(UIAlertView *alertView) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-        };
-        return alertView;
+        return;
     }
 
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        if (!touchIDEnabled() && !passcodeEnabled()) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            handler(NO);
-            return;
-        }
         if (touchIDEnabled())
             [controller startMonitoring];
         };
     } else {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        if (!touchIDEnabled() && !passcodeEnabled()) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            handler(NO);
-            return;
-        }
         if (touchIDEnabled())
             [controller startMonitoring];
         };
     }
 
-    return alertView;
+    [alertView show];
 }
 
--(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *title;
     NSString *message = nil;
     switch (alertType) {
@@ -243,29 +223,32 @@ static ASCommon *sharedCommonObj;
             handler(YES);
         }
     };
+
+    if (!touchIDEnabled() && !passcodeEnabled()) {
+        handler(NO);
+        return;
+    }
+
+    if (!touchIDEnabled()) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+                handler(!authenticated);
+            } passcode:getPasscode()];
+        return;
+    }
+
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        if (!touchIDEnabled() && !passcodeEnabled()) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            handler(NO);
-            return;
-        }
         if (touchIDEnabled())
             [controller startMonitoring];
         };
     } else {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        if (!touchIDEnabled() && !passcodeEnabled()) {
-            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-            handler(NO);
-            return;
-        }
         if (touchIDEnabled())
             [controller startMonitoring];
         };
     }
 
-    return alertView;
+    [alertView show];
 }
 
 -(BOOL)isTouchIDDevice {

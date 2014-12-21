@@ -116,11 +116,10 @@ NSTimer *currentTempGlobalDisableTimer;
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
-	[alertView show];
 }
 
 %end
@@ -136,11 +135,10 @@ NSTimer *currentTempGlobalDisableTimer;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
-	[alertView show];
 }
 
 %end
@@ -197,11 +195,10 @@ NSTimer *currentTempGlobalDisableTimer;
 		return %orig;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			%orig;
 		}];
-	[alertView show];
 	return NO;
 }
 
@@ -234,14 +231,6 @@ NSTimer *currentTempGlobalDisableTimer;
 		[iconView _setIcon:appIcon animated:YES];
 
 		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-			blurredWindow.hidden = YES;
-			blurredWindow = nil;
-
-			if (wasCancelled) {
-				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
-			}
-		}];
 		blurredWindow.backgroundColor = [UIColor clearColor];
 
 		UIVisualEffect *blurEffect;
@@ -255,7 +244,14 @@ NSTimer *currentTempGlobalDisableTimer;
 		blurredWindow.windowLevel = UIWindowLevelAlert-1;
 		[blurredWindow addSubview:visualEffectView];
 		[blurredWindow makeKeyAndVisible];
-		[alertView show];
+		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+			blurredWindow.hidden = YES;
+			blurredWindow = nil;
+
+			if (wasCancelled) {
+				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
+			}
+		}];
 	}
 }
 
@@ -269,7 +265,7 @@ static BOOL searchControllerAuthenticating;
 	%orig;
 	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
-		UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
 			searchControllerHasAuthenticated = YES;
@@ -277,7 +273,6 @@ static BOOL searchControllerAuthenticating;
 			[self _setShowingKeyboard:YES];
 		}
 		}];
-		[alertView show];
 		searchControllerAuthenticating = YES;
 	}
 }
@@ -304,11 +299,10 @@ static BOOL searchControllerAuthenticating;
 		return;
 	}
 
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
-	[alertView show];
 }
 
 %end
@@ -324,14 +318,13 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
-	UIAlertView *alertView = [[ASCommon sharedInstance] createAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		[self presentAnimated:YES];
 	}
 	}];
-	[alertView show];
 }
 
 -(void)_endPresentation {
