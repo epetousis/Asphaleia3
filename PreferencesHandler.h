@@ -25,11 +25,17 @@
 #define kDelayAfterLockTimeKey @"timeIntervalLock"
 #define kControlPanelInAppsKey @"controlPanelAllowedInApps"
 #define kEnableControlPanelKey @"controlPanel"
+#define kPasscodeKey @"passcode"
+#define kPasscodeEnabledKey @"simplePasscode"
+#define kTouchIDEnabledKey @"touchID"
 
 static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 BOOL shouldRequireAuthorisationOnWifi(void);
+BOOL passcodeEnabled(void);
+BOOL touchIDEnabled(void);
+NSString *getPasscode(void);
 BOOL shouldEnableControlPanel(void);
 BOOL shouldAllowControlPanelInApps(void);
 NSInteger appSecurityDelayTimeInterval(void);
@@ -46,7 +52,7 @@ BOOL shouldUnsecurelyUnlockIntoApp(void);
 BOOL shouldObscureAppContent(void);
 BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
-NSArray *getProtectedApps();
+NSArray *getProtectedApps(void);
 
 @interface ASPreferencesHandler : NSObject
 @property (retain) NSMutableDictionary *prefs;

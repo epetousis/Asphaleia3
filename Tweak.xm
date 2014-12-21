@@ -24,6 +24,7 @@
 #import "ASActivatorListener.h"
 #import "ASControlPanel.h"
 #import "NSTimer+Blocks.h"
+#import "ASPasscodeHandler.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;

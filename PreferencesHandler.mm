@@ -17,6 +17,18 @@ BOOL shouldRequireAuthorisationOnWifi(void) {
     return YES;
 }
 
+BOOL passcodeEnabled(void) {
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] boolValue] : NO;
+}
+
+BOOL touchIDEnabled(void) {
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] boolValue] : NO;
+}
+
+NSString *getPasscode(void) {
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeKey] ? [[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeKey] : @"0000";
+}
+
 BOOL shouldEnableControlPanel(void) {
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] boolValue] : NO;
 }
@@ -100,7 +112,7 @@ BOOL shouldSecureAppArrangement(void) {
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
 }
 
-NSArray *getProtectedApps() {
+NSArray *getProtectedApps(void) {
 	if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return [NSArray array];
 
