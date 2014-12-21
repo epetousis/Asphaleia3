@@ -119,7 +119,8 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            if (authenticated)
                 handler(!authenticated);
             }];
         } else {
@@ -133,7 +134,8 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            if (authenticated)
                 handler(!authenticated);
             }];
         return;
@@ -210,7 +212,8 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+            if (authenticated)
                 handler(!authenticated);
             }];
         } else {
@@ -224,7 +227,8 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+        if (authenticated)
             handler(!authenticated);
         }];
         return;
