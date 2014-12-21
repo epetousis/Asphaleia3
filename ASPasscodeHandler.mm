@@ -24,7 +24,7 @@
     return sharedInstance;
 }
  
--(void)showInKeyWindowWithTitle:(NSString *)title subtitle:(NSString *)subtitle passcode:(NSString *)passcode eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
+-(void)showInKeyWindowWithTitle:(NSString *)title subtitle:(NSString *)subtitle passcode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
 	self.passcode = passcode;
 	self.eventBlock = [eventBlock copy];
 

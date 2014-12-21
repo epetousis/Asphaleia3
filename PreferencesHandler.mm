@@ -6,14 +6,17 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 
 BOOL shouldRequireAuthorisationOnWifi(void) {
 	BOOL unlockOnWifi = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockKey] boolValue] : NO;
-	NSString *unlockSSID = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] ? [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] : @"";
+	NSString *unlockSSIDValue = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] ? [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] : @"";
+	NSArray *unlockSSIDs = [unlockSSIDValue componentsSeparatedByString:@", "];
 	CFArrayRef interfaceArray = CNCopySupportedInterfaces();
 	CFDictionaryRef networkInfoDictionary = CNCopyCurrentNetworkInfo((CFStringRef)CFArrayGetValueAtIndex(interfaceArray, 0));
 	NSDictionary *ssidList = (__bridge NSDictionary*)networkInfoDictionary;
 	NSString *currentSSID = [ssidList valueForKey:@"SSID"];
 
-	if (unlockOnWifi && [currentSSID isEqualToString:unlockSSID])
-		return NO;
+	for (NSString *SSID in unlockSSIDs) {
+		if (unlockOnWifi && [currentSSID isEqualToString:SSID])
+			return NO;
+	}
     return YES;
 }
 

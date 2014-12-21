@@ -43,13 +43,16 @@ NSTimer *currentTempGlobalDisableTimer;
 		[iconView setHighlighted:NO];
 		[fingerglyph removeFromSuperview];
 		[containerView removeFromSuperview];
+		[iconTouchIDController stopMonitoring];
+		if ([iconView isEqual:currentIconView]) {
+			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+				if (authenticated)
+            		[iconView.icon launchFromLocation:iconView.location];
+        	}];
+		}
 		fingerglyph = nil;
 		currentIconView = nil;
 		containerView = nil;
-		[iconTouchIDController stopMonitoring];
-		if ([iconView isEqual:currentIconView]) {
-			// show the passcode view.
-		}
 
 		return;
 	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] || [temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID]) && !shouldProtectAllApps()) {
