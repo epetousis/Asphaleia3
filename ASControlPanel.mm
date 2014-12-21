@@ -45,6 +45,9 @@
          otherButtonTitles:buttonTitleArray
                   tapBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
                     if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:addRemoveFromSecureAppsTitle]) {
+                        if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey])
+                            [[ASPreferencesHandler sharedInstance].prefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
+
                         [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
                         [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
                     } else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:mySecuredAppsTitle]) {

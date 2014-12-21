@@ -50,11 +50,8 @@ static ASCommon *sharedCommonObj;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
-    NSString *message = nil;
-    if (touchIDEnabled())
-        message = @"Scan fingerprint to open.";
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
-                   message:message
+                   message:@"Scan fingerprint to open."
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
@@ -122,9 +119,9 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
-            } passcode:getPasscode()];
+            }];
         } else {
             handler(YES);
         }
@@ -136,9 +133,9 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
-            } passcode:getPasscode()];
+            }];
         return;
     }
 
@@ -159,7 +156,6 @@ static ASCommon *sharedCommonObj;
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *title;
-    NSString *message = nil;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
             title = @"Arrange Apps";
@@ -183,11 +179,9 @@ static ASCommon *sharedCommonObj;
             title = @"Asphaleia";
             break;
     }
-    if (touchIDEnabled())
-        message = @"Scan fingerprint to access.";
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                   message:message
+                   message:@"Scan fingerprint to access."
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
@@ -216,9 +210,9 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
-            } passcode:getPasscode()];
+            }];
         } else {
             handler(YES);
         }
@@ -230,9 +224,9 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
-                handler(!authenticated);
-            } passcode:getPasscode()];
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() eventBlock:^void(BOOL authenticated){
+            handler(!authenticated);
+        }];
         return;
     }
 
