@@ -7,6 +7,7 @@
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"
 #import "PreferencesHandler.h"
+#import "ASPasscodeHandler.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -46,11 +47,14 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)createAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(UIAlertView *)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
+    NSString *message = nil;
+    if (touchIDEnabled())
+        message = @"Scan fingerprint to open.";
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
-                   message:@"Scan fingerprint to open."
+                   message:message
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
@@ -64,7 +68,6 @@ static ASCommon *sharedCommonObj;
         if (![subview isKindOfClass:[objc_getClass("SBIconImageView") class]])
             [subview removeFromSuperview];
     }
-    [customIconView setHighlighted:YES];
     [customIconView setLabelAccessoryViewHidden:YES];
     [customIconView setLabelHidden:YES];
     v.view.frame = CGRectMake(0,0,270,30);
@@ -72,17 +75,21 @@ static ASCommon *sharedCommonObj;
     customIconView.userInteractionEnabled = NO;
     [v.view addSubview:customIconView];
 
-    __block PKGlyphView *fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-    fingerglyph.secondaryColor = [UIColor redColor];
-    fingerglyph.primaryColor = [UIColor whiteColor];
-    CGRect fingerframe = fingerglyph.frame;
-    fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-    fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-    fingerglyph.frame = fingerframe;
-    UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
-    containerView.center = [iconView _iconImageView].center;
-    [containerView addSubview:fingerglyph];
-    [customIconView addSubview:containerView];
+    __block PKGlyphView *fingerglyph;
+    if (touchIDEnabled()) {
+        [customIconView setHighlighted:YES];
+        fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+        fingerglyph.secondaryColor = [UIColor redColor];
+        fingerglyph.primaryColor = [UIColor whiteColor];
+        CGRect fingerframe = fingerglyph.frame;
+        fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+        fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+        fingerglyph.frame = fingerframe;
+        UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
+        containerView.center = [iconView _iconImageView].center;
+        [containerView addSubview:fingerglyph];
+        [customIconView addSubview:containerView];
+    }
 
     [[alertView _alertController] setValue:v forKey:@"contentViewController"];
     [(UIAlertController *)[alertView _alertController]_foregroundView].alpha = 0.0;
@@ -114,15 +121,56 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
-        handler(buttonIndex == [alertView cancelButtonIndex]);
+        if (buttonIndex != [alertView cancelButtonIndex]) {
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+                handler(!authenticated);
+            } passcode:getPasscode()];
+        } else {
+            handler(YES);
+        }
     };
+
+    if (!touchIDEnabled() && !passcodeEnabled()) {
+        alertView.didPresentBlock = ^(UIAlertView *alertView) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            handler(NO);
+            return;
+        };
+        return alertView;
+    }
+
+    if (!touchIDEnabled()) {
+        alertView.willPresentBlock = ^(UIAlertView *alertView) {
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+                handler(!authenticated);
+            } passcode:getPasscode()];
+            return;
+        };
+        alertView.didPresentBlock = ^(UIAlertView *alertView) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+        };
+        return alertView;
+    }
+
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        [controller startMonitoring];
+        if (!touchIDEnabled() && !passcodeEnabled()) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            handler(NO);
+            return;
+        }
+        if (touchIDEnabled())
+            [controller startMonitoring];
         };
     } else {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        [controller startMonitoring];
+        if (!touchIDEnabled() && !passcodeEnabled()) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            handler(NO);
+            return;
+        }
+        if (touchIDEnabled())
+            [controller startMonitoring];
         };
     }
 
@@ -131,6 +179,7 @@ static ASCommon *sharedCommonObj;
 
 -(UIAlertView *)createAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     NSString *title;
+    NSString *message = nil;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
             title = @"Arrange Apps";
@@ -154,9 +203,11 @@ static ASCommon *sharedCommonObj;
             title = @"Asphaleia";
             break;
     }
+    if (touchIDEnabled())
+        message = @"Scan fingerprint to access.";
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                   message:@"Scan fingerprint to access."
+                   message:message
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
@@ -184,15 +235,33 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
-        handler(buttonIndex == [alertView cancelButtonIndex]);
+        if (buttonIndex != [alertView cancelButtonIndex]) {
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithEventBlock:^void(BOOL authenticated){
+                handler(!authenticated);
+            } passcode:getPasscode()];
+        } else {
+            handler(YES);
+        }
     };
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        [controller startMonitoring];
+        if (!touchIDEnabled() && !passcodeEnabled()) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            handler(NO);
+            return;
+        }
+        if (touchIDEnabled())
+            [controller startMonitoring];
         };
     } else {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        [controller startMonitoring];
+        if (!touchIDEnabled() && !passcodeEnabled()) {
+            [alertView dismissWithClickedButtonIndex:-1 animated:YES];
+            handler(NO);
+            return;
+        }
+        if (touchIDEnabled())
+            [controller startMonitoring];
         };
     }
 
