@@ -1519,6 +1519,21 @@ static NSArray *hiddenDisplayIdentifiers; static NSMutableArray *iconsToLoad; st
                                     @"com.apple.MobileReplayer",
                                     @"com.apple.SiriViewService",
                                     @"com.apple.TencentWeiboAccountMigrationDialog",
+                                    @"com.apple.AskPermissionUI",
+                                    @"com.apple.Diagnostics",
+                                    @"com.apple.family",
+                                    @"com.apple.GameController",
+                                    @"com.apple.HealthPrivacyService",
+                                    @"com.apple.InCallService",
+                                    @"com.apple.mobilesms.notification",
+                                    @"com.apple.PhotosViewService",
+                                    @"com.apple.PreBoard",
+                                    @"com.apple.PrintKit.Print-Center",
+                                    @"com.apple.SharedWebCredentialViewService",
+                                    @"com.apple.share",
+                                    @"com.apple.webapp",
+                                    @"com.apple.webapp1",
+                                    @"com.apple.CoreAuthUI",
                                     nil];
     }
 }

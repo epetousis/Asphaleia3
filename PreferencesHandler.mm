@@ -2,6 +2,8 @@
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[ASPreferencesHandler sharedInstance].prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];
+	[ASPreferencesHandler sharedInstance].asphaleiaDisabled = !passcodeEnabled() && !touchIDEnabled();
+	[ASPreferencesHandler sharedInstance].appSecurityDisabled = !passcodeEnabled() && !touchIDEnabled();
 }
 
 BOOL shouldRequireAuthorisationOnWifi(void) {

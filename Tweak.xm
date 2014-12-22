@@ -38,6 +38,21 @@ NSTimer *currentTempGlobalDisableTimer;
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
+	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		if (fingerglyph && currentIconView && containerView) {
+			[currentIconView setHighlighted:NO];
+			[iconView setHighlighted:NO];
+			[fingerglyph removeFromSuperview];
+			[containerView removeFromSuperview];
+			[iconTouchIDController stopMonitoring];
+			fingerglyph = nil;
+			currentIconView = nil;
+			containerView = nil;
+		}
+		%orig;
+		return;
+	}
+
 	if (fingerglyph && currentIconView && containerView) {
 		[currentIconView setHighlighted:NO];
 		[iconView setHighlighted:NO];
@@ -47,8 +62,8 @@ NSTimer *currentTempGlobalDisableTimer;
 		if ([iconView isEqual:currentIconView]) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 				if (authenticated)
-            		[iconView.icon launchFromLocation:iconView.location];
-        	}];
+					[iconView.icon launchFromLocation:iconView.location];
+			}];
 		}
 		fingerglyph = nil;
 		currentIconView = nil;
@@ -57,6 +72,14 @@ NSTimer *currentTempGlobalDisableTimer;
 		return;
 	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] || [temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID]) && !shouldProtectAllApps()) {
 		%orig;
+		return;
+	} else if (!touchIDEnabled() && passcodeEnabled()) {
+		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+			[iconView setHighlighted:NO];
+
+			if (authenticated)
+			%orig;
+		}];
 		return;
 	}
 
@@ -110,7 +133,7 @@ NSTimer *currentTempGlobalDisableTimer;
 }
 
 -(void)iconHandleLongPress:(SBIconView *)iconView {
-	if (self.isEditing || !shouldSecureAppArrangement()) {
+	if (self.isEditing || !shouldSecureAppArrangement() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled) {
 		%orig;
 		return;
 	}
@@ -133,7 +156,7 @@ NSTimer *currentTempGlobalDisableTimer;
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
-	if (![getProtectedApps() containsObject:item.displayIdentifier] || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier]) {
+	if (![getProtectedApps() containsObject:item.displayIdentifier] || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		%orig;
 		return;
 	}
@@ -163,13 +186,13 @@ NSTimer *currentTempGlobalDisableTimer;
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier])
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		%orig;
 }
 
 -(void)layoutSubviews {
 	%orig;
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier]) {
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
 	}
 	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
@@ -342,7 +365,7 @@ static BOOL controlCentreHasAuthenticated;
 
 -(void)willAnimateDeactivation:(BOOL)deactivation {
 	%orig;
-	if (![getProtectedApps() containsObject:[self bundleIdentifier]])
+	if (![getProtectedApps() containsObject:[self bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		return;
 
 	if (currentTempUnlockTimer)

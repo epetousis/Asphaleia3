@@ -33,6 +33,16 @@
         [LASharedActivator registerListener:self forName:@"Dynamic Selection"];
 }
 
+-(void)load {
+    if ([LASharedActivator isRunningInsideSpringBoard] && self.eventHandler)
+        [LASharedActivator registerListener:self forName:@"Dynamic Selection"];
+}
+
+- (void)unload {
+    if ([LASharedActivator isRunningInsideSpringBoard])
+        [LASharedActivator unregisterListenerWithName:@"Dynamic Selection"];
+}
+
 - (NSString *)activator:(LAActivator *)activator requiresLocalizedGroupForListenerName:(NSString *)listenerName {
     return @"Asphaleia";
 }

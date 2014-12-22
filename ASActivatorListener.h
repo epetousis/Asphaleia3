@@ -7,4 +7,6 @@ typedef void (^ASActivatorListenerEventHandler) (LAEvent *event, BOOL abortEvent
 @property ASActivatorListenerEventHandler eventHandler;
 +(instancetype)sharedInstance;
 - (void)loadWithEventHandler:(ASActivatorListenerEventHandler)handler;
+-(void)load;
+- (void)unload;
 @end

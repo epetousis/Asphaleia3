@@ -4,4 +4,5 @@
 @interface ASControlPanel : NSObject <LAListener>
 +(instancetype)sharedInstance;
 - (void)load;
+-(void)unload;
 @end
