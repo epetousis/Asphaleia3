@@ -24,5 +24,6 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 -(BOOL)shouldAddObscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
+-(void)dismissAnyAuthenticationAlerts;
 
 @end

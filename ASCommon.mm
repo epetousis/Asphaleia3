@@ -33,6 +33,7 @@
 @interface ASCommon ()
 @property (readwrite) NSMutableArray *snapshotViews;
 @property (readwrite) NSMutableArray *obscurityViews;
+@property UIAlertView *currentAlertView;
 @end
 
 @implementation ASCommon
@@ -110,6 +111,7 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
+        self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
@@ -144,6 +146,11 @@ static ASCommon *sharedCommonObj;
             [controller startMonitoring];
         };
     }
+
+    if (self.currentAlertView)
+        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+
+    self.currentAlertView = alertView;
 
     [alertView show];
 }
@@ -205,6 +212,7 @@ static ASCommon *sharedCommonObj;
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
+        self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
             if (authenticated)
@@ -239,6 +247,11 @@ static ASCommon *sharedCommonObj;
             [controller startMonitoring];
         };
     }
+
+    if (self.currentAlertView)
+        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+
+    self.currentAlertView = alertView;
 
     [alertView show];
 }
@@ -307,6 +320,11 @@ static ASCommon *sharedCommonObj;
     UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return finalImage;
+}
+
+-(void)dismissAnyAuthenticationAlerts {
+    if (self.currentAlertView)
+        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
 }
 
 @end

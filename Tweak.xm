@@ -235,6 +235,8 @@ ASTouchWindow *anywhereTouchWindow;
 
 -(void)_lockUI {
 	[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
+	[[ASPasscodeHandler sharedInstance] dismissPasscodeView];
 	%orig;
 	if (shouldResetAppExitTimerOnLock() && currentTempUnlockTimer) {
 		[currentTempUnlockTimer fire];
