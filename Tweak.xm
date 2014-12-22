@@ -28,7 +28,6 @@
 #import "ASTouchWindow.h"
 
 PKGlyphView *fingerglyph;
-UIView *containerView;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 BTTouchIDController *iconTouchIDController;
@@ -46,7 +45,7 @@ ASTouchWindow *anywhereTouchWindow;
 		return;
 	}
 
-	if (fingerglyph && currentIconView && containerView) {
+	if (fingerglyph && currentIconView) {
 		[iconView setHighlighted:NO];
 		if ([iconView isEqual:currentIconView]) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
@@ -74,16 +73,14 @@ ASTouchWindow *anywhereTouchWindow;
 
 	currentIconView = iconView;
 	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
-	fingerglyph.secondaryColor = [UIColor redColor];
-	fingerglyph.primaryColor = [UIColor whiteColor];
+	fingerglyph.secondaryColor = [UIColor grayColor];
+	fingerglyph.primaryColor = [UIColor redColor];
 	CGRect fingerframe = fingerglyph.frame;
 	fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
 	fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
 	fingerglyph.frame = fingerframe;
-	containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
-	containerView.center = [iconView _iconImageView].center;
-	[containerView addSubview:fingerglyph];
-	[iconView addSubview:containerView];
+	fingerglyph.center = CGPointMake(CGRectGetMidX([iconView _iconImageView].bounds),CGRectGetMidY([iconView _iconImageView].bounds));
+	[[iconView _iconImageView] addSubview:fingerglyph];
 	//[iconView bringSubviewToFront:containerView];
 
 	fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
@@ -94,7 +91,7 @@ ASTouchWindow *anywhereTouchWindow;
 	iconTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
 		switch (event) {
 		case TouchIDMatched:
-			if (fingerglyph && currentIconView && containerView) {
+			if (fingerglyph && currentIconView) {
 				[currentIconView.icon launchFromLocation:currentIconView.location];
 				[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 			}
@@ -139,14 +136,12 @@ ASTouchWindow *anywhereTouchWindow;
 
 %new
 -(void)resetAsphaleiaIconView {
-	if (fingerglyph && currentIconView && containerView) {
+	if (fingerglyph && currentIconView) {
 		[currentIconView setHighlighted:NO];
 		[fingerglyph removeFromSuperview];
-		[containerView removeFromSuperview];
 		[iconTouchIDController stopMonitoring];
 		fingerglyph = nil;
 		currentIconView = nil;
-		containerView = nil;
 		iconTouchIDController = nil;
 		if (anywhereTouchWindow) {
 			[anywhereTouchWindow setHidden:YES];
