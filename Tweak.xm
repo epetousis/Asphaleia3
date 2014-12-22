@@ -81,7 +81,6 @@ ASTouchWindow *anywhereTouchWindow;
 	fingerglyph.frame = fingerframe;
 	fingerglyph.center = CGPointMake(CGRectGetMidX([iconView _iconImageView].bounds),CGRectGetMidY([iconView _iconImageView].bounds));
 	[[iconView _iconImageView] addSubview:fingerglyph];
-	//[iconView bringSubviewToFront:containerView];
 
 	fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
 	[UIView animateWithDuration:0.3f animations:^{

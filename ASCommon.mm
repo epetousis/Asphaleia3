@@ -72,16 +72,14 @@ static ASCommon *sharedCommonObj;
     if (touchIDEnabled()) {
         imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
         fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-        fingerglyph.secondaryColor = [UIColor redColor];
-        fingerglyph.primaryColor = [UIColor whiteColor];
+        fingerglyph.secondaryColor = [UIColor grayColor];
+        fingerglyph.primaryColor = [UIColor redColor];
         CGRect fingerframe = fingerglyph.frame;
         fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
         fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
         fingerglyph.frame = fingerframe;
-        UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
-        containerView.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
-        [containerView addSubview:fingerglyph];
-        [imgView addSubview:containerView];
+        fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+        [imgView addSubview:fingerglyph];
     }
 
     [[alertView _alertController] setValue:v forKey:@"contentViewController"];
