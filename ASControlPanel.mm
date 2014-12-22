@@ -77,6 +77,11 @@
         [LASharedActivator registerListener:self forName:@"Control Panel"];
 }
 
+- (void)unload {
+    if ([LASharedActivator isRunningInsideSpringBoard])
+        [LASharedActivator unregisterListenerWithName:@"Control Panel"];
+}
+
 - (NSString *)activator:(LAActivator *)activator requiresLocalizedGroupForListenerName:(NSString *)listenerName {
     return @"Asphaleia";
 }

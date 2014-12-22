@@ -77,7 +77,6 @@
 - (void)removeSectionDescriptorAtIndex:(NSInteger)index;
 - (void)removeSectionDescriptorsAtIndexes:(NSIndexSet *)indexSet;
 - (BOOL)waitUntilDate:(NSDate *)date forContentInSectionAtIndex:(NSInteger)sectionIndex;
-- (void)iconLoadedFromNotification:(NSNotification *)notification;
 - (void)sectionRequestedSectionReload:(id)section animated:(BOOL)animated;
 - (NSMutableDictionary *)preferences;
 - (BOOL)is5SfromDS;
