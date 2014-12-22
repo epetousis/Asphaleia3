@@ -37,6 +37,8 @@ NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 
+typedef struct __IOHIDEvent * IOHIDEventRef;
+
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
@@ -49,7 +51,7 @@ ASTouchWindow *anywhereTouchWindow;
 	if (fingerglyph && currentIconView && containerView) {
 		[iconView setHighlighted:NO];
 		if ([iconView isEqual:currentIconView]) {
-			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 				if (authenticated)
 					[iconView.icon launchFromLocation:iconView.location];
 			}];
@@ -61,7 +63,7 @@ ASTouchWindow *anywhereTouchWindow;
 		%orig;
 		return;
 	} else if (!touchIDEnabled() && passcodeEnabled()) {
-		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 			[iconView setHighlighted:NO];
 
 			if (authenticated)
@@ -147,6 +149,7 @@ ASTouchWindow *anywhereTouchWindow;
 		fingerglyph = nil;
 		currentIconView = nil;
 		containerView = nil;
+		iconTouchIDController = nil;
 		if (anywhereTouchWindow) {
 			[anywhereTouchWindow setHidden:YES];
 			anywhereTouchWindow = nil;
@@ -239,8 +242,8 @@ ASTouchWindow *anywhereTouchWindow;
 %hook SBLockScreenManager
 
 -(void)_lockUI {
-	%orig;
 	[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+	%orig;
 	if (shouldResetAppExitTimerOnLock() && currentTempUnlockTimer) {
 		[currentTempUnlockTimer fire];
 		[currentTempGlobalDisableTimer fire];

@@ -8,6 +8,7 @@
 #import "NSTimer+Blocks.h"
 #import "PreferencesHandler.h"
 #import "ASPasscodeHandler.h"
+#import "SBIconController.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -50,6 +51,8 @@ static ASCommon *sharedCommonObj;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     // need to add customisation to this...
     // icon at the top-centre of the alert
+    [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
+
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
                    message:@"Scan fingerprint to open."
                    delegate:nil
@@ -119,7 +122,7 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 handler(!authenticated);
             }];
@@ -134,7 +137,7 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 handler(!authenticated);
             }];
@@ -157,6 +160,8 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
+
     NSString *title;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
@@ -212,7 +217,7 @@ static ASCommon *sharedCommonObj;
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
         [controller stopMonitoring];
         if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 handler(!authenticated);
             }];
@@ -227,7 +232,7 @@ static ASCommon *sharedCommonObj;
     }
 
     if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:title subtitle:@"Enter passcode to access." passcode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
         if (authenticated)
             handler(!authenticated);
         }];
@@ -281,7 +286,7 @@ static ASCommon *sharedCommonObj;
     UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
     UIVisualEffectView *obscurityView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
     obscurityView.frame = snapshotView.bounds;
-    
+
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.image = obscurityEye;
     imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);

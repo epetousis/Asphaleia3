@@ -24,7 +24,7 @@
     return sharedInstance;
 }
  
--(void)showInKeyWindowWithTitle:(NSString *)title subtitle:(NSString *)subtitle passcode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
+-(void)showInKeyWindowWithPasscode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock {
 	self.passcode = passcode;
 	self.eventBlock = [eventBlock copy];
 
@@ -40,7 +40,7 @@
 	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimple4DigitKeypad") alloc] init];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];
-	[self.passcodeView updateStatusText:title subtitle:subtitle animated:NO];
+	[self.passcodeView updateStatusText:@"Enter Passcode" subtitle:nil animated:NO];
 
 	UIVisualEffect *effect;
 	effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
@@ -53,6 +53,15 @@
 
 	[self.passcodeView setBackgroundAlpha:0.f];
 
+	UIImageView *iconImageView = [[UIImageView alloc] initWithImage:[iconView.icon getIconImage:1]];
+	iconImageView.contentMode = UIViewContentModeScaleAspectFill;
+	iconImageView.frame = CGRectMake(0,0,40,40);
+	iconImageView.center = CGPointMake(CGRectGetMidX(self.passcodeWindow.bounds),32);
+
+	self.passcodeView.luminosityBoost = 0.33;
+	[self.passcodeView _evaluateLuminance];
+
+	[self.passcodeWindow addSubview:iconImageView];
     [self.passcodeWindow addSubview:self.passcodeView];
     [self.passcodeWindow setAlpha:0.f];
     [self.passcodeWindow makeKeyAndVisible];
