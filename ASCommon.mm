@@ -61,23 +61,16 @@ static ASCommon *sharedCommonObj;
     BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
     UIViewController *v = [[UIViewController alloc] init];
-    SBIconView *customIconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
-    [customIconView _setIcon:[iconView icon] animated:YES];
-    // Little hack to get rid of the badge
-    for (UIView *subview in customIconView.subviews) {
-        if (![subview isKindOfClass:[objc_getClass("SBIconImageView") class]])
-            [subview removeFromSuperview];
-    }
-    [customIconView setLabelAccessoryViewHidden:YES];
-    [customIconView setLabelHidden:YES];
     v.view.frame = CGRectMake(0,0,270,30);
-    customIconView.center = CGPointMake(CGRectGetMidX(v.view.bounds),CGRectGetMidY(v.view.bounds)+20);
-    customIconView.userInteractionEnabled = NO;
-    [v.view addSubview:customIconView];
+    UIImage *iconImage = [iconView.icon getIconImage:2];
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+    imgView.center = CGPointMake(CGRectGetMidX(v.view.bounds),CGRectGetMidY(v.view.bounds)+20);
+    [v.view addSubview:imgView];
 
     __block PKGlyphView *fingerglyph;
     if (touchIDEnabled()) {
-        [customIconView setHighlighted:YES];
+        imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
         fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
         fingerglyph.secondaryColor = [UIColor redColor];
         fingerglyph.primaryColor = [UIColor whiteColor];
@@ -86,9 +79,9 @@ static ASCommon *sharedCommonObj;
         fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
         fingerglyph.frame = fingerframe;
         UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,fingerframe.size.width,fingerframe.size.height)];
-        containerView.center = [iconView _iconImageView].center;
+        containerView.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
         [containerView addSubview:fingerglyph];
-        [customIconView addSubview:containerView];
+        [imgView addSubview:containerView];
     }
 
     [[alertView _alertController] setValue:v forKey:@"contentViewController"];
@@ -301,6 +294,24 @@ static ASCommon *sharedCommonObj;
 -(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
     [self.obscurityViews removeObjectAtIndex:[self.snapshotViews indexOfObject:snapshotView]];
     [self.snapshotViews removeObject:snapshotView];
+}
+
+-(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
+    UIGraphicsBeginImageContextWithOptions(origImage.size, NO, origImage.scale);
+    CGContextRef imgContext = UIGraphicsGetCurrentContext();
+    CGRect imageRect = CGRectMake(0, 0, origImage.size.width, origImage.size.height);
+    CGContextScaleCTM(imgContext, 1, -1);
+    CGContextTranslateCTM(imgContext, 0, -imageRect.size.height);
+    CGContextSaveGState(imgContext);
+    CGContextClipToMask(imgContext, imageRect, origImage.CGImage);
+    [tintColour set];
+    CGContextFillRect(imgContext, imageRect);
+    CGContextRestoreGState(imgContext);
+    CGContextSetBlendMode(imgContext, kCGBlendModeMultiply);
+    CGContextDrawImage(imgContext, imageRect, origImage.CGImage);
+    UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return finalImage;
 }
 
 @end
