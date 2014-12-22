@@ -25,6 +25,7 @@
 #import "ASControlPanel.h"
 #import "NSTimer+Blocks.h"
 #import "ASPasscodeHandler.h"
+#import "ASTouchWindow.h"
 
 PKGlyphView *fingerglyph;
 UIView *containerView;
@@ -34,40 +35,26 @@ BTTouchIDController *iconTouchIDController;
 NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
+ASTouchWindow *anywhereTouchWindow;
 
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
-		if (fingerglyph && currentIconView && containerView) {
-			[currentIconView setHighlighted:NO];
-			[iconView setHighlighted:NO];
-			[fingerglyph removeFromSuperview];
-			[containerView removeFromSuperview];
-			[iconTouchIDController stopMonitoring];
-			fingerglyph = nil;
-			currentIconView = nil;
-			containerView = nil;
-		}
+		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 		%orig;
 		return;
 	}
 
 	if (fingerglyph && currentIconView && containerView) {
-		[currentIconView setHighlighted:NO];
 		[iconView setHighlighted:NO];
-		[fingerglyph removeFromSuperview];
-		[containerView removeFromSuperview];
-		[iconTouchIDController stopMonitoring];
 		if ([iconView isEqual:currentIconView]) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithTitle:iconView.icon.displayName subtitle:@"Enter passcode to open." passcode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 				if (authenticated)
 					[iconView.icon launchFromLocation:iconView.location];
 			}];
 		}
-		fingerglyph = nil;
-		currentIconView = nil;
-		containerView = nil;
+		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 
 		return;
 	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] || [temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID]) && !shouldProtectAllApps()) {
@@ -82,6 +69,8 @@ NSTimer *currentTempGlobalDisableTimer;
 		}];
 		return;
 	}
+
+	anywhereTouchWindow = [[ASTouchWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 
 	currentIconView = iconView;
 	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
@@ -107,13 +96,7 @@ NSTimer *currentTempGlobalDisableTimer;
 		case TouchIDMatched:
 			if (fingerglyph && currentIconView && containerView) {
 				[currentIconView.icon launchFromLocation:currentIconView.location];
-				[currentIconView setHighlighted:NO];
-				[fingerglyph removeFromSuperview];
-				[containerView removeFromSuperview];
-				fingerglyph = nil;
-				currentIconView = nil;
-				containerView = nil;
-				[controller stopMonitoring];
+				[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 			}
 			break;
 		case TouchIDFingerDown:
@@ -130,6 +113,12 @@ NSTimer *currentTempGlobalDisableTimer;
 		}
 	}];
 	[iconTouchIDController startMonitoring];
+
+	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
+		if (blockedTouch) {
+			[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+		}
+	}];
 }
 
 -(void)iconHandleLongPress:(SBIconView *)iconView {
@@ -146,6 +135,23 @@ NSTimer *currentTempGlobalDisableTimer;
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
+}
+
+%new
+-(void)resetAsphaleiaIconView {
+	if (fingerglyph && currentIconView && containerView) {
+		[currentIconView setHighlighted:NO];
+		[fingerglyph removeFromSuperview];
+		[containerView removeFromSuperview];
+		[iconTouchIDController stopMonitoring];
+		fingerglyph = nil;
+		currentIconView = nil;
+		containerView = nil;
+		if (anywhereTouchWindow) {
+			[anywhereTouchWindow setHidden:YES];
+			anywhereTouchWindow = nil;
+		}
+	}
 }
 
 %end
@@ -234,6 +240,7 @@ NSTimer *currentTempGlobalDisableTimer;
 
 -(void)_lockUI {
 	%orig;
+	[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 	if (shouldResetAppExitTimerOnLock() && currentTempUnlockTimer) {
 		[currentTempUnlockTimer fire];
 		[currentTempGlobalDisableTimer fire];
