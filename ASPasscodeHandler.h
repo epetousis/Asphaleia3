@@ -9,4 +9,5 @@ typedef void (^ASPasscodeHandlerEventBlock) (BOOL authenticated);
 @property (retain) NSString *passcode;
 +(instancetype)sharedInstance;
 -(void)showInKeyWindowWithPasscode:(NSString *)passcode iconView:(SBIconView *)iconView eventBlock:(ASPasscodeHandlerEventBlock)eventBlock;
+-(void)dismissPasscodeView;
 @end
