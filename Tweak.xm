@@ -37,8 +37,6 @@ NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 
-typedef struct __IOHIDEvent * IOHIDEventRef;
-
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
