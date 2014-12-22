@@ -276,9 +276,8 @@ static ASCommon *sharedCommonObj;
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
     UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 
-    UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
-    UIVisualEffectView *obscurityView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    obscurityView.frame = snapshotView.bounds;
+    UIView *obscurityView = [[UIView alloc] initWithFrame:snapshotView.bounds];
+    obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
 
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.image = obscurityEye;
