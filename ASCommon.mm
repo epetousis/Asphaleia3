@@ -49,8 +49,6 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    // need to add customisation to this...
-    // icon at the top-centre of the alert
     [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
