@@ -197,12 +197,12 @@ ASTouchWindow *anywhereTouchWindow;
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
 	}
-	/*CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
+	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
 	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
-	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];*/
+	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 
 	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewForSnapshotView:self];
 	[self addSubview:obscurityView];
