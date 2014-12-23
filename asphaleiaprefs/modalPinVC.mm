@@ -13,7 +13,7 @@
 #import <sys/sysctl.h>
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 
-@interface asphaleiaMain: PSListController {
+@interface AsphaleiaPrefsListController: PSListController {
 }
 -(void)goBack;
 -(void)authenticated;
@@ -251,7 +251,7 @@
         }
         if (textField.text.length == 4) {
             if ([textField.text isEqualToString:self.oldPasscode]) {
-                [(asphaleiaMain *)_delegate authenticated];
+                [(AsphaleiaPrefsListController *)_delegate authenticated];
                 [self dismissViewControllerAnimated:YES completion:NULL];
             } else {
                 AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
@@ -295,7 +295,7 @@
                         if (isTouchIDDevice()) {
                             [prefs setObject:[NSNumber numberWithBool:YES] forKey:@"touchID"];
                         }
-                        [(asphaleiaMain *)_delegate authenticated];
+                        [(AsphaleiaPrefsListController *)_delegate authenticated];
                     }
                     [prefs writeToFile:prefpath atomically:YES];
                     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
@@ -420,7 +420,7 @@
 - (void)rightButtonPressed:(UIBarButtonItem *)sender
 {
     if (_isAuth || _first) {
-        [(asphaleiaMain *)_delegate goBack];
+        [(AsphaleiaPrefsListController *)_delegate goBack];
     } 
     [self dismissViewControllerAnimated:YES completion:nil]; 
     

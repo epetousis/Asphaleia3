@@ -77,7 +77,7 @@
 {
     // NSLog(@"=========poping view");
     _enteredCorrectly = YES;
-    [_rootController popViewControllerAnimated:YES];
+    [[[self parentController] navigationController] popViewControllerAnimated:YES];
 }
 
 -(void)authenticated
@@ -87,29 +87,17 @@
 
 -(void)showSecurity
 {
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        [self pushController:[[securedAppsAL alloc]init]];
-    } else {
-        [(UINavigationController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] pushViewController:[[securedAppsAL alloc]init] animated:YES];
-    }
+    [self pushController:[[securedAppsAL alloc]init]];
 }
 
 -(void)showCreators
 {
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        [self pushController:[[creatorsVC alloc]init]];
-    } else {
-        [(UINavigationController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] pushViewController:[[creatorsVC alloc]init] animated:YES];
-    }
+    [self pushController:[[creatorsVC alloc]init]];
 }
 
 -(void)showPasscodeOptions
 {
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
-        [self pushController:[[passcodeOptionsVC alloc]init]];
-    } else {
-        [(UINavigationController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] pushViewController:[[passcodeOptionsVC alloc]init] animated:YES];
-    }
+    [self pushController:[[passcodeOptionsVC alloc]init]];
 }
 
 /*static inline void LoadDeviceKey(NSMutableDictionary *dict, NSString *key)
