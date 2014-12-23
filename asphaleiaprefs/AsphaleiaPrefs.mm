@@ -14,6 +14,7 @@
     modalPinVC *pinVC;
     NSDate *_resignDate;
 }
+@property BOOL passcodeViewIsTransitioning;
 @end
 
 @implementation AsphaleiaPrefsListController
@@ -53,7 +54,7 @@
 -(void)viewDidAppear:(BOOL)view
 {
 	[super viewDidAppear:view];
-	if (!_enteredCorrectly) {
+	if (!_enteredCorrectly && !self.passcodeViewIsTransitioning) {
 		[self presentAuthView];
 		_enteredCorrectly = NO;
 	}
@@ -65,18 +66,17 @@
 	if([[NSFileManager defaultManager]fileExistsAtPath:prefpath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:prefpath] objectForKey:@"passcode"] length] == 4) {
 		// NSLog(@"================presentAuthView def");
 		pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
-		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
+		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
 	} else {
 		// NSLog(@"================presentAuthView set");
 		pinVC = [[modalPinVC alloc] initToSetPasscodeFirst:self];
- 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:pinVC animated:YES completion:NULL];
+ 		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
  	}
 }
 
 - (void)goBack
 {
     // NSLog(@"=========poping view");
-    _enteredCorrectly = YES;
     [[[self parentController] navigationController] popViewControllerAnimated:YES];
 }
 
