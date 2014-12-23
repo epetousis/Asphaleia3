@@ -17,6 +17,7 @@
 }
 -(void)goBack;
 -(void)authenticated;
+@property BOOL passcodeViewIsTransitioning;
 @end
 @interface passcodeOptions: PSListController {
 }
@@ -419,10 +420,13 @@
 
 - (void)rightButtonPressed:(UIBarButtonItem *)sender
 {
+    [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:YES];
     if (_isAuth || _first) {
         [(AsphaleiaPrefsListController *)_delegate goBack];
     } 
-    [self dismissViewControllerAnimated:YES completion:nil]; 
+    [self dismissViewControllerAnimated:YES completion:^{
+        [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
+    }];
     
 }
 
