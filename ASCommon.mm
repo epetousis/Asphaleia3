@@ -11,6 +11,8 @@
 #import "SBIconController.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
+#define titleWithSpacingForIcon(t) [NSString stringWithFormat:@"\n\n\n%@",t]
+#define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
 
 @interface UIAlertView ()
 -(id)_alertController;
@@ -52,20 +54,17 @@ static ASCommon *sharedCommonObj;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:iconView.icon.displayName
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:titleWithSpacingForIcon(iconView.icon.displayName)
                    message:@"Scan fingerprint to open."
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
     BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
-    UIViewController *v = [[UIViewController alloc] init];
-    v.view.frame = CGRectMake(0,0,270,30);
     UIImage *iconImage = [iconView.icon getIconImage:2];
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-    imgView.center = CGPointMake(CGRectGetMidX(v.view.bounds),CGRectGetMidY(v.view.bounds)+20);
-    [v.view addSubview:imgView];
+    imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
 
     __block PKGlyphView *fingerglyph;
     if (touchIDEnabled()) {
@@ -81,13 +80,10 @@ static ASCommon *sharedCommonObj;
         [imgView addSubview:fingerglyph];
     }
 
-    [[alertView _alertController] setValue:v forKey:@"contentViewController"];
-    [(UIAlertController *)[alertView _alertController]_foregroundView].alpha = 0.0;
-
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown:
-                alertView.title = @"Scanning finger...";
+                alertView.title = titleWithSpacingForIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
                     alertView.title = iconView.icon.displayName;
                 } repeats:NO];
@@ -97,7 +93,7 @@ static ASCommon *sharedCommonObj;
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 break;
             case TouchIDNotMatched:
-                alertView.title = iconView.icon.displayName;
+                alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -135,8 +131,30 @@ static ASCommon *sharedCommonObj;
         return;
     }
 
+    alertView.willPresentBlock = ^(UIAlertView *alertView) {
+        UIView *labelSuperview;
+        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
+            if ([subview isKindOfClass:[UILabel class]]) {
+                labelSuperview = [subview superview];
+            }
+        }
+        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+            [labelSuperview addSubview:imgView];
+        }
+    };
+
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
+            UIView *labelSuperview;
+            for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
+                if ([subview isKindOfClass:[UILabel class]]) {
+                    labelSuperview = [subview superview];
+                }
+            }
+            if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+                [labelSuperview addSubview:imgView];
+            }
+
         if (touchIDEnabled())
             [controller startMonitoring];
         };
@@ -182,6 +200,7 @@ static ASCommon *sharedCommonObj;
             title = @"Asphaleia";
             break;
     }
+    title = titleWithSpacingForSmallIcon(title);
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:@"Scan fingerprint to access."
@@ -193,7 +212,7 @@ static ASCommon *sharedCommonObj;
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown:
-                alertView.title = @"Scanning finger...";
+                alertView.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
                     alertView.title = title;
                 } repeats:NO];
@@ -236,8 +255,30 @@ static ASCommon *sharedCommonObj;
         return;
     }
 
+    /*alertView.willPresentBlock = ^(UIAlertView *alertView) {
+        UIView *labelSuperview;
+        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
+            if ([subview isKindOfClass:[UILabel class]]) {
+                labelSuperview = [subview superview];
+            }
+        }
+        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+            [labelSuperview addSubview:imgView];
+        }
+    };*/
+
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
+        /*UIView *labelSuperview;
+        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
+            if ([subview isKindOfClass:[UILabel class]]) {
+                labelSuperview = [subview superview];
+            }
+        }
+        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+            [labelSuperview addSubview:imgView];
+        }*/
+
         if (touchIDEnabled())
             [controller startMonitoring];
         };
@@ -325,6 +366,17 @@ static ASCommon *sharedCommonObj;
 -(void)dismissAnyAuthenticationAlerts {
     if (self.currentAlertView)
         [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+}
+
+- (NSMutableArray *)allSubviewsOfView:(UIView *)view
+{
+    NSMutableArray *viewArray = [NSMutableArray array];
+    [viewArray addObject:view];
+    for (UIView *subview in view.subviews)
+    {
+        [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
+    }
+    return viewArray;
 }
 
 @end
