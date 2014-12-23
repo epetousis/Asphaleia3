@@ -3,6 +3,10 @@
 #import "SBIconView.h"
 #import "SBAppSwitcherSnapshotView.h"
 
+@interface UIAlertView ()
+-(id)_alertController;
+@end
+
 typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
   ASAuthenticationAlertAppArranging,
   ASAuthenticationAlertSwitcher,
@@ -25,5 +29,6 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 -(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)dismissAnyAuthenticationAlerts;
+- (NSMutableArray *)allSubviewsOfView:(UIView *)view;
 
 @end

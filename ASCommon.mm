@@ -14,24 +14,6 @@
 #define titleWithSpacingForIcon(t) [NSString stringWithFormat:@"\n\n\n%@",t]
 #define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
 
-@interface UIAlertView ()
--(id)_alertController;
-@end
-
-@interface UIAlertController ()
-@property (readonly) UIView * _foregroundView;
-@property (readonly) UIView * _dimmingView;
--(UIView *)_foregroundView;
--(UIView *)_dimmingView;
--(id)_containedAlertController;
--(id)_alertControllerView;
--(id)_alertControllerContainer;
-@end
-
-@interface SBIconImageView ()
-@property(assign, nonatomic) float brightness;
-@end
-
 @interface ASCommon ()
 @property (readwrite) NSMutableArray *snapshotViews;
 @property (readwrite) NSMutableArray *obscurityViews;
@@ -175,29 +157,38 @@ static ASCommon *sharedCommonObj;
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
+    NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
+    UIImage *iconImage;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
             title = @"Arrange Apps";
+            iconImage = [UIImage imageNamed:@"IconEditMode.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         case ASAuthenticationAlertSwitcher:
             title = @"Multitasking";
+            iconImage = [UIImage imageNamed:@"IconMultitasking.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         case ASAuthenticationAlertSpotlight:
             title = @"Spotlight";
+            iconImage = [UIImage imageNamed:@"IconSpotlight.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         case ASAuthenticationAlertPowerDown:
             title = @"Slide to Power Off";
+            iconImage = [UIImage imageNamed:@"IconPowerOff.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         case ASAuthenticationAlertControlCentre:
             title = @"Control Center";
+            iconImage = [UIImage imageNamed:@"IconControlCenter.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         case ASAuthenticationAlertControlPanel:
             title = @"Asphaleia Control Panel";
+            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
         default:
             title = @"Asphaleia";
+            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
     }
     title = titleWithSpacingForSmallIcon(title);
@@ -255,7 +246,11 @@ static ASCommon *sharedCommonObj;
         return;
     }
 
-    /*alertView.willPresentBlock = ^(UIAlertView *alertView) {
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+    imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
+
+    alertView.willPresentBlock = ^(UIAlertView *alertView) {
         UIView *labelSuperview;
         for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
             if ([subview isKindOfClass:[UILabel class]]) {
@@ -265,11 +260,11 @@ static ASCommon *sharedCommonObj;
         if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
             [labelSuperview addSubview:imgView];
         }
-    };*/
+    };
 
     if (shouldBeginMonitoringOnWillPresent) {
         alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        /*UIView *labelSuperview;
+        UIView *labelSuperview;
         for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
             if ([subview isKindOfClass:[UILabel class]]) {
                 labelSuperview = [subview superview];
@@ -277,7 +272,7 @@ static ASCommon *sharedCommonObj;
         }
         if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
             [labelSuperview addSubview:imgView];
-        }*/
+        }
 
         if (touchIDEnabled())
             [controller startMonitoring];
