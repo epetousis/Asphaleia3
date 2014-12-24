@@ -23,4 +23,6 @@
 -(void)setLabelAccessoryViewHidden:(BOOL)hidden;
 -(void)setLabelHidden:(BOOL)hidden;
 -(void)_updateLabel;
+// New method
+-(void)updateLabelWithText:(NSString *)text;
 @end
