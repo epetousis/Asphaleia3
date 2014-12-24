@@ -35,6 +35,9 @@ NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
+BOOL authenticatingForIconOnHomeScreen;
+BOOL scanningForIconOnHomeScreen;
+NSString *authenticatingIconHomeScreenDisplayName;
 
 %hook SBIconController
 
@@ -97,18 +100,25 @@ ASTouchWindow *anywhereTouchWindow;
 			break;
 		case TouchIDFingerDown:
 			[fingerglyph setState:1 animated:YES completionHandler:nil];
+			scanningForIconOnHomeScreen = YES;
+			[currentIconView _updateLabel];
 			break;
 		case TouchIDFingerUp:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 			break;
 		case TouchIDNotMatched:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
+			scanningForIconOnHomeScreen = NO;
+			[currentIconView _updateLabel];
 			if (shouldVibrateOnIncorrectFingerprint())
 					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 		}
 	}];
 	[iconTouchIDController startMonitoring];
+	authenticatingIconHomeScreenDisplayName = [[currentIconView icon] displayName];
+	authenticatingForIconOnHomeScreen = YES;
+	[currentIconView _updateLabel];
 
 	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
 		if (blockedTouch) {
@@ -140,12 +150,35 @@ ASTouchWindow *anywhereTouchWindow;
 		[fingerglyph removeFromSuperview];
 		[iconTouchIDController stopMonitoring];
 		fingerglyph = nil;
+		scanningForIconOnHomeScreen = NO;
+		authenticatingForIconOnHomeScreen = NO;
+		authenticatingIconHomeScreenDisplayName = nil;
+		[currentIconView _updateLabel];
 		currentIconView = nil;
 		iconTouchIDController = nil;
 		if (anywhereTouchWindow) {
 			[anywhereTouchWindow setHidden:YES];
 			anywhereTouchWindow = nil;
 		}
+	}
+}
+
+%end
+
+%hook SBIconLabelView
+
++(void)updateIconLabelView:(id)view withSettings:(id)settings imageParameters:(id)parameters {
+	if (currentIconView && authenticatingForIconOnHomeScreen && [[parameters text] isEqual:authenticatingIconHomeScreenDisplayName]) {
+		id imageParameters = parameters;
+
+		if (scanningForIconOnHomeScreen)
+			[imageParameters setText:@"Scanning..."];
+		else
+			[imageParameters setText:@"Scan finger"];
+
+		%orig(view,settings,imageParameters);
+	} else {
+		%orig;
 	}
 }
 
