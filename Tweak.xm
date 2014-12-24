@@ -26,6 +26,7 @@
 #import "NSTimer+Blocks.h"
 #import "ASPasscodeHandler.h"
 #import "ASTouchWindow.h"
+#import "SBIconLabelView.h"
 
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
@@ -35,10 +36,6 @@ NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
-
-BOOL authenticatingForIconOnHomeScreen;
-BOOL scanningForIconOnHomeScreen;
-NSString *authenticatingIconHomeScreenDisplayName;
 
 %hook SBIconController
 
@@ -102,8 +99,7 @@ NSString *authenticatingIconHomeScreenDisplayName;
 		case TouchIDFingerDown:
 			[fingerglyph setState:1 animated:YES completionHandler:nil];
 
-			scanningForIconOnHomeScreen = YES;
-			[currentIconView _updateLabel];
+			[currentIconView updateLabelWithText:@"Scanning..."];
 
 			break;
 		case TouchIDFingerUp:
@@ -112,8 +108,7 @@ NSString *authenticatingIconHomeScreenDisplayName;
 		case TouchIDNotMatched:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 
-			scanningForIconOnHomeScreen = NO;
-			[currentIconView _updateLabel];
+			[currentIconView updateLabelWithText:@"Scan finger"];
 
 			if (shouldVibrateOnIncorrectFingerprint())
 					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -122,9 +117,7 @@ NSString *authenticatingIconHomeScreenDisplayName;
 	}];
 	[iconTouchIDController startMonitoring];
 
-	authenticatingIconHomeScreenDisplayName = [[currentIconView icon] displayName];
-	authenticatingForIconOnHomeScreen = YES;
-	[currentIconView _updateLabel];
+	[currentIconView updateLabelWithText:@"Scan finger"];
 
 	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
 		if (blockedTouch) {
@@ -157,11 +150,8 @@ NSString *authenticatingIconHomeScreenDisplayName;
 		[iconTouchIDController stopMonitoring];
 		fingerglyph = nil;
 
-		scanningForIconOnHomeScreen = NO;
-		authenticatingForIconOnHomeScreen = NO;
-		authenticatingIconHomeScreenDisplayName = nil;
 		[currentIconView _updateLabel];
-		
+
 		currentIconView = nil;
 		iconTouchIDController = nil;
 		if (anywhereTouchWindow) {
@@ -173,21 +163,15 @@ NSString *authenticatingIconHomeScreenDisplayName;
 
 %end
 
-%hook SBIconLabelView
+%hook SBIconView
 
-+(void)updateIconLabelView:(id)view withSettings:(id)settings imageParameters:(id)parameters {
-	if (currentIconView && authenticatingForIconOnHomeScreen && [[parameters text] isEqual:authenticatingIconHomeScreenDisplayName]) {
-		id imageParameters = parameters;
+%new
+-(void)updateLabelWithText:(NSString *)text {
+	SBIconLabelView *iconLabelView = [self valueForKey:@"_labelView"];
 
-		if (scanningForIconOnHomeScreen)
-			[imageParameters setText:@"Scanning..."];
-		else
-			[imageParameters setText:@"Scan finger"];
-
-		%orig(view,settings,imageParameters);
-	} else {
-		%orig;
-	}
+	id imageParameters = [[iconLabelView imageParameters] mutableCopy];
+	[imageParameters setText:text];
+	[%c(SBIconLabelView) updateIconLabelView:iconLabelView withSettings:nil imageParameters:imageParameters];
 }
 
 %end
