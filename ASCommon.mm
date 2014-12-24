@@ -92,7 +92,6 @@ static ASCommon *sharedCommonObj;
         self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-            if (authenticated)
                 handler(!authenticated);
             }];
         } else {
@@ -107,7 +106,6 @@ static ASCommon *sharedCommonObj;
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-            if (authenticated)
                 handler(!authenticated);
             }];
         return;
@@ -225,7 +223,6 @@ static ASCommon *sharedCommonObj;
         self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
-            if (authenticated)
                 handler(!authenticated);
             }];
         } else {
@@ -240,7 +237,6 @@ static ASCommon *sharedCommonObj;
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
-        if (authenticated)
             handler(!authenticated);
         }];
         return;
