@@ -108,7 +108,7 @@ ASTouchWindow *anywhereTouchWindow;
 		case TouchIDNotMatched:
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 
-			[currentIconView updateLabelWithText:@"Scan finger"];
+			[currentIconView updateLabelWithText:@"Scan finger..."];
 
 			if (shouldVibrateOnIncorrectFingerprint())
 					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -117,7 +117,7 @@ ASTouchWindow *anywhereTouchWindow;
 	}];
 	[iconTouchIDController startMonitoring];
 
-	[currentIconView updateLabelWithText:@"Scan finger"];
+	[currentIconView updateLabelWithText:@"Scan finger..."];
 
 	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
 		if (blockedTouch) {
