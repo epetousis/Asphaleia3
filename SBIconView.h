@@ -22,4 +22,5 @@
 -(void)_setIcon:(id)icon animated:(BOOL)animated;
 -(void)setLabelAccessoryViewHidden:(BOOL)hidden;
 -(void)setLabelHidden:(BOOL)hidden;
+-(void)_updateLabel;
 @end
