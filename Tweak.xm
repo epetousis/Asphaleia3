@@ -387,6 +387,35 @@ static BOOL controlCentreHasAuthenticated;
 
 %end
 
+%hook SpringBoard
+static BOOL openURLHasAuthenticated;
+
+-(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
+	%orig;
+	openURLHasAuthenticated = NO;
+}
+
+-(void)applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating needsPermission:(BOOL)permission activationSettings:(id)settings withResult:(id)result {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		%orig;
+		return;
+	}
+
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+			if (!wasCancelled) {
+				// using %orig; crashes springboard, so this is my alternative.
+				openURLHasAuthenticated = YES;
+				[self applicationOpenURL:url];
+			}
+		}];
+}
+
+%end
+
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();

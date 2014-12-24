@@ -3,6 +3,9 @@
 @interface SpringBoard : NSObject
 -(void)_revealSpotlight;
 -(SBApplication *)_accessibilityFrontMostApplication;
+-(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result;
+-(BOOL)_requestPermissionToOpenURL:(id)openURL withApplication:(id)application sender:(id)sender;
+-(void)applicationOpenURL:(id)url;
 @end
 
 @interface SpringBoard (SBApplicationTesting)
