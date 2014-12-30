@@ -145,19 +145,24 @@ ASTouchWindow *anywhereTouchWindow;
 %new
 -(void)resetAsphaleiaIconView {
 	if (fingerglyph && currentIconView) {
-		[currentIconView setHighlighted:NO];
-		[fingerglyph removeFromSuperview];
-		[iconTouchIDController stopMonitoring];
-		fingerglyph = nil;
-
 		[currentIconView _updateLabel];
 
-		currentIconView = nil;
-		iconTouchIDController = nil;
-		if (anywhereTouchWindow) {
-			[anywhereTouchWindow setHidden:YES];
-			anywhereTouchWindow = nil;
-		}
+		[UIView animateWithDuration:0.3f animations:^{
+			fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
+		}];
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+			[currentIconView setHighlighted:NO];
+			[fingerglyph removeFromSuperview];
+			[iconTouchIDController stopMonitoring];
+			fingerglyph = nil;
+
+			currentIconView = nil;
+			iconTouchIDController = nil;
+			if (anywhereTouchWindow) {
+				[anywhereTouchWindow setHidden:YES];
+				anywhereTouchWindow = nil;
+			}
+		});
 	}
 }
 
