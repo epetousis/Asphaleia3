@@ -67,7 +67,7 @@ static ASCommon *sharedCommonObj;
             case TouchIDFingerDown:
                 alertView.title = titleWithSpacingForIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-                    alertView.title = iconView.icon.displayName;
+                    alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
                 } repeats:NO];
                 [fingerglyph setState:1 animated:YES completionHandler:nil];
                 break;
