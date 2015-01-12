@@ -19,15 +19,11 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
 typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject
-@property (readonly) NSMutableArray *snapshotViews;
-@property (readonly) NSMutableArray *obscurityViews;
 +(instancetype)sharedInstance;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)isTouchIDDevice;
--(BOOL)shouldAddObscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
--(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
--(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
+-(UIView *)obscurityViewWithSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)dismissAnyAuthenticationAlerts;
 - (NSMutableArray *)allSubviewsOfView:(UIView *)view;
 
