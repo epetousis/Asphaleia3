@@ -15,8 +15,6 @@
 #define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
 
 @interface ASCommon ()
-@property (readwrite) NSMutableArray *snapshotViews;
-@property (readwrite) NSMutableArray *obscurityViews;
 @property UIAlertView *currentAlertView;
 @end
 
@@ -306,14 +304,7 @@ static ASCommon *sharedCommonObj;
     return [touchIDModels containsObject:results];
 }
 
--(BOOL)shouldAddObscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
-    return [self.snapshotViews indexOfObject:snapshotView] == NSNotFound;
-}
-
--(UIView *)obscurityViewForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
-    if (self.snapshotViews && [self.snapshotViews indexOfObject:snapshotView] != NSNotFound)
-        return [self.obscurityViews objectAtIndex:[self.snapshotViews indexOfObject:snapshotView]];
-
+-(UIView *)obscurityViewWithSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
     UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 
@@ -326,14 +317,7 @@ static ASCommon *sharedCommonObj;
     imageView.center = obscurityView.center;
     [obscurityView addSubview:imageView];
 
-    [self.snapshotViews addObject:snapshotView];
-    [self.obscurityViews insertObject:obscurityView atIndex:[self.snapshotViews indexOfObject:snapshotView]];
     return obscurityView;
-}
-
--(void)obscurityViewRemovedForSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
-    [self.obscurityViews removeObjectAtIndex:[self.snapshotViews indexOfObject:snapshotView]];
-    [self.snapshotViews removeObject:snapshotView];
 }
 
 -(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
