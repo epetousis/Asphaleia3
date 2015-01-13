@@ -27,6 +27,7 @@
 #import "ASPasscodeHandler.h"
 #import "ASTouchWindow.h"
 #import "SBIconLabelView.h"
+#import "SBIconLabelImageParameters.h"
 
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
@@ -175,7 +176,7 @@ NSMutableDictionary *obscurityViews;
 -(void)updateLabelWithText:(NSString *)text {
 	SBIconLabelView *iconLabelView = [self valueForKey:@"_labelView"];
 
-	id imageParameters = [[iconLabelView imageParameters] mutableCopy];
+	SBIconLabelImageParameters *imageParameters = [[iconLabelView imageParameters] mutableCopy];
 	[imageParameters setText:text];
 	[%c(SBIconLabelView) updateIconLabelView:iconLabelView withSettings:nil imageParameters:imageParameters];
 }
@@ -205,10 +206,10 @@ NSMutableDictionary *obscurityViews;
 
 %hook SBAppSwitcherIconController
 
--(void)dealloc {
+/*-(void)dealloc {
 	iconController = nil;
 	%orig;
-}
+}*/
 
 -(id)init {
 	iconController = %orig;
@@ -247,14 +248,14 @@ NSMutableDictionary *obscurityViews;
 	[self addSubview:obscurityView];
 }
 
--(void)dealloc {
+/*-(void)dealloc {
 	UIView *obscurityView = [obscurityViews objectForKey:[NSValue valueWithNonretainedObject:self]];
 	if (obscurityView) {
 		[obscurityView removeFromSuperview];
 		[obscurityViews setObject:[NSNull null] forKey:[NSValue valueWithNonretainedObject:self]];
 	}
 	%orig;
-}
+}*/
 
 %end
 

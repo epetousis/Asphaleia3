@@ -62,27 +62,31 @@ static ASCommon *sharedCommonObj;
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
-            case TouchIDFingerDown:
+            case TouchIDFingerDown: {
                 alertView.title = titleWithSpacingForIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
                     alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
                 } repeats:NO];
                 [fingerglyph setState:1 animated:YES completionHandler:nil];
                 break;
-            case TouchIDFingerUp:
+            }
+            case TouchIDFingerUp: {
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 break;
-            case TouchIDNotMatched:
+            }
+            case TouchIDNotMatched: {
                 alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
                 [fingerglyph setState:0 animated:YES completionHandler:nil];
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 break;
-            case TouchIDMatched:
+            }
+            case TouchIDMatched: {
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
                 break;
+            }
         }
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
@@ -198,22 +202,25 @@ static ASCommon *sharedCommonObj;
 
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
-            case TouchIDFingerDown:
+            case TouchIDFingerDown: {
                 alertView.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
                     alertView.title = title;
                 } repeats:NO];
                 break;
-            case TouchIDNotMatched:
+            }
+            case TouchIDNotMatched: {
                 alertView.title = title;
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 break;
-            case TouchIDMatched:
+            }
+            case TouchIDMatched: {
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
                 break;
+            }
         }
     }];
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {

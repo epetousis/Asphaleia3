@@ -4,7 +4,7 @@
 typedef void (^ASActivatorListenerEventHandler) (LAEvent *event, BOOL abortEventCalled);
  
 @interface ASActivatorListener : NSObject <LAListener>
-@property ASActivatorListenerEventHandler eventHandler;
+@property (nonatomic, strong) ASActivatorListenerEventHandler eventHandler;
 +(instancetype)sharedInstance;
 - (void)loadWithEventHandler:(ASActivatorListenerEventHandler)handler;
 -(void)load;

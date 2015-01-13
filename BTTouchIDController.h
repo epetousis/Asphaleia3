@@ -33,7 +33,7 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 	id _monitorDelegate;
 	NSArray *_monitorObservers;
 }
-@property BTTouchIDEventBlock biometricEventBlock;
+@property (nonatomic, strong) BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;
 -(void)startMonitoring;
 -(void)stopMonitoring;
