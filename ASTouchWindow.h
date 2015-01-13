@@ -7,6 +7,6 @@ typedef void (^ASTouchWindowTouchBlockedEvent) (ASTouchWindow *touchWindow, BOOL
 	BOOL touchedOutside;
 }
 @property (assign) UIView *viewToAllowTouchIn;
-@property ASTouchWindowTouchBlockedEvent handler;
+@property (nonatomic, strong) ASTouchWindowTouchBlockedEvent handler;
 -(void)blockTouchesAllowingTouchInView:(UIView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler;
 @end

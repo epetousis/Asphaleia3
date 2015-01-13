@@ -9,6 +9,7 @@ Asphaleia_FILES = Tweak.xm BTTouchIDController.m ASCommon.mm UIAlertView+Blocks.
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
 Asphaleia_LDFLAGS = -lactivator
 SHARED_CFLAGS = -fobjc-arc
+ADDITIONAL_OBJCFLAGS = -fobjc-arc
 
 BUNDLE_NAME = AsphaleiaAssets
 AsphaleiaAssets_INSTALL_PATH = /Library/Application Support/Asphaleia

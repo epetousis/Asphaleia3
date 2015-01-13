@@ -13,7 +13,8 @@
 {
     void (^block)() = [inBlock copy];
     id ret = [self scheduledTimerWithTimeInterval:inTimeInterval target:self selector:@selector(jdExecuteSimpleBlock:) userInfo:block repeats:inRepeats];
-    [block release];
+    //[block release];
+    block = nil;
     return ret;
 }
 
@@ -21,7 +22,8 @@
 {
     void (^block)() = [inBlock copy];
     id ret = [self timerWithTimeInterval:inTimeInterval target:self selector:@selector(jdExecuteSimpleBlock:) userInfo:block repeats:inRepeats];
-    [block release];
+    //[block release];
+    block = nil;
     return ret;
 }
 

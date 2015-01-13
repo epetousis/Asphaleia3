@@ -10,7 +10,7 @@
 @interface ASPasscodeHandler ()
 @property SBUIPasscodeLockViewSimple4DigitKeypad *passcodeView;
 @property UIWindow *passcodeWindow;
-@property ASPasscodeHandlerEventBlock eventBlock;
+@property (nonatomic, strong) ASPasscodeHandlerEventBlock eventBlock;
 @end
 
 @implementation ASPasscodeHandler
