@@ -9,6 +9,11 @@
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 #define bundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
 
+@interface PSListController ()
+-(void)viewDidDisappear:(BOOL)animated;
+-(void)viewDidAppear:(BOOL)animated;
+@end
+
 @interface AsphaleiaPrefsListController: PSListController {
 	BOOL _enteredCorrectly;
 	modalPinVC *pinVC;
