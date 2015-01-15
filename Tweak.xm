@@ -37,7 +37,6 @@ NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
-NSMutableDictionary *obscurityViews;
 
 %hook SBIconController
 
@@ -225,12 +224,11 @@ NSMutableDictionary *obscurityViews;
 		%orig;
 }
 
--(void)layoutSubviews {
+-(void)didMoveToWindow {
 	%orig;
-	UIView *obscurityView = [obscurityViews objectForKey:[NSValue valueWithNonretainedObject:self]];
-	if (obscurityView) {
-		[obscurityView removeFromSuperview];
-		[obscurityViews removeObjectForKey:[NSValue valueWithNonretainedObject:self]];
+	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
+		if (view.tag == 80085)
+			[view removeFromSuperview];
 	}
 
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
@@ -243,19 +241,10 @@ NSMutableDictionary *obscurityViews;
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 
-	obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:self];
-	[obscurityViews setObject:obscurityView forKey:[NSValue valueWithNonretainedObject:self]];
+	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:self];
+	obscurityView.tag = 80085; // ;)
 	[self addSubview:obscurityView];
 }
-
-/*-(void)dealloc {
-	UIView *obscurityView = [obscurityViews objectForKey:[NSValue valueWithNonretainedObject:self]];
-	if (obscurityView) {
-		[obscurityView removeFromSuperview];
-		[obscurityViews removeObjectForKey:[NSValue valueWithNonretainedObject:self]];
-	}
-	%orig;
-}*/
 
 %end
 
