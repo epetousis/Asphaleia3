@@ -230,7 +230,7 @@ NSMutableDictionary *obscurityViews;
 	UIView *obscurityView = [obscurityViews objectForKey:[NSValue valueWithNonretainedObject:self]];
 	if (obscurityView) {
 		[obscurityView removeFromSuperview];
-		[obscurityViews setObject:[NSNull null] forKey:[NSValue valueWithNonretainedObject:self]];
+		[obscurityViews removeObjectForKey:[NSValue valueWithNonretainedObject:self]];
 	}
 
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
@@ -252,7 +252,7 @@ NSMutableDictionary *obscurityViews;
 	UIView *obscurityView = [obscurityViews objectForKey:[NSValue valueWithNonretainedObject:self]];
 	if (obscurityView) {
 		[obscurityView removeFromSuperview];
-		[obscurityViews setObject:[NSNull null] forKey:[NSValue valueWithNonretainedObject:self]];
+		[obscurityViews removeObjectForKey:[NSValue valueWithNonretainedObject:self]];
 	}
 	%orig;
 }*/
