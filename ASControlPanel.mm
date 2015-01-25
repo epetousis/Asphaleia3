@@ -3,6 +3,8 @@
 #import "UIAlertView+Blocks.h"
 #import "SpringBoard.h"
 #import "PreferencesHandler.h"
+#import <objc/runtime.h>
+#import <dlfcn.h>
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 #define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
@@ -18,6 +20,7 @@
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedInstance = [self new];
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
     });
     return sharedInstance;
 }
@@ -100,13 +103,17 @@
 }
  
 - (void)load {
-    if ([LASharedActivator isRunningInsideSpringBoard])
-        [LASharedActivator registerListener:self forName:@"Control Panel"];
+    if (objc_getClass("LAActivator")) {
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
+            [[objc_getClass("LAActivator") sharedInstance] registerListener:self forName:@"Control Panel"];
+    }
 }
 
 - (void)unload {
-    if ([LASharedActivator isRunningInsideSpringBoard])
-        [LASharedActivator unregisterListenerWithName:@"Control Panel"];
+    if (objc_getClass("LAActivator")) {
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
+            [[objc_getClass("LAActivator") sharedInstance] unregisterListenerWithName:@"Control Panel"];
+    }
 }
 
 - (NSString *)activator:(LAActivator *)activator requiresLocalizedGroupForListenerName:(NSString *)listenerName {
