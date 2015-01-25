@@ -20,6 +20,7 @@
 	NSDate *_resignDate;
 }
 @property BOOL passcodeViewIsTransitioning;
+@property BOOL alreadyAnimatedOnce;
 @end
 
 @implementation AsphaleiaPrefsListController
@@ -69,10 +70,13 @@
 		[self presentAuthView];
 		_enteredCorrectly = NO;
 	} else {
-		[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
-		[UIView animateWithDuration:0.3f animations:^{
-			[(UINavigationItem*)self.navigationItem titleView].alpha = 1.0f;
-		}];
+		if (!self.alreadyAnimatedOnce) {
+			self.alreadyAnimatedOnce = YES;
+			[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
+			[UIView animateWithDuration:0.3f animations:^{
+				[(UINavigationItem*)self.navigationItem titleView].alpha = 1.0f;
+			}];
+		}
 	}
 }
 
