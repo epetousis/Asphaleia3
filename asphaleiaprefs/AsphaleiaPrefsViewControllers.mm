@@ -1,4 +1,5 @@
 #import "AsphaleiaPrefsViewControllers.h"
+#import <dlfcn.h>
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
@@ -643,7 +644,9 @@
 {
     // Return the number of rows in the section.
     if (section == 0 && [CPPrefs objectForKey:@"controlPanel"]) {
-        if ([[CPPrefs objectForKey:@"controlPanel"] boolValue]) {
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+        Class la = objc_getClass("LAActivator");
+        if ([[CPPrefs objectForKey:@"controlPanel"] boolValue] && la) {
             return 2;
         }
     }
@@ -685,7 +688,9 @@
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"special cell"];
             @try {
                 NSString *detailString = @"No actions";
-                NSInteger eventsAssignedCount = [[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Control Panel"] count];
+                dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+                Class la = objc_getClass("LAActivator");
+                NSInteger eventsAssignedCount = [[[la sharedInstance] eventsAssignedToListenerWithName:@"Control Panel"] count];
                 if (eventsAssignedCount == 1) {
                     detailString = @"1 action";
                 } else if (eventsAssignedCount > 0) {
@@ -704,6 +709,14 @@
             cell.textLabel.text = @"Control Panel";
             cell.textLabel.font = [UIFont systemFontOfSize:17.f];
             switchview.tag = 1;
+
+            dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+            Class la = objc_getClass("LAActivator");
+            if (!la) {
+                cell.userInteractionEnabled = NO;
+                cell.textLabel.enabled = NO;
+                cell.detailTextLabel.enabled = NO;
+            }
         } else {
             cell.textLabel.text = @"Allow Access in Apps";
             switchview.tag = 2;
@@ -731,15 +744,20 @@
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
     switch (section) {
-        case 0:
-            if (isIphone5S) {
-                return @"Use Activator or Touch ID on the home screen to access Asphaleia's Control Panel.";
+        case 0: {
+            dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+            Class la = objc_getClass("LAActivator");
+            if (la) {
+                return @"Use Activator on the home screen to access Asphaleia's Control Panel.";
+            } else {
+                return @"Activator is required to use this feature.";
             }
-            return @"Use Activator on the home screen to access Asphaleia's Control Panel.";
             break;
-        default:
+        }
+        default: {
             return @"";
             break;
+        }
     }
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -747,14 +765,21 @@
     
     if (indexPath.row == 1 || indexPath.row == 2) {
         // NSLog(@"=======selecting row at index path");
-        [self.navigationController pushViewController:[[activatorListenerVC alloc]initWithListener:@"Control Panel"] animated:YES];
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+        Class la = objc_getClass("LAListenerSettingsViewController");
+        if (la) {
+            LAListenerSettingsViewController *vc = [[la alloc] init];
+            [vc setListenerName:@"Control Panel"];
+            vc.title = @"Activation Methods";
+            [self.navigationController pushViewController:vc animated:YES];
+        }
     }
 
 }
 
 @end
 
-#pragma mark Activator Listener View Controller
+/*#pragma mark Activator Listener View Controller
 @implementation activatorListenerVC
 - (id)initWithListener:(NSString *)listener
 {
@@ -765,7 +790,7 @@
     }
     return self;
 }
-@end
+@end*/
 
 #pragma mark Time Lock View Controller
 @interface timeLockVC () {
@@ -1110,7 +1135,14 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (indexPath.section == 0 && indexPath.row == 1) {
-       [self.navigationController pushViewController:[[activatorListenerVC alloc] initWithListener:@"Dynamic Selection"] animated:YES];
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+        Class la = objc_getClass("LAListenerSettingsViewController");
+        if (la) {
+            LAListenerSettingsViewController *vc = [[la alloc] init];
+            [vc setListenerName:@"Dynamic Selection"];
+            vc.title = @"Activation Methods";
+            [self.navigationController pushViewController:vc animated:YES];
+        }
     } else if (indexPath.section == 4 || indexPath.section == 3) {
         NSIndexPath *altPath = [NSIndexPath indexPathForRow:indexPath.row inSection:(indexPath.section-3)];
         NSString *displayIdentifier = [dataSource displayIdentifierForIndexPath:altPath];
@@ -1854,12 +1886,20 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
     switch (section) {
-        case 0:
-            return @"Use Activator in an app to add or remove it from your Secured Apps list.";
+        case 0: {
+            dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+            Class la = objc_getClass("LAActivator");
+            if (la) {
+                return @"Use Activator in an app to add or remove it from your Secured Apps list.";
+            } else {
+                return @"Activator is required to use this feature.";
+            }
             break;
-        default:
+        }
+        default: {
             return @"";
             break;
+        }
     }
 }
 - (void)updateSwitchAtIndexPath:(UISwitch *)selSwitch{
@@ -1912,7 +1952,9 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
     if (section == 4 || section == 3) {
         return [[_sectionDescriptors objectAtIndex:(section-3)] rowCount];
     } else if (section == 0) {
-        if ([[prefs objectForKey:@"dynamicSelection"] boolValue]) {
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+        Class la = objc_getClass("LAActivator");
+        if ([[prefs objectForKey:@"dynamicSelection"] boolValue] && la) {
             return 2;
         }
     }
@@ -1946,6 +1988,14 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
             cell.accessoryView = switchview;
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
+
+            dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+            Class la = objc_getClass("LAActivator");
+            if (!la) {
+                cell.userInteractionEnabled = NO;
+                cell.textLabel.enabled = NO;
+                cell.detailTextLabel.enabled = NO;
+            }
         } /*else if (indexPath.row == 1 && isIphone5S) {
             UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
             [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
@@ -1958,8 +2008,10 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"special cell"];
             @try {
                 // NSLog(@"rechecking");
+                dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+                Class la = objc_getClass("LAActivator");
                 NSString *detailString = @"No actions";
-                NSInteger eventsAssignedCount = [[[LAActivator sharedInstance] eventsAssignedToListenerWithName:@"Dynamic Selection"] count];
+                NSInteger eventsAssignedCount = [[[la sharedInstance] eventsAssignedToListenerWithName:@"Dynamic Selection"] count];
                 if (eventsAssignedCount == 1) {
                     detailString = @"1 action";
                 } else if (eventsAssignedCount > 0) {

@@ -1,4 +1,6 @@
 #import "ASActivatorListener.h"
+#import <objc/runtime.h>
+#import <dlfcn.h>
 
 @implementation ASActivatorListener
 
@@ -7,6 +9,7 @@
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedInstance = [self new];
+        dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
     });
     return sharedInstance;
 }
@@ -29,18 +32,24 @@
  
 - (void)loadWithEventHandler:(ASActivatorListenerEventHandler)handler {
     self.eventHandler = [handler copy];
-    if ([LASharedActivator isRunningInsideSpringBoard])
-        [LASharedActivator registerListener:self forName:@"Dynamic Selection"];
+    if (objc_getClass("LAActivator")) {
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
+            [[objc_getClass("LAActivator") sharedInstance] registerListener:self forName:@"Dynamic Selection"];
+    }
 }
 
 -(void)load {
-    if ([LASharedActivator isRunningInsideSpringBoard] && self.eventHandler)
-        [LASharedActivator registerListener:self forName:@"Dynamic Selection"];
+    if (objc_getClass("LAActivator")) {
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard] && self.eventHandler)
+            [[objc_getClass("LAActivator") sharedInstance] registerListener:self forName:@"Dynamic Selection"];
+    }
 }
 
 - (void)unload {
-    if ([LASharedActivator isRunningInsideSpringBoard])
-        [LASharedActivator unregisterListenerWithName:@"Dynamic Selection"];
+    if (objc_getClass("LAActivator")) {
+        if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
+            [[objc_getClass("LAActivator") sharedInstance] unregisterListenerWithName:@"Dynamic Selection"];
+    }
 }
 
 - (NSString *)activator:(LAActivator *)activator requiresLocalizedGroupForListenerName:(NSString *)listenerName {

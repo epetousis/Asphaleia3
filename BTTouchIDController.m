@@ -5,6 +5,7 @@ https://github.com/Sassoty/BioTesting */
 #import <UIKit/UIKit.h>
 #import "ASActivatorListener.h"
 #import "ASControlPanel.h"
+#import <dlfcn.h>
 
 @interface BTTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
@@ -46,11 +47,15 @@ https://github.com/Sassoty/BioTesting */
 	[monitor _setMatchingEnabled:YES];
 	[monitor _startMatching];
 
-	if ([LASharedActivator hasListenerWithName:@"Dynamic Selection"])
-		[[ASActivatorListener sharedInstance] unload];
-	
-	if ([LASharedActivator hasListenerWithName:@"Control Panel"])
-		[[ASControlPanel sharedInstance] unload];
+	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	Class la = objc_getClass("LASharedActivator");
+	if (la) {
+		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+			[[ASActivatorListener sharedInstance] unload];
+		
+		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+			[[ASControlPanel sharedInstance] unload];
+	}
 
 	log(@"Started monitoring");
 }
@@ -75,11 +80,15 @@ https://github.com/Sassoty/BioTesting */
 
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
-	if (![LASharedActivator hasListenerWithName:@"Dynamic Selection"])
-		[[ASActivatorListener sharedInstance] load];
+	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	Class la = objc_getClass("LASharedActivator");
+	if (la) {
+		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+			[[ASActivatorListener sharedInstance] load];
 	
-	if (![LASharedActivator hasListenerWithName:@"Control Panel"])
-		[[ASControlPanel sharedInstance] load];
+		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+			[[ASControlPanel sharedInstance] load];
+	}
 
 	log(@"Stopped Monitoring");
 }
