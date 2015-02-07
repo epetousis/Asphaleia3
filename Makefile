@@ -7,8 +7,6 @@ TARGET = iphone:clang:latest:8.0
 TWEAK_NAME = Asphaleia
 Asphaleia_FILES = Tweak.xm BTTouchIDController.m ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASPasscodeHandler.mm ASTouchWindow.m
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
-SHARED_CFLAGS = -fobjc-arc
-ADDITIONAL_OBJCFLAGS = -fobjc-arc
 
 BUNDLE_NAME = AsphaleiaAssets
 AsphaleiaAssets_INSTALL_PATH = /Library/Application Support/Asphaleia

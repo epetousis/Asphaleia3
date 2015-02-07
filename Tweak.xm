@@ -224,7 +224,7 @@ ASTouchWindow *anywhereTouchWindow;
 		%orig;
 }
 
--(void)didMoveToWindow {
+-(void)layoutSubviews {
 	%orig;
 	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
 		if (view.tag == 80085)
