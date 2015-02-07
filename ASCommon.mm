@@ -23,10 +23,10 @@
 static ASCommon *sharedCommonObj;
 
 +(instancetype)sharedInstance {
-    @synchronized(self) {
-        if (!sharedCommonObj)
-            sharedCommonObj = [[ASCommon alloc] init];
-    }
+    static dispatch_once_t token = 0;
+    dispatch_once(&token, ^{
+        sharedCommonObj = [[ASCommon alloc] init];
+    })
 
     return sharedCommonObj;
 }
