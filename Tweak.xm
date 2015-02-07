@@ -155,13 +155,13 @@ ASTouchWindow *anywhereTouchWindow;
 			[currentIconView setHighlighted:NO];
 			[fingerglyph removeFromSuperview];
 			[iconTouchIDController stopMonitoring];
-			fingerglyph = nil;
+			[fingerglyph release];
 
 			currentIconView = nil;
-			iconTouchIDController = nil;
+			[iconTouchIDController release];
 			if (anywhereTouchWindow) {
 				[anywhereTouchWindow setHidden:YES];
-				anywhereTouchWindow = nil;
+				[anywhereTouchWindow release];
 			}
 		});
 	}
@@ -205,10 +205,10 @@ ASTouchWindow *anywhereTouchWindow;
 
 %hook SBAppSwitcherIconController
 
-/*-(void)dealloc {
+-(void)dealloc {
 	iconController = nil;
 	%orig;
-}*/
+}
 
 -(id)init {
 	iconController = %orig;
@@ -226,11 +226,6 @@ ASTouchWindow *anywhereTouchWindow;
 
 -(void)layoutSubviews {
 	%orig;
-	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
-		if (view.tag == 80085)
-			[view removeFromSuperview];
-	}
-
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
 	}
@@ -244,6 +239,14 @@ ASTouchWindow *anywhereTouchWindow;
 	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:self];
 	obscurityView.tag = 80085; // ;)
 	[self addSubview:obscurityView];
+}
+
+-(void)dealloc {
+	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
+		if (view.tag == 80085)
+			[view removeFromSuperview];
+	}
+	%orig;
 }
 
 %end
@@ -309,7 +312,7 @@ ASTouchWindow *anywhereTouchWindow;
 		[blurredWindow makeKeyAndVisible];
 		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			blurredWindow.hidden = YES;
-			blurredWindow = nil;
+			[blurredWindow release];
 
 			if (wasCancelled) {
 				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
@@ -413,8 +416,8 @@ static BOOL controlCentreHasAuthenticated;
 
 	temporarilyUnlockedAppBundleID = [self bundleIdentifier];
 	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
-		temporarilyUnlockedAppBundleID = nil;
-		currentTempUnlockTimer = nil;
+		[temporarilyUnlockedAppBundleID release];
+		[currentTempUnlockTimer release];
 	} repeats:NO];
 }
 

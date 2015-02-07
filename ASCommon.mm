@@ -352,7 +352,7 @@ static ASCommon *sharedCommonObj;
 
 - (NSMutableArray *)allSubviewsOfView:(UIView *)view
 {
-    NSMutableArray *viewArray = [NSMutableArray array];
+    NSMutableArray *viewArray = [[NSMutableArray alloc] init];
     [viewArray addObject:view];
     for (UIView *subview in view.subviews)
     {
