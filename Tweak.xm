@@ -229,6 +229,12 @@ ASTouchWindow *anywhereTouchWindow;
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
 	}
+	
+	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
+		if (view.tag == 80085)
+			return;
+	}
+
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
 	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
