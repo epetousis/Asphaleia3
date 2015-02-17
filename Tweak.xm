@@ -243,8 +243,10 @@ ASTouchWindow *anywhereTouchWindow;
 
 -(void)dealloc {
 	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
-		if (view.tag == 80085)
+		if (view.tag == 80085) {
 			[view removeFromSuperview];
+			[view release];
+		}
 	}
 	%orig;
 }

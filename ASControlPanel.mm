@@ -68,6 +68,8 @@
                         [ASPreferencesHandler sharedInstance].prefs = tempPrefs;
                         [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
                     }
+
+                    [self.alertView release];
                 };
 
             NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
