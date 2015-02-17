@@ -109,4 +109,10 @@ https://github.com/Sassoty/BioTesting */
     }
 }
 
+-(void)dealloc {
+	[self stopMonitoring];
+
+	[super dealloc];
+}
+
 @end

@@ -80,7 +80,9 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
+						[self.passcodeView release];
 						self.passcodeView = nil;
+						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(YES);
                  	}
@@ -98,7 +100,9 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
+						[self.passcodeView release];
 						self.passcodeView = nil;
+						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(NO);
                  	}
@@ -114,7 +118,9 @@
     	             	if (finished) {
     	             		[self.passcodeView removeFromSuperview];
 							[self.passcodeWindow setHidden:YES];
+							[self.passcodeView release];
 							self.passcodeView = nil;
+							[self.passcodeWindow release];
 							self.passcodeWindow = nil;
 							self.eventBlock(NO);
     	             	}

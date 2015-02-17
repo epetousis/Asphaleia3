@@ -26,7 +26,7 @@ static ASCommon *sharedCommonObj;
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedCommonObj = [[ASCommon alloc] init];
-    })
+    });
 
     return sharedCommonObj;
 }
@@ -85,6 +85,10 @@ static ASCommon *sharedCommonObj;
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
+                [fingerglyph release];
+                [controller release];
+                [alertView release];
+                [imgView release];
                 break;
             }
         }
@@ -99,10 +103,18 @@ static ASCommon *sharedCommonObj;
         } else {
             handler(YES);
         }
+        [fingerglyph release];
+        [controller release];
+        [alertView release];
+        [imgView release];
     };
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         handler(NO);
+        [fingerglyph release];
+        [controller release];
+        [alertView release];
+        [imgView release];
         return;
     }
 
@@ -110,37 +122,21 @@ static ASCommon *sharedCommonObj;
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
             }];
+        [fingerglyph release];
+        [controller release];
+        [alertView release];
+        [imgView release];
         return;
     }
 
     alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        UIView *labelSuperview;
-        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
-            if ([subview isKindOfClass:[UILabel class]]) {
-                labelSuperview = [subview superview];
-            }
-        }
-        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-            [labelSuperview addSubview:imgView];
-        }
+        [self addSubview:imgView toAlertView:alertView];
+
+        if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
+            [controller startMonitoring];
     };
 
-    if (shouldBeginMonitoringOnWillPresent) {
-        alertView.willPresentBlock = ^(UIAlertView *alertView) {
-            UIView *labelSuperview;
-            for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
-                if ([subview isKindOfClass:[UILabel class]]) {
-                    labelSuperview = [subview superview];
-                }
-            }
-            if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-                [labelSuperview addSubview:imgView];
-            }
-
-        if (touchIDEnabled())
-            [controller startMonitoring];
-        };
-    } else {
+    if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
             [controller startMonitoring];
@@ -200,6 +196,10 @@ static ASCommon *sharedCommonObj;
          otherButtonTitles:@"Passcode",nil];
     BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
+    __block UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+    imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
+
     __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown: {
@@ -219,6 +219,9 @@ static ASCommon *sharedCommonObj;
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
+                [controller release];
+                [alertView release];
+                [imgView release];
                 break;
             }
         }
@@ -233,52 +236,37 @@ static ASCommon *sharedCommonObj;
         } else {
             handler(YES);
         }
+        [controller release];
+        [alertView release];
+        [imgView release];
     };
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         handler(NO);
+        [controller release];
+        [alertView release];
+        [imgView release];
         return;
     }
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
-            handler(!authenticated);
-        }];
+                handler(!authenticated);
+            }];
+        [controller release];
+        [alertView release];
+        [imgView release];
         return;
     }
 
-    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-    imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
-
     alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        UIView *labelSuperview;
-        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
-            if ([subview isKindOfClass:[UILabel class]]) {
-                labelSuperview = [subview superview];
-            }
-        }
-        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-            [labelSuperview addSubview:imgView];
-        }
+        [self addSubview:imgView toAlertView:alertView];
+
+        if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
+            [controller startMonitoring];
     };
 
-    if (shouldBeginMonitoringOnWillPresent) {
-        alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        UIView *labelSuperview;
-        for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
-            if ([subview isKindOfClass:[UILabel class]]) {
-                labelSuperview = [subview superview];
-            }
-        }
-        if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-            [labelSuperview addSubview:imgView];
-        }
-
-        if (touchIDEnabled())
-            [controller startMonitoring];
-        };
-    } else {
+    if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
             [controller startMonitoring];
@@ -358,7 +346,19 @@ static ASCommon *sharedCommonObj;
     {
         [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
     }
-    return viewArray;
+    return [viewArray autorelease];
+}
+
+-(void)addSubview:(UIView *)view toAlertView:(UIAlertView *)alertView {
+    UIView *labelSuperview;
+    for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
+        if ([subview isKindOfClass:[UILabel class]]) {
+            labelSuperview = [subview superview];
+        }
+    }
+    if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+        [labelSuperview addSubview:view];
+    }
 }
 
 @end
