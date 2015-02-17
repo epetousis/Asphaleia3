@@ -346,7 +346,7 @@ static ASCommon *sharedCommonObj;
     {
         [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
     }
-    return [viewArray autorelease];
+    return viewArray;
 }
 
 -(void)addSubview:(UIView *)view toAlertView:(UIAlertView *)alertView {
