@@ -85,6 +85,7 @@
 						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(YES);
+						[self.eventBlock release];
                  	}
                  }];
 	} else if (arg1.passcode.length == 4 && ![arg1.passcode isEqual:self.passcode]) {
@@ -105,6 +106,7 @@
 						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(NO);
+						[self.eventBlock release];
                  	}
                  }];
 }
@@ -123,6 +125,7 @@
 							[self.passcodeWindow release];
 							self.passcodeWindow = nil;
 							self.eventBlock(NO);
+							[self.eventBlock release];
     	             	}
     	             }];
 	}
