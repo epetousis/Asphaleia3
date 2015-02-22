@@ -28,4 +28,10 @@
     [self makeKeyAndVisible];
 }
 
+-(void)dealloc {
+    [self.handler release];
+
+    [super dealloc];
+}
+
 @end

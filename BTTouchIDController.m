@@ -102,15 +102,14 @@ https://github.com/Sassoty/BioTesting */
 }
 
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
-	BTTouchIDEventBlock eventBlock = self.biometricEventBlock;
-    
-    if (eventBlock) {
-        eventBlock(self, monitor, event);
+    if (self.biometricEventBlock) {
+        self.biometricEventBlock(self, monitor, event);
     }
 }
 
 -(void)dealloc {
 	[self stopMonitoring];
+	[self.biometricEventBlock release];
 
 	[super dealloc];
 }

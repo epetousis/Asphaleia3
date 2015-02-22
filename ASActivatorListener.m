@@ -31,6 +31,8 @@
 }
  
 - (void)loadWithEventHandler:(ASActivatorListenerEventHandler)handler {
+    if (self.eventHandler)
+        [self.eventHandler release];
     self.eventHandler = [handler copy];
     if (objc_getClass("LAActivator")) {
         if ([[objc_getClass("LAActivator") sharedInstance] isRunningInsideSpringBoard])
