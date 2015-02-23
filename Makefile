@@ -4,13 +4,22 @@ ARCHS = armv7 armv7s arm64
 
 TARGET = iphone:clang:latest:8.0
 
+LIBRARY_NAME = libasphaleiaui
+libasphaleiaui_FILES = BTTouchIDController.m ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASPasscodeHandler.mm ASTouchWindow.m
+libasphaleiaui_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
+libasphaleiaui_INSTALL_PATH = /Library/Application Support/Asphaleia
+libasphaleiaui_CFLAGS = -fobjc-arc
+
 TWEAK_NAME = Asphaleia
-Asphaleia_FILES = Tweak.xm BTTouchIDController.m ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASPasscodeHandler.mm ASTouchWindow.m
+Asphaleia_FILES = Tweak.xm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
+Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)
+Asphaleia_LIBRARIES = asphaleiaui
 
 BUNDLE_NAME = AsphaleiaAssets
 AsphaleiaAssets_INSTALL_PATH = /Library/Application Support/Asphaleia
 
+include $(THEOS_MAKE_PATH)/library.mk
 include $(THEOS_MAKE_PATH)/tweak.mk
 include $(THEOS)/makefiles/bundle.mk
 

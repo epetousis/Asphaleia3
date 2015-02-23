@@ -229,11 +229,6 @@ ASTouchWindow *anywhereTouchWindow;
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
 	}
-	
-	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
-		if (view.tag == 80085)
-			return;
-	}
 
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
@@ -241,6 +236,13 @@ ASTouchWindow *anywhereTouchWindow;
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
+	
+	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+
+	for (UIView *view in array) {
+		if (view.tag == 80085)
+			return;
+	}
 
 	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:self];
 	obscurityView.tag = 80085; // ;)
@@ -248,8 +250,10 @@ ASTouchWindow *anywhereTouchWindow;
 }
 
 -(void)dealloc {
-	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
-		if (view.tag == 80085) {
+	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+
+	for (UIView *view in array) {
+		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
 			[view removeFromSuperview];
 			[view release];
 		}

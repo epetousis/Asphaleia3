@@ -107,12 +107,4 @@ https://github.com/Sassoty/BioTesting */
     }
 }
 
--(void)dealloc {
-	// somethings broken here i think
-	[self stopMonitoring];
-	[self.biometricEventBlock release];
-
-	[super dealloc];
-}
-
 @end

@@ -85,10 +85,6 @@ static ASCommon *sharedCommonObj;
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
-                [fingerglyph release];
-                [controller release];
-                [alertView release];
-                [imgView release];
                 break;
             }
         }
@@ -103,18 +99,10 @@ static ASCommon *sharedCommonObj;
         } else {
             handler(YES);
         }
-        [fingerglyph release];
-        [controller release];
-        [alertView release];
-        [imgView release];
     };
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         handler(NO);
-        [fingerglyph release];
-        [controller release];
-        [alertView release];
-        [imgView release];
         return;
     }
 
@@ -122,10 +110,6 @@ static ASCommon *sharedCommonObj;
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
             }];
-        [fingerglyph release];
-        [controller release];
-        [alertView release];
-        [imgView release];
         return;
     }
 
@@ -219,9 +203,6 @@ static ASCommon *sharedCommonObj;
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
                 handler(NO);
-                [controller release];
-                [alertView release];
-                [imgView release];
                 break;
             }
         }
@@ -236,16 +217,10 @@ static ASCommon *sharedCommonObj;
         } else {
             handler(YES);
         }
-        [controller release];
-        [alertView release];
-        [imgView release];
     };
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         handler(NO);
-        [controller release];
-        [alertView release];
-        [imgView release];
         return;
     }
 
@@ -253,9 +228,6 @@ static ASCommon *sharedCommonObj;
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
             }];
-        [controller release];
-        [alertView release];
-        [imgView release];
         return;
     }
 
@@ -338,7 +310,7 @@ static ASCommon *sharedCommonObj;
         [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
 }
 
-- (NSMutableArray *)allSubviewsOfView:(UIView *)view
+- (NSArray *)allSubviewsOfView:(UIView *)view
 {
     NSMutableArray *viewArray = [[NSMutableArray alloc] init];
     [viewArray addObject:view];
@@ -346,7 +318,7 @@ static ASCommon *sharedCommonObj;
     {
         [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
     }
-    return viewArray;
+    return [NSArray arrayWithArray:viewArray];
 }
 
 -(void)addSubview:(UIView *)view toAlertView:(UIAlertView *)alertView {
