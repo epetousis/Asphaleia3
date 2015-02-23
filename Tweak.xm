@@ -155,13 +155,13 @@ ASTouchWindow *anywhereTouchWindow;
 			[currentIconView setHighlighted:NO];
 			[fingerglyph removeFromSuperview];
 			[iconTouchIDController stopMonitoring];
-			[fingerglyph release];
+			//[fingerglyph release];
 
 			currentIconView = nil;
-			[iconTouchIDController release];
+			//[iconTouchIDController release];
 			if (anywhereTouchWindow) {
 				[anywhereTouchWindow setHidden:YES];
-				[anywhereTouchWindow release];
+				//[anywhereTouchWindow release];
 			}
 		});
 	}
