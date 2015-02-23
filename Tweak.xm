@@ -230,6 +230,20 @@ BOOL appAlreadyAuthenticated;
 		%orig;
 }
 
++(id)appSwitcherSnapshotViewForDisplayItem:(SBDisplayItem *)application orientation:(int)orientation loadAsync:(BOOL)async withQueue:(id)queue statusBarCache:(id)cache {
+	SBAppSwitcherSnapshotView* snapshotView = %orig;
+
+	if ((![getProtectedApps() containsObject:application.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:application.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		return snapshotView;
+	}
+
+	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:snapshotView];
+	obscurityView.tag = 80085; // ;)
+	[snapshotView addSubview:obscurityView];
+
+	return snapshotView;
+}
+
 -(void)layoutSubviews {
 	%orig;
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
@@ -242,29 +256,6 @@ BOOL appAlreadyAuthenticated;
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
-	
-	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
-
-	for (UIView *view in array) {
-		if (view.tag == 80085)
-			return;
-	}
-
-	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:self];
-	obscurityView.tag = 80085; // ;)
-	[self addSubview:obscurityView];
-}
-
--(void)dealloc {
-	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
-
-	for (UIView *view in array) {
-		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
-			[view removeFromSuperview];
-			[view release];
-		}
-	}
-	%orig;
 }
 
 %end
