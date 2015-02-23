@@ -37,6 +37,7 @@ NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
+BOOL appAlreadyAuthenticated;
 
 %hook SBIconController
 
@@ -51,8 +52,10 @@ ASTouchWindow *anywhereTouchWindow;
 		[iconView setHighlighted:NO];
 		if ([iconView isEqual:currentIconView]) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-				if (authenticated)
+				if (authenticated) {
+					appAlreadyAuthenticated = YES;
 					[iconView.icon launchFromLocation:iconView.location];
+				}
 			}];
 		}
 		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
@@ -65,8 +68,10 @@ ASTouchWindow *anywhereTouchWindow;
 		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 			[iconView setHighlighted:NO];
 
-			if (authenticated)
-			%orig;
+			if (authenticated){
+				appAlreadyAuthenticated = YES;
+				%orig;
+			}
 		}];
 		return;
 	}
@@ -93,6 +98,7 @@ ASTouchWindow *anywhereTouchWindow;
 		switch (event) {
 		case TouchIDMatched:
 			if (fingerglyph && currentIconView) {
+				appAlreadyAuthenticated = YES;
 				[currentIconView.icon launchFromLocation:currentIconView.location];
 				[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 			}
@@ -153,15 +159,15 @@ ASTouchWindow *anywhereTouchWindow;
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
-			[fingerglyph removeFromSuperview];
 			[iconTouchIDController stopMonitoring];
-			//[fingerglyph release];
+			[fingerglyph release];
+			fingerglyph = nil;
 
 			currentIconView = nil;
 			//[iconTouchIDController release];
 			if (anywhereTouchWindow) {
-				[anywhereTouchWindow setHidden:YES];
-				//[anywhereTouchWindow release];
+				[anywhereTouchWindow release];
+				anywhereTouchWindow = nil;
 			}
 		});
 	}
@@ -458,6 +464,30 @@ static BOOL openURLHasAuthenticated;
 				// using %orig; crashes springboard, so this is my alternative.
 				openURLHasAuthenticated = YES;
 				[self applicationOpenURL:url];
+			}
+		}];
+}
+
+%end
+
+%hook SBUIController
+
+- (void)activateApplicationAnimated:(id)application {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
+		appAlreadyAuthenticated = NO;
+		%orig;
+		return;
+	}
+
+	appAlreadyAuthenticated = NO;
+
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+			if (!wasCancelled) {
+				%orig;
 			}
 		}];
 }
