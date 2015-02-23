@@ -80,12 +80,9 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
-						[self.passcodeView release];
 						self.passcodeView = nil;
-						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(YES);
-						[self.eventBlock release];
                  	}
                  }];
 	} else if (arg1.passcode.length == 4 && ![arg1.passcode isEqual:self.passcode]) {
@@ -101,12 +98,9 @@
                  	if (finished) {
                  		[self.passcodeView removeFromSuperview];
 						[self.passcodeWindow setHidden:YES];
-						[self.passcodeView release];
 						self.passcodeView = nil;
-						[self.passcodeWindow release];
 						self.passcodeWindow = nil;
 						self.eventBlock(NO);
-						[self.eventBlock release];
                  	}
                  }];
 }
@@ -120,12 +114,9 @@
     	             	if (finished) {
     	             		[self.passcodeView removeFromSuperview];
 							[self.passcodeWindow setHidden:YES];
-							[self.passcodeView release];
 							self.passcodeView = nil;
-							[self.passcodeWindow release];
 							self.passcodeWindow = nil;
 							self.eventBlock(NO);
-							[self.eventBlock release];
     	             	}
     	             }];
 	}

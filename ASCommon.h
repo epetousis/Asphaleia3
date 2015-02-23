@@ -25,6 +25,6 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 -(BOOL)isTouchIDDevice;
 -(UIView *)obscurityViewWithSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)dismissAnyAuthenticationAlerts;
-- (NSMutableArray *)allSubviewsOfView:(UIView *)view;
+- (NSArray *)allSubviewsOfView:(UIView *)view;
 
 @end
