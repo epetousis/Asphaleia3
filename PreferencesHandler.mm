@@ -131,15 +131,13 @@ NSArray *getProtectedApps(void) {
 
 @implementation ASPreferencesHandler
 
-static ASPreferencesHandler *sharedCommonObj;
-
 +(instancetype)sharedInstance {
-    @synchronized(self) {
-        if (!sharedCommonObj)
-            sharedCommonObj = [[ASPreferencesHandler alloc] init];
-    }
-
-    return sharedCommonObj;
+	static id sharedInstance = nil;
+	static dispatch_once_t token = 0;
+	dispatch_once(&token, ^{
+		sharedInstance = [self new];
+	});
+	return sharedInstance;
 }
 
 @end
