@@ -23,7 +23,6 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)isTouchIDDevice;
--(UIView *)obscurityViewWithSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView;
 -(void)dismissAnyAuthenticationAlerts;
 - (NSArray *)allSubviewsOfView:(UIView *)view;
 

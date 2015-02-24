@@ -271,22 +271,6 @@ static ASCommon *sharedCommonObj;
     return [touchIDModels containsObject:results];
 }
 
--(UIView *)obscurityViewWithSnapshotView:(SBAppSwitcherSnapshotView *)snapshotView {
-    NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
-    UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-
-    UIView *obscurityView = [[UIView alloc] initWithFrame:snapshotView.bounds];
-    obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
-
-    UIImageView *imageView = [[UIImageView alloc] init];
-    imageView.image = obscurityEye;
-    imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
-    imageView.center = obscurityView.center;
-    [obscurityView addSubview:imageView];
-
-    return obscurityView;
-}
-
 -(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
     UIGraphicsBeginImageContextWithOptions(origImage.size, NO, origImage.scale);
     CGContextRef imgContext = UIGraphicsGetCurrentContext();
