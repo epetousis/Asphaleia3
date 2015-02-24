@@ -29,6 +29,8 @@
 #import "SBIconLabelView.h"
 #import "SBIconLabelImageParameters.h"
 
+#define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
+
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
@@ -237,23 +239,40 @@ BOOL appAlreadyAuthenticated;
 		return snapshotView;
 	}
 
-	UIView *obscurityView = [[ASCommon sharedInstance] obscurityViewWithSnapshotView:snapshotView];
-	obscurityView.tag = 80085; // ;)
-	[snapshotView addSubview:obscurityView];
+	@autoreleasepool {
+		NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
+    	UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+		
+    	UIView *obscurityView = [[[UIView alloc] initWithFrame:snapshotView.bounds] autorelease];
+    	obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
+		
+    	UIImageView *imageView = [[[UIImageView alloc] init] autorelease];
+    	imageView.image = obscurityEye;
+    	imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
+    	imageView.center = obscurityView.center;
+    	[obscurityView addSubview:imageView];
+		
+		obscurityView.tag = 80085; // ;)
+		[snapshotView addSubview:obscurityView];
+    	[asphaleiaAssets release];
+    }
 
 	return snapshotView;
 }
 
 -(void)layoutSubviews {
 	%orig;
+	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
+
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		snapshotImageView.layer.filters = nil;
+		[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 		return;
 	}
 
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
 	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
-	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 }
@@ -458,6 +477,13 @@ static BOOL openURLHasAuthenticated;
 			}
 		}];
 }
+
+/*- (void)_menuButtonDown:(id)arg1 {
+	if ([[UIApplication sharedApplication].keyWindow isMemberOfClass:[UIWindow class]])
+	{
+    	// no alertview
+	}
+}*/
 
 %end
 
