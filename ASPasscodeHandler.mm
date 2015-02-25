@@ -72,22 +72,24 @@
 }
 
 -(void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewSimple4DigitKeypad *)arg1 {
-	if (arg1.passcode.length == 4 && [arg1.passcode isEqual:self.passcode]) {
-		[UIView animateWithDuration:.15f delay:0.0
-                    options:UIViewAnimationOptionCurveEaseIn
-                 animations:^{[self.passcodeWindow setAlpha:0.f];}
-                 completion:^(BOOL finished){
-                 	if (finished) {
-                 		[self.passcodeView removeFromSuperview];
-						[self.passcodeWindow setHidden:YES];
-						self.passcodeView = nil;
-						self.passcodeWindow = nil;
-						self.eventBlock(YES);
-                 	}
-                 }];
-	} else if (arg1.passcode.length == 4 && ![arg1.passcode isEqual:self.passcode]) {
-		[arg1 resetForFailedPasscode];
-	}
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+		if (arg1.passcode.length == 4 && [arg1.passcode isEqual:self.passcode]) {
+				[UIView animateWithDuration:.15f delay:0.0
+		                options:UIViewAnimationOptionCurveEaseIn
+		             animations:^{[self.passcodeWindow setAlpha:0.f];}
+		             completion:^(BOOL finished){
+						if (finished) {
+							[self.passcodeView removeFromSuperview];
+							[self.passcodeWindow setHidden:YES];
+							self.passcodeView = nil;
+							self.passcodeWindow = nil;
+							self.eventBlock(YES);
+						}
+					}];
+		} else if (arg1.passcode.length == 4 && ![arg1.passcode isEqual:self.passcode]) {
+			[arg1 resetForFailedPasscode];
+		}
+	});
 }
 
 -(void)passcodeLockViewCancelButtonPressed:(id)arg1 {
