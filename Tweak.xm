@@ -528,6 +528,24 @@ static BOOL openURLHasAuthenticated;
 
 		[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
 		[[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+
+		NSString *title = nil;
+		NSString *description = nil;
+		if (![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]) {
+			title = @"Disabled authentication";
+			description = [NSString stringWithFormat:@"Disabled authentication for %@", frontmostApp.displayName];
+		} else {
+			title = @"Enabled authentication";
+			description = [NSString stringWithFormat:@"Enabled authentication for %@", frontmostApp.displayName];
+		}
+
+		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
+		           message:description
+		          delegate:nil
+		 cancelButtonTitle:@"Okay"
+		 otherButtonTitles:nil];
+		[alertView show];
+		[alertView release];
 		return;
 	}];
 }
