@@ -23,6 +23,7 @@
 -(void)setLabelAccessoryViewHidden:(BOOL)hidden;
 -(void)setLabelHidden:(BOOL)hidden;
 -(void)_updateLabel;
+-(BOOL)isInDock;
 // New method
 -(void)updateLabelWithText:(NSString *)text;
 @end
