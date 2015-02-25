@@ -56,7 +56,7 @@
 	UIImageView *iconImageView = [[UIImageView alloc] initWithImage:[iconView.icon getIconImage:1]];
 	iconImageView.contentMode = UIViewContentModeScaleAspectFill;
 	iconImageView.frame = CGRectMake(0,0,40,40);
-	iconImageView.center = CGPointMake(CGRectGetMidX(self.passcodeWindow.bounds),32);
+	iconImageView.center = CGPointMake(CGRectGetMidX(self.passcodeWindow.bounds),self.passcodeView.statusTitleView.center.y/2);
 
 	self.passcodeView.luminosityBoost = 0.33;
 	[self.passcodeView _evaluateLuminance];
