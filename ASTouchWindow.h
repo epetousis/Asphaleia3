@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import "SBIconView.h"
 @class ASTouchWindow;
 
 typedef void (^ASTouchWindowTouchBlockedEvent) (ASTouchWindow *touchWindow, BOOL blockedTouch);
@@ -6,7 +7,7 @@ typedef void (^ASTouchWindowTouchBlockedEvent) (ASTouchWindow *touchWindow, BOOL
 @interface ASTouchWindow : UIWindow {
 	BOOL touchedOutside;
 }
-@property (assign) UIView *viewToAllowTouchIn;
+@property (assign) SBIconView *viewToAllowTouchIn;
 @property (nonatomic, strong) ASTouchWindowTouchBlockedEvent handler;
--(void)blockTouchesAllowingTouchInView:(UIView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler;
+-(void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler;
 @end

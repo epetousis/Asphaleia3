@@ -3,7 +3,11 @@
 @implementation ASTouchWindow
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-    if (!CGRectContainsPoint(self.viewToAllowTouchIn.frame, point)) {
+    CGRect frame = self.viewToAllowTouchIn.frame;
+    if (self.viewToAllowTouchIn.isInDock) {
+        frame = CGRectMake(frame.origin.x,[UIScreen mainScreen].bounds.size.height-self.viewToAllowTouchIn.superview.frame.size.height+frame.origin.y,frame.size.width,frame.size.height);
+    }
+    if (!CGRectContainsPoint(frame, point)) {
         self.handler(self, YES);
         return YES;
     }
@@ -22,7 +26,7 @@
     return self;
 }
 
--(void)blockTouchesAllowingTouchInView:(UIView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler {
+-(void)blockTouchesAllowingTouchInView:(SBIconView *)touchView touchBlockedHandler:(ASTouchWindowTouchBlockedEvent)handler {
     self.viewToAllowTouchIn = touchView;
     self.handler = [handler copy];
     [self makeKeyAndVisible];
