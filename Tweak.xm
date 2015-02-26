@@ -63,7 +63,7 @@ BOOL appAlreadyAuthenticated;
 		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
 
 		return;
-	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] || [temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID]) && !shouldProtectAllApps()) {
+	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || !iconView.icon.applicationBundleID) {
 		%orig;
 		return;
 	} else if (!touchIDEnabled() && passcodeEnabled()) {
