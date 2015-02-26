@@ -243,26 +243,26 @@ BOOL appAlreadyAuthenticated;
 
 	@autoreleasepool {
 		NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
-    	UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+		UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 		
-    	UIView *obscurityView = [[[UIView alloc] initWithFrame:snapshotView.bounds] autorelease];
-    	obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
+		UIView *obscurityView = [[[UIView alloc] initWithFrame:snapshotView.bounds] autorelease];
+		obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:1.f];//0.7f];
 		
-    	UIImageView *imageView = [[[UIImageView alloc] init] autorelease];
-    	imageView.image = obscurityEye;
-    	imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
-    	imageView.center = obscurityView.center;
-    	[obscurityView addSubview:imageView];
+		UIImageView *imageView = [[[UIImageView alloc] init] autorelease];
+		imageView.image = obscurityEye;
+		imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
+		imageView.center = obscurityView.center;
+		[obscurityView addSubview:imageView];
 		
 		obscurityView.tag = 80085; // ;)
 		[snapshotView addSubview:obscurityView];
-    	[asphaleiaAssets release];
-    }
+		[asphaleiaAssets release];
+	}
 
 	return snapshotView;
 }
 
--(void)layoutSubviews {
+/*-(void)layoutSubviews {
 	%orig;
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 
@@ -277,7 +277,7 @@ BOOL appAlreadyAuthenticated;
 	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
-}
+}*/
 
 %end
 
@@ -483,7 +483,7 @@ static BOOL openURLHasAuthenticated;
 /*- (void)_menuButtonDown:(id)arg1 {
 	if ([[UIApplication sharedApplication].keyWindow isMemberOfClass:[UIWindow class]])
 	{
-    	// no alertview
+		// no alertview
 	}
 }*/
 
@@ -542,8 +542,8 @@ static BOOL openURLHasAuthenticated;
 		}
 
 		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-		           message:description
-		          delegate:nil
+				   message:description
+				  delegate:nil
 		 cancelButtonTitle:@"Okay"
 		 otherButtonTitles:nil];
 		[alertView show];
