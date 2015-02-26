@@ -198,12 +198,14 @@ BOOL appAlreadyAuthenticated;
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 
-	if ((![getProtectedApps() containsObject:item.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [item.displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
+	SBIconView *iconView = [iconViews objectForKey:displayLayout];
+
+	if ((![getProtectedApps() containsObject:item.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [item.displayIdentifier isEqual:[frontmostApp bundleIdentifier]] || !iconView.icon.displayName) {
 		%orig;
 		return;
 	}
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:[iconViews objectForKey:displayLayout] beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
