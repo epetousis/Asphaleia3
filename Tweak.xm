@@ -162,13 +162,13 @@ BOOL appAlreadyAuthenticated;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
 			[iconTouchIDController stopMonitoring];
-			[fingerglyph release];
+			//[fingerglyph release];
 			fingerglyph = nil;
 
 			currentIconView = nil;
 			//[iconTouchIDController release];
 			if (anywhereTouchWindow) {
-				[anywhereTouchWindow release];
+				//[anywhereTouchWindow release];
 				anywhereTouchWindow = nil;
 			}
 		});
@@ -215,10 +215,10 @@ BOOL appAlreadyAuthenticated;
 
 %hook SBAppSwitcherIconController
 
--(void)dealloc {
+/*-(void)dealloc {
 	iconController = nil;
 	%orig;
-}
+}*/
 
 -(id)init {
 	iconController = %orig;
@@ -234,50 +234,53 @@ BOOL appAlreadyAuthenticated;
 		%orig;
 }
 
-+(id)appSwitcherSnapshotViewForDisplayItem:(SBDisplayItem *)application orientation:(int)orientation loadAsync:(BOOL)async withQueue:(id)queue statusBarCache:(id)cache {
-	SBAppSwitcherSnapshotView* snapshotView = %orig;
-
-	if ((![getProtectedApps() containsObject:application.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:application.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
-		return snapshotView;
-	}
-
-	@autoreleasepool {
-		NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
-		UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-		
-		UIView *obscurityView = [[[UIView alloc] initWithFrame:snapshotView.bounds] autorelease];
-		obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:1.f];//0.7f];
-		
-		UIImageView *imageView = [[[UIImageView alloc] init] autorelease];
-		imageView.image = obscurityEye;
-		imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
-		imageView.center = obscurityView.center;
-		[obscurityView addSubview:imageView];
-		
-		obscurityView.tag = 80085; // ;)
-		[snapshotView addSubview:obscurityView];
-		[asphaleiaAssets release];
-	}
-
-	return snapshotView;
-}
-
-/*-(void)layoutSubviews {
+-(void)prepareToBecomeVisibleIfNecessary {
 	%orig;
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
-		snapshotImageView.layer.filters = nil;
-		[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
+	BOOL alreadyBlurred = snapshotImageView.layer.filters != nil;
+
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || alreadyBlurred) {
 		return;
 	}
 
+	//UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:[NSNumber numberWithFloat:15] forKey:@"inputRadius"];
 	[filter setValue:[NSNumber numberWithBool:YES] forKey:@"inputHardEdges"];
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
-}*/
+
+	NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
+	UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+	
+	UIView *obscurityView = [[UIView alloc] initWithFrame:self.bounds];
+	obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
+	
+	UIImageView *imageView = [[UIImageView alloc] init];
+	imageView.image = obscurityEye;
+	imageView.frame = CGRectMake(0, 0, obscurityEye.size.width*2, obscurityEye.size.height*2);
+	imageView.center = obscurityView.center;
+	[obscurityView addSubview:imageView];
+	
+	obscurityView.tag = 80085; // ;)
+	[self addSubview:obscurityView];
+}
+
+-(void)_viewDismissing:(id)dismissing {
+	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
+	snapshotImageView.layer.filters = nil;
+	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
+
+	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+
+	for (UIView *view in array) {
+		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
+			[view removeFromSuperview];
+		}
+	}
+	%orig;
+}
 
 %end
 
@@ -342,7 +345,6 @@ BOOL appAlreadyAuthenticated;
 		[blurredWindow makeKeyAndVisible];
 		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			blurredWindow.hidden = YES;
-			[blurredWindow release];
 
 			if (wasCancelled) {
 				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
@@ -446,8 +448,10 @@ static BOOL controlCentreHasAuthenticated;
 
 	temporarilyUnlockedAppBundleID = [self bundleIdentifier];
 	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
-		[temporarilyUnlockedAppBundleID release];
-		[currentTempUnlockTimer release];
+		temporarilyUnlockedAppBundleID = nil;
+		currentTempUnlockTimer = nil;
+		//[temporarilyUnlockedAppBundleID release];
+		//[currentTempUnlockTimer release];
 	} repeats:NO];
 }
 
