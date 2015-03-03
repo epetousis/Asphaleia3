@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-#import <UIKit/UIApplication2.h>
 #import "PKGlyphView.h"
 #import "BTTouchIDController.h"
 #import "ASCommon.h"
@@ -162,13 +161,13 @@ BOOL appAlreadyAuthenticated;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
 			[iconTouchIDController stopMonitoring];
-			//[fingerglyph release];
+			[fingerglyph release];
 			fingerglyph = nil;
 
 			currentIconView = nil;
-			//[iconTouchIDController release];
+			[iconTouchIDController release];
 			if (anywhereTouchWindow) {
-				//[anywhereTouchWindow release];
+				[anywhereTouchWindow release];
 				anywhereTouchWindow = nil;
 			}
 		});
@@ -268,6 +267,22 @@ BOOL appAlreadyAuthenticated;
 }
 
 -(void)_viewDismissing:(id)dismissing {
+	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
+	snapshotImageView.layer.filters = nil;
+	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
+
+	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+
+	for (UIView *view in array) {
+		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
+			[view removeFromSuperview];
+		}
+	}
+	%orig;
+}
+
+-(void)dealloc {
+	AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = nil;
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
@@ -450,8 +465,8 @@ static BOOL controlCentreHasAuthenticated;
 	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
 		temporarilyUnlockedAppBundleID = nil;
 		currentTempUnlockTimer = nil;
-		//[temporarilyUnlockedAppBundleID release];
-		//[currentTempUnlockTimer release];
+		[temporarilyUnlockedAppBundleID release];
+		[currentTempUnlockTimer release];
 	} repeats:NO];
 }
 
