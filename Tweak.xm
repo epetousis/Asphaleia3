@@ -165,7 +165,6 @@ BOOL appAlreadyAuthenticated;
 			fingerglyph = nil;
 
 			currentIconView = nil;
-			[iconTouchIDController release];
 			if (anywhereTouchWindow) {
 				[anywhereTouchWindow release];
 				anywhereTouchWindow = nil;
