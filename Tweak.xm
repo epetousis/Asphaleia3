@@ -282,7 +282,6 @@ BOOL appAlreadyAuthenticated;
 }
 
 -(void)dealloc {
-	AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 	UIImageView *snapshotImageView = [self valueForKey:@"_snapshotImageView"];
 	snapshotImageView.layer.filters = nil;
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
