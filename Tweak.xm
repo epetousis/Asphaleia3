@@ -263,6 +263,7 @@ BOOL appAlreadyAuthenticated;
 	
 	obscurityView.tag = 80085; // ;)
 	[self addSubview:obscurityView];
+	[asphaleiaAssets release];
 }
 
 -(void)_viewDismissing:(id)dismissing {
@@ -270,13 +271,16 @@ BOOL appAlreadyAuthenticated;
 	snapshotImageView.layer.filters = nil;
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 
-	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+	@autoreleasepool {
+		NSArray *array = [[[[ASCommon sharedInstance] allSubviewsOfView:self] copy] autorelease];
 
-	for (UIView *view in array) {
-		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
-			[view removeFromSuperview];
+		for (UIView *view in array) {
+			if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
+				[view removeFromSuperview];
+			}
 		}
 	}
+
 	%orig;
 }
 
@@ -285,13 +289,16 @@ BOOL appAlreadyAuthenticated;
 	snapshotImageView.layer.filters = nil;
 	[self setValue:snapshotImageView forKey:@"_snapshotImageView"];
 
-	NSArray *array = [[[ASCommon sharedInstance] allSubviewsOfView:self] copy];
+	@autoreleasepool {
+		NSArray *array = [[[[ASCommon sharedInstance] allSubviewsOfView:self] copy] autorelease];
 
-	for (UIView *view in array) {
-		if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
-			[view removeFromSuperview];
+		for (UIView *view in array) {
+			if (view.tag == 80085 && [[view class] isKindOfClass:[UIView class]]) {
+				[view removeFromSuperview];
+			}
 		}
 	}
+
 	%orig;
 }
 
