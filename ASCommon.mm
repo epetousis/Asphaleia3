@@ -31,11 +31,17 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
 
+    NSString *message;
+    if (customMessage)
+        message = customMessage;
+    else
+        message = @"Scan fingerprint to open.";
+
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:titleWithSpacingForIcon(iconView.icon.displayName)
-                   message:@"Scan fingerprint to open."
+                   message:message
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];

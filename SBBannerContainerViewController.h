@@ -1,6 +1,4 @@
-@interface BBBulletin : NSObject
--(NSString *)sectionID;
-@end
+#import "BBBulletin.h"
 
 @interface SBBannerContainerViewController : UIViewController
 @property(readonly, assign, nonatomic) UIView* bannerContextView;

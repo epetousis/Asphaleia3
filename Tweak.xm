@@ -28,6 +28,8 @@
 #import "SBIconLabelView.h"
 #import "SBIconLabelImageParameters.h"
 #import "SBBannerContainerViewController.h"
+#import "BBBulletin.h"
+#import "SBApplicationController.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -206,7 +208,7 @@ BOOL appAlreadyAuthenticated;
 		return;
 	}
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -366,7 +368,7 @@ BOOL appAlreadyAuthenticated;
 		blurredWindow.windowLevel = UIWindowLevelAlert-1;
 		[blurredWindow addSubview:visualEffectView];
 		[blurredWindow makeKeyAndVisible];
-		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			blurredWindow.hidden = YES;
 
 			if (wasCancelled) {
@@ -498,7 +500,7 @@ static BOOL openURLHasAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				// using %orig; crashes springboard, so this is my alternative.
 				openURLHasAuthenticated = YES;
@@ -531,7 +533,7 @@ static BOOL openURLHasAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
@@ -628,6 +630,26 @@ BOOL currentBannerAuthenticated;
 -(void)setBannerPullPercentage:(float)percentage {
 	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
 		%orig;
+}
+
+%end
+
+%hook SBBulletinModalController
+
+-(void)observer:(id)observer addBulletin:(BBBulletin *)bulletin forFeed:(unsigned)feed {
+	if ((![getProtectedApps() containsObject:[bulletin sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[bulletin sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
+		%orig;
+
+	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[bulletin sectionID]];
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:@"Scan fingerprint to show notification." beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+			if (!wasCancelled) {
+				%orig;
+			}
+		}];
 }
 
 %end
