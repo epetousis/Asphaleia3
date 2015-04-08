@@ -620,6 +620,16 @@ BOOL currentBannerAuthenticated;
 	%orig;
 }
 
+-(void)setBannerPullDisplacement:(float)displacement {
+	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
+		%orig;
+}
+
+-(void)setBannerPullPercentage:(float)percentage {
+	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
+		%orig;
+}
+
 %end
 
 %ctor {
