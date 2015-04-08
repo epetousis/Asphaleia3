@@ -6,7 +6,7 @@
 * classdump-dyld is licensed under GPLv3, Copyright © 2013 by Elias Limneos.
 */
 
-#import <Preferences/Preferences-Structs.h>
+#import <Preferences/Preferences.h>
 #import <Preferences/PSDetailController.h>
 #import "DevicePINControllerDelegate.h"
 

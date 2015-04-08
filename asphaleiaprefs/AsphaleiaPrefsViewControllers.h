@@ -9,14 +9,12 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #import <Preferences/Preferences.h>
-#import <CaptainHook/CaptainHook.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
 #import <Twitter/Twitter.h>
 #import <MobileGestalt/MobileGestalt.h>
 #import <MessageUI/MessageUI.h>
 #import <SystemConfiguration/CaptiveNetwork.h>
-#import <UIKit/UIPreferencesTable.h>
 #import "asphaleiaTVC.h"
 
 @interface UIImage(Extras)

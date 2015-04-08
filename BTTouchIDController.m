@@ -5,6 +5,7 @@ https://github.com/Sassoty/BioTesting */
 #import <UIKit/UIKit.h>
 #import "ASActivatorListener.h"
 #import "ASControlPanel.h"
+#import <libactivator/libactivator.h>
 #import <dlfcn.h>
 
 @interface BTTouchIDController ()

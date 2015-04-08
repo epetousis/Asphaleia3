@@ -6,9 +6,6 @@
 * classdump-dyld is licensed under GPLv3, Copyright © 2013 by Elias Limneos.
 */
 
-#import <UIKit/UIView.h>
-#import <UIKit/UITextFieldDelegate.h>
-
 @protocol SBUIPasscodeEntryFieldDelegate;
 @class UITextField, NSMutableCharacterSet, UIColor, NSString;
 
