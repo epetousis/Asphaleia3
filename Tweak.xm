@@ -96,34 +96,36 @@ BOOL appAlreadyAuthenticated;
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
-	iconTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-		switch (event) {
-		case TouchIDMatched:
-			if (fingerglyph && currentIconView) {
-				appAlreadyAuthenticated = YES;
-				[currentIconView.icon launchFromLocation:currentIconView.location];
-				[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+	if (!iconTouchIDController) {
+		iconTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+			switch (event) {
+			case TouchIDMatched:
+				if (fingerglyph && currentIconView) {
+					appAlreadyAuthenticated = YES;
+					[currentIconView.icon launchFromLocation:currentIconView.location];
+					[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+				}
+				break;
+			case TouchIDFingerDown:
+				[fingerglyph setState:1 animated:YES completionHandler:nil];
+
+				[currentIconView updateLabelWithText:@"Scanning..."];
+
+				break;
+			case TouchIDFingerUp:
+				[fingerglyph setState:0 animated:YES completionHandler:nil];
+				break;
+			case TouchIDNotMatched:
+				[fingerglyph setState:0 animated:YES completionHandler:nil];
+
+				[currentIconView updateLabelWithText:@"Scan finger..."];
+
+				if (shouldVibrateOnIncorrectFingerprint())
+						AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+				break;
 			}
-			break;
-		case TouchIDFingerDown:
-			[fingerglyph setState:1 animated:YES completionHandler:nil];
-
-			[currentIconView updateLabelWithText:@"Scanning..."];
-
-			break;
-		case TouchIDFingerUp:
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-			break;
-		case TouchIDNotMatched:
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-
-			[currentIconView updateLabelWithText:@"Scan finger..."];
-
-			if (shouldVibrateOnIncorrectFingerprint())
-					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-			break;
-		}
-	}];
+		}];
+	}
 	[iconTouchIDController startMonitoring];
 
 	[currentIconView updateLabelWithText:@"Scan finger..."];
@@ -540,6 +542,7 @@ static BOOL openURLHasAuthenticated;
 
 %hook SBBannerContainerViewController
 UIVisualEffectView *notificationBlurView;
+PKGlyphView *bannerFingerGlyph;
 BTTouchIDController *bannerTouchIDController;
 BOOL currentBannerAuthenticated;
 
@@ -557,42 +560,44 @@ BOOL currentBannerAuthenticated;
 	notificationBlurView.userInteractionEnabled = NO;
 	[self.bannerContextView addSubview:notificationBlurView];
 
-	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
-	fingerglyph.secondaryColor = [UIColor grayColor];
-	fingerglyph.primaryColor = [UIColor redColor];
-	CGRect fingerframe = fingerglyph.frame;
+	bannerFingerGlyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
+	bannerFingerGlyph.secondaryColor = [UIColor grayColor];
+	bannerFingerGlyph.primaryColor = [UIColor redColor];
+	CGRect fingerframe = bannerFingerGlyph.frame;
 	fingerframe.size.height = notificationBlurView.frame.size.height-10;
 	fingerframe.size.width = notificationBlurView.frame.size.width-10;
-	fingerglyph.frame = fingerframe;
-	fingerglyph.center = CGPointMake(CGRectGetMidX(notificationBlurView.bounds),CGRectGetMidY(notificationBlurView.bounds));
-	[notificationBlurView.contentView addSubview:fingerglyph];
+	bannerFingerGlyph.frame = fingerframe;
+	bannerFingerGlyph.center = CGPointMake(CGRectGetMidX(notificationBlurView.bounds),CGRectGetMidY(notificationBlurView.bounds));
+	[notificationBlurView.contentView addSubview:bannerFingerGlyph];
 
-	bannerTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-		switch (event) {
-		case TouchIDMatched:
-			if (fingerglyph && notificationBlurView) {
-				currentBannerAuthenticated = YES;
-				[bannerTouchIDController stopMonitoring];
-				[UIView animateWithDuration:0.3f animations:^{
-					[notificationBlurView setAlpha:0.0f];
-				}];
+	if (!bannerTouchIDController) {
+		bannerTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+			switch (event) {
+			case TouchIDMatched:
+				if (bannerFingerGlyph && notificationBlurView) {
+					currentBannerAuthenticated = YES;
+					[bannerTouchIDController stopMonitoring];
+					[UIView animateWithDuration:0.3f animations:^{
+						[notificationBlurView setAlpha:0.0f];
+					}];
+				}
+				break;
+			case TouchIDFingerDown:
+				[bannerFingerGlyph setState:1 animated:YES completionHandler:nil];
+	
+				break;
+			case TouchIDFingerUp:
+				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
+				break;
+			case TouchIDNotMatched:
+				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
+	
+				if (shouldVibrateOnIncorrectFingerprint())
+						AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+				break;
 			}
-			break;
-		case TouchIDFingerDown:
-			[fingerglyph setState:1 animated:YES completionHandler:nil];
-
-			break;
-		case TouchIDFingerUp:
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-			break;
-		case TouchIDNotMatched:
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-
-			if (shouldVibrateOnIncorrectFingerprint())
-					AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-			break;
-		}
-	}];
+		}];
+	}
 	[bannerTouchIDController startMonitoring];
 }
 
@@ -602,6 +607,11 @@ BOOL currentBannerAuthenticated;
 }
 
 -(void)dealloc {
+	if (bannerFingerGlyph) {
+		[bannerFingerGlyph release];
+		bannerFingerGlyph = nil;
+	}
+
 	if (notificationBlurView) {
 		[notificationBlurView removeFromSuperview];
 		[notificationBlurView release];
