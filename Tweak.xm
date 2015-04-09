@@ -194,8 +194,9 @@ BOOL appAlreadyAuthenticated;
 %end
 
 %hook SBAppSwitcherController
+BOOL switcherAppAlreadyAuthenticated;
 
--(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
+-(void)switcherScroller:(id)scroller itemTapped:(SBDisplayLayout *)displayLayout {
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
@@ -209,8 +210,36 @@ BOOL appAlreadyAuthenticated;
 	}
 
 	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	switcherAppAlreadyAuthenticated = YES;
 	if (!wasCancelled)
 		%orig;
+	}];
+}
+
+-(void)switcherWasDismissed:(BOOL)dismissed {
+	switcherAppAlreadyAuthenticated = NO;
+	%orig;
+}
+
+-(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
+	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
+	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
+
+	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+
+	SBIconView *iconView = [iconViews objectForKey:displayLayout];
+
+	if ((![getProtectedApps() containsObject:item.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [item.displayIdentifier isEqual:[frontmostApp bundleIdentifier]] || !iconView.icon.displayName || switcherAppAlreadyAuthenticated) {
+		%orig;
+		return;
+	}
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	switcherAppAlreadyAuthenticated = NO;
+	if (!wasCancelled)
+		%orig;
+	else
+		[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
 	}];
 }
 
@@ -368,7 +397,7 @@ BOOL appAlreadyAuthenticated;
 		blurredWindow.windowLevel = UIWindowLevelAlert-1;
 		[blurredWindow addSubview:visualEffectView];
 		[blurredWindow makeKeyAndVisible];
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.15 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
 			[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 				blurredWindow.hidden = YES;
 
