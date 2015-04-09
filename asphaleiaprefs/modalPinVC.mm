@@ -241,7 +241,7 @@
 - (void)textFieldDidChange:(UITextField *)textField
 {
     if(_isAuth) {
-        int i = 1;
+        __block int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
             if (i <= textField.text.length) {
                 [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dot.png"]];
@@ -251,19 +251,21 @@
             i++;
         }
         if (textField.text.length == 4) {
-            if ([textField.text isEqualToString:self.oldPasscode]) {
-                [(AsphaleiaPrefsListController *)_delegate authenticated];
-                [self dismissViewControllerAnimated:YES completion:NULL];
-            } else {
-                AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
-                [(UILabel *)[(NSArray *)[_imageViews objectAtIndex:1]objectAtIndex:1] setText:@"Wrong Passcode"];
-                textField.text = @"";
-                i = 1;
-                for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
-                    [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
-                    i++;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                if ([textField.text isEqualToString:self.oldPasscode]) {
+                    [(AsphaleiaPrefsListController *)_delegate authenticated];
+                    [self dismissViewControllerAnimated:YES completion:NULL];
+                } else {
+                    AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
+                    [(UILabel *)[(NSArray *)[_imageViews objectAtIndex:1]objectAtIndex:1] setText:@"Wrong Passcode"];
+                    textField.text = @"";
+                    i = 1;
+                    for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
+                        i++;
+                    }
                 }
-            }
+            });
         }
     } else if(_isSet) {
         int i = 1;
