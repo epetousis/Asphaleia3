@@ -52,6 +52,7 @@ BOOL shouldUnsecurelyUnlockIntoApp(void);
 BOOL shouldObscureAppContent(void);
 BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
+NSArray *getProtectedAppsNoBullshit(void);
 NSArray *getProtectedApps(void);
 
 @interface ASPreferencesHandler : NSObject

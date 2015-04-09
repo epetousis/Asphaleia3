@@ -65,7 +65,7 @@
 }
 
 - (NSArray *)activator:(LAActivator *)activator requiresCompatibleEventModesForListenerWithName:(NSString *)listenerName {
-    return [NSArray arrayWithObjects:@"application", nil];
+    return @[@"application"];
 }
  
 @end
