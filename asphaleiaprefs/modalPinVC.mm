@@ -420,12 +420,14 @@
 
 - (void)rightButtonPressed:(UIBarButtonItem *)sender
 {
-    [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:YES];
+    if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
+        [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:YES];
     if (_isAuth || _first) {
         [(AsphaleiaPrefsListController *)_delegate goBack];
     } 
     [self dismissViewControllerAnimated:YES completion:^{
-        [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
+        if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
+            [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
     }];
     
 }
