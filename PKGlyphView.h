@@ -6,9 +6,6 @@
 
 #import <UIKit/UIKit.h>
 
-#import "PKMicaResizableView-Protocol.h"
-#import "PKGlyphViewDelegate-Protocol.h"
-
 @class NSMutableArray, NSString, PKCheckGlyphView, PKFingerprintGlyphView, PKPhoneGlyphView, UIColor, UIImage, UIImageView;
 
 @interface PKGlyphView : UIView
@@ -33,10 +30,10 @@
     UIColor *_secondaryColor;
     UIImage *_customImage;
     int _state;
-    id <PKGlyphViewDelegate> _delegate;
+    id _delegate;
 }
 
-@property(assign, nonatomic) id <PKGlyphViewDelegate> delegate; // @synthesize delegate=_delegate;
+@property(assign, nonatomic) id delegate; // @synthesize delegate=_delegate;
 @property(readonly, nonatomic) int state; // @synthesize state=_state;
 @property(retain, nonatomic) UIImage *customImage; // @synthesize customImage=_customImage;
 @property(copy, nonatomic) UIColor *secondaryColor; // @synthesize secondaryColor=_secondaryColor;

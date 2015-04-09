@@ -562,14 +562,34 @@ BOOL currentBannerAuthenticated;
 	notificationBlurView.userInteractionEnabled = NO;
 	[self.bannerContextView addSubview:notificationBlurView];
 
+	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[[self _bulletin] sectionID]];
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+	UIImage *iconImage = [iconView.icon getIconImage:2];
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,notificationBlurView.frame.size.height-20,notificationBlurView.frame.size.height-20);
+    imgView.center = CGPointMake(imgView.frame.size.width/2+10,CGRectGetMidY(notificationBlurView.bounds));
+	[notificationBlurView.contentView addSubview:imgView];
+	[appIcon release];
+	[iconView release];
+
+	NSString *displayName = [application displayName];
+	UILabel *appNameLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+	appNameLabel.textColor = [UIColor whiteColor];
+	appNameLabel.text = displayName;
+	[appNameLabel sizeToFit];
+	appNameLabel.center = CGPointMake(10+imgView.frame.size.width+10+appNameLabel.frame.size.width/2,CGRectGetMidY(notificationBlurView.bounds));
+	[notificationBlurView.contentView addSubview:appNameLabel];
+
 	bannerFingerGlyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
 	bannerFingerGlyph.secondaryColor = [UIColor grayColor];
 	bannerFingerGlyph.primaryColor = [UIColor redColor];
 	CGRect fingerframe = bannerFingerGlyph.frame;
-	fingerframe.size.height = notificationBlurView.frame.size.height-10;
-	fingerframe.size.width = notificationBlurView.frame.size.width-10;
+	fingerframe.size.height = notificationBlurView.frame.size.height-20;
+	fingerframe.size.width = notificationBlurView.frame.size.height-20;
 	bannerFingerGlyph.frame = fingerframe;
-	bannerFingerGlyph.center = CGPointMake(CGRectGetMidX(notificationBlurView.bounds),CGRectGetMidY(notificationBlurView.bounds));
+	bannerFingerGlyph.center = CGPointMake(notificationBlurView.bounds.size.width-fingerframe.size.height/2-10,CGRectGetMidY(notificationBlurView.bounds));
 	[notificationBlurView.contentView addSubview:bannerFingerGlyph];
 
 	if (!bannerTouchIDController) {
@@ -637,8 +657,10 @@ BOOL currentBannerAuthenticated;
 %hook SBBulletinModalController
 
 -(void)observer:(id)observer addBulletin:(BBBulletin *)bulletin forFeed:(unsigned)feed {
-	if ((![getProtectedApps() containsObject:[bulletin sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[bulletin sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
+	if ((![getProtectedApps() containsObject:[bulletin sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[bulletin sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated) {
 		%orig;
+		return;
+	}
 
 	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[bulletin sectionID]];
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
