@@ -487,13 +487,13 @@ static BOOL controlCentreHasAuthenticated;
 %hook SpringBoard
 static BOOL openURLHasAuthenticated;
 
--(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
+-(void)_openURLCore:(id)core display:(id)display animating:(BOOL)animating sender:(id)sender activationSettings:(id)settings withResult:(id)result {
 	%orig;
 	openURLHasAuthenticated = NO;
 }
 
--(void)applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating needsPermission:(BOOL)permission activationSettings:(id)settings withResult:(id)result {
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+-(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated) {
 		%orig;
 		return;
 	}
@@ -510,13 +510,6 @@ static BOOL openURLHasAuthenticated;
 			}
 		}];
 }
-
-/*- (void)_menuButtonDown:(id)arg1 {
-	if ([[UIApplication sharedApplication].keyWindow isMemberOfClass:[UIWindow class]])
-	{
-		// no alertview
-	}
-}*/
 
 %end
 
