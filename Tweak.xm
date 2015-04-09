@@ -512,7 +512,7 @@ static BOOL openURLHasAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
