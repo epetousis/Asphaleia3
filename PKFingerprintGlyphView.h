@@ -6,11 +6,9 @@
 
 #import <UIKit/UIKit.h>
 
-#import "PKMicaResizableView-Protocol.h"
-
 @class CALayer, NSArray, NSMutableArray, NSString, UIColor;
 
-@interface PKFingerprintGlyphView : UIView <PKMicaResizableView>
+@interface PKFingerprintGlyphView : UIView
 {
     CALayer *_backgroundLayer;
     CALayer *_foregroundLayer;
