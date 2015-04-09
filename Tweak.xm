@@ -368,13 +368,15 @@ BOOL appAlreadyAuthenticated;
 		blurredWindow.windowLevel = UIWindowLevelAlert-1;
 		[blurredWindow addSubview:visualEffectView];
 		[blurredWindow makeKeyAndVisible];
-		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-			blurredWindow.hidden = YES;
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+			[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+				blurredWindow.hidden = YES;
 
-			if (wasCancelled) {
-				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
-			}
-		}];
+				if (wasCancelled) {
+					[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
+				}
+			}];
+		});
 	}
 }
 
