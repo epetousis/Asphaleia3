@@ -72,7 +72,7 @@
 }
 
 -(void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewSimple4DigitKeypad *)arg1 {
-	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 		if (arg1.passcode.length == 4 && [arg1.passcode isEqual:self.passcode]) {
 				[UIView animateWithDuration:.15f delay:0.0
 		                options:UIViewAnimationOptionCurveEaseIn
