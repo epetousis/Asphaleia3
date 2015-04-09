@@ -117,6 +117,15 @@ BOOL shouldSecureAppArrangement(void) {
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
 }
 
+NSArray *getProtectedAppsNoBullshit(void) {
+	NSMutableArray *protectedApps = [NSMutableArray array];
+	for (NSString *app in [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey]) {
+		if ([[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:app] boolValue])
+			[protectedApps addObject:app];
+	}
+	return [NSArray arrayWithArray:protectedApps];
+}
+
 NSArray *getProtectedApps(void) {
 	if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return [NSArray array];

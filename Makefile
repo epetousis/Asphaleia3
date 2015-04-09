@@ -15,7 +15,7 @@ Asphaleia_FILES = Tweak.xm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
 Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)
 Asphaleia_LIBRARIES = asphaleiaui
-#Asphaleia_CFLAGS = -fobjc-arc
+Asphaleia_CFLAGS = -fobjc-arc
 
 BUNDLE_NAME = AsphaleiaAssets
 AsphaleiaAssets_INSTALL_PATH = /Library/Application Support/Asphaleia

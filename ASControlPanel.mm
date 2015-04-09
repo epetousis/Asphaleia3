@@ -39,7 +39,7 @@
             NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
             NSString *addRemoveFromSecureAppsTitle = nil;
             if (bundleID) {
-                addRemoveFromSecureAppsTitle = [getProtectedApps() containsObject:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
+                addRemoveFromSecureAppsTitle = [getProtectedAppsNoBullshit() containsObject:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
             }
             NSMutableArray *buttonTitleArray = [NSMutableArray arrayWithObjects:mySecuredAppsTitle, enableGlobalAppsTitle, nil];
             if (addRemoveFromSecureAppsTitle)
