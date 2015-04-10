@@ -25,6 +25,7 @@
 
 @interface modalPinVC () {
 }
+@property UITextField *textField;
 @property (retain) NSString *oldPasscode;
 @property CGFloat screenWidth;
 
@@ -50,12 +51,12 @@
     // [topView release];
     
     
-    UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    textField.keyboardType = UIKeyboardTypeNumberPad;
-    textField.delegate = self;
-    [self.view addSubview:textField];
-    [textField becomeFirstResponder];
-    [textField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
+    _textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    _textField.keyboardType = UIKeyboardTypeNumberPad;
+    _textField.delegate = self;
+    [self.view addSubview:_textField];
+    [_textField becomeFirstResponder];
+    [_textField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
 
     if (_isAuth) {
         UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(rightButtonPressed:)];
@@ -363,7 +364,7 @@
                     [prefs setObject:_newPasscode forKey:@"passcode"];
                     [prefs writeToFile:prefpath atomically:YES];
                     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
-                    [textField resignFirstResponder];
+                    [_textField resignFirstResponder];
                     [self dismissViewControllerAnimated:YES completion:nil];
                 } else {
                     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
@@ -430,7 +431,7 @@
     if (_isAuth || _first) {
         [(AsphaleiaPrefsListController *)_delegate goBack];
     }
-    [textField resignFirstResponder];
+    [_textField resignFirstResponder];
     [self dismissViewControllerAnimated:YES completion:^{
         if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
             [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
