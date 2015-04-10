@@ -303,6 +303,7 @@
                     }
                     [prefs writeToFile:prefpath atomically:YES];
                     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
+                    [textField resignFirstResponder];
                     [self dismissViewControllerAnimated:YES completion:nil];
                 } else {
                     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
@@ -362,6 +363,7 @@
                     [prefs setObject:_newPasscode forKey:@"passcode"];
                     [prefs writeToFile:prefpath atomically:YES];
                     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
+                    [textField resignFirstResponder];
                     [self dismissViewControllerAnimated:YES completion:nil];
                 } else {
                     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
@@ -427,7 +429,8 @@
         [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:YES];
     if (_isAuth || _first) {
         [(AsphaleiaPrefsListController *)_delegate goBack];
-    } 
+    }
+    [textField resignFirstResponder];
     [self dismissViewControllerAnimated:YES completion:^{
         if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
             [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
