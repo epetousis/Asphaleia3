@@ -309,6 +309,26 @@ BOOL switcherAppAlreadyAuthenticated;
 	return YES;
 }
 
+- (void)activateApplicationAnimated:(id)application {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
+		appAlreadyAuthenticated = NO;
+		%orig;
+		return;
+	}
+
+	appAlreadyAuthenticated = NO;
+
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+			if (!wasCancelled) {
+				%orig;
+			}
+		}];
+}
+
 %end
 
 %hook SBLockScreenManager
@@ -491,30 +511,6 @@ static BOOL openURLHasAuthenticated;
 				// using %orig; crashes springboard, so this is my alternative.
 				openURLHasAuthenticated = YES;
 				[self applicationOpenURL:url];
-			}
-		}];
-}
-
-%end
-
-%hook SBUIController
-
-- (void)activateApplicationAnimated:(id)application {
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
-		appAlreadyAuthenticated = NO;
-		%orig;
-		return;
-	}
-
-	appAlreadyAuthenticated = NO;
-
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-			if (!wasCancelled) {
-				%orig;
 			}
 		}];
 }
