@@ -254,6 +254,7 @@
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 if ([textField.text isEqualToString:self.oldPasscode]) {
                     [(AsphaleiaPrefsListController *)_delegate authenticated];
+                    [textField resignFirstResponder];
                     [self dismissViewControllerAnimated:YES completion:NULL];
                 } else {
                     AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);

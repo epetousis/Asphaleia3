@@ -385,7 +385,7 @@
             cell.textLabel.text = @"Obscure App Content";
             switchview.tag = 2;
         } else if (indexPath.section == 1) {
-            cell.textLabel.text = @"Unlock to App unsecured";
+            cell.textLabel.text = @"Unlock to App Unsecured";
             switchview.tag = 10;
         }
         [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
