@@ -172,7 +172,7 @@ BOOL appAlreadyAuthenticated;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
 			[iconTouchIDController stopMonitoring];
-			
+
 			[fingerglyph removeFromSuperview];
 			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
@@ -448,6 +448,26 @@ static BOOL searchControllerAuthenticating;
 %hook SBControlCenterController
 static BOOL controlCentreAuthenticating;
 static BOOL controlCentreHasAuthenticated;
+
+-(void)presentAnimated:(BOOL)animated completion:(id)completion {
+	if (controlCentreAuthenticating) {
+		return;
+	}
+
+	if (!shouldSecureControlCentre() || controlCentreHasAuthenticated) {
+		%orig;
+		return;
+	}
+
+	controlCentreAuthenticating = YES;
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	controlCentreAuthenticating = NO;
+	if (!wasCancelled) {
+		controlCentreHasAuthenticated = YES;
+		%orig;
+	}
+	}];
+}
 
 -(void)beginTransitionWithTouchLocation:(CGPoint)touchLocation {
 	if (!shouldSecureControlCentre() || controlCentreHasAuthenticated || controlCentreAuthenticating) {

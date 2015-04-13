@@ -29,7 +29,7 @@
 #define kPasscodeEnabledKey @"simplePasscode"
 #define kTouchIDEnabledKey @"touchID"
 
-static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
+static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist";
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 BOOL shouldRequireAuthorisationOnWifi(void);

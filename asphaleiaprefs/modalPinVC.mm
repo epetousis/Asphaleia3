@@ -11,7 +11,7 @@
 #import <Preferences/Preferences.h>
 #import <sys/socket.h> 
 #import <sys/sysctl.h>
-#define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
+#define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist"
 
 @interface AsphaleiaPrefsListController: PSListController {
 }

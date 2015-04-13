@@ -4,7 +4,6 @@
 typedef void (^ASActivatorListenerEventHandler) (LAEvent *event, BOOL abortEventCalled);
  
 @interface ASActivatorListener : NSObject <LAListener> {
-	NSData *iconData;
 	NSData *smallIconData;
 }
 @property (nonatomic, strong) ASActivatorListenerEventHandler eventHandler;
