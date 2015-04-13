@@ -107,6 +107,7 @@
     securedAppDS *dataSource;
     NSMutableDictionary *prefs;
 }
+-(void)updateSelectionButton;
 - (void)removeButton;
 - (void)addButton;
 - (void)enableAllApps;

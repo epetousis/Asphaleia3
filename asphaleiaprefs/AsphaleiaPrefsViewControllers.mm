@@ -1095,6 +1095,33 @@
         [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:(numOfNows -1) inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
         [self.tableView endUpdates]; 
     }
+
+    [self updateSelectionButton];
+}
+-(void)updateSelectionButton {
+    if (![[[dataSource preferences] objectForKey:@"globalAppSecurity"] boolValue]) {
+        int upto = 4;
+        if ([self.tableView numberOfSections] == 4) {
+            upto = 3;
+        }
+        NSMutableDictionary *securedAppDict = [[[dataSource preferences] objectForKey:@"securedApps"] isKindOfClass:[NSDictionary class]] ? [[dataSource preferences] objectForKey:@"securedApps"] : [[NSMutableDictionary alloc] init];
+        int total = 0;
+        for (NSInteger j = 3; j <= upto; ++j)
+        {
+            for (NSInteger i = 0; i < [dataSource tableView:self.tableView numberOfRowsInSection:j]; ++i)
+            {
+                if ([dataSource tableView:self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:j]].accessoryType == UITableViewCellAccessoryCheckmark)
+                    total++;
+            }
+        }
+        if (total == securedAppDict.count-1) {
+            UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Deselect All" style:UIBarButtonItemStylePlain target:self action:@selector(disableAllApps)];
+            [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
+        } else {
+            UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All" style:UIBarButtonItemStylePlain target:self action:@selector(enableAllApps)];
+            [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
+        }
+    }
 }
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
@@ -1104,15 +1131,10 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    if (![[[dataSource preferences] objectForKey:@"globalAppSecurity"] boolValue]) {
-        UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All" style:UIBarButtonItemStylePlain target:self action:@selector(enableAllApps)];
-        [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
-    }
     self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
     self.tableView.dataSource = dataSource;
     dataSource.tableView = self.tableView;
     dataSource.tableViewController = self;
-
 }
 
 - (void)viewDidUnload
@@ -1189,8 +1211,7 @@
     [[dataSource preferences] setObject:securedAppDict forKey:@"securedApps"]; 
     [[dataSource preferences] writeToFile:prefpath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
-    UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select None" style:UIBarButtonItemStylePlain target:self action:@selector(disableAllApps)];
-    [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
+    [self updateSelectionButton];
 }
 - (void)disableAllApps
 {
@@ -1208,15 +1229,14 @@
            NSString *displayIdentifier = [dataSource displayIdentifierForIndexPath:altPath];
            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
            cell.accessoryType = UITableViewCellAccessoryNone;
-           [[dataSource preferences] setObject:[NSNumber numberWithBool:NO] forKey:displayIdentifier];
+           [securedAppDict setObject:[NSNumber numberWithBool:NO] forKey:displayIdentifier];
 
         }
     }
     [[dataSource preferences] setObject:securedAppDict forKey:@"securedApps"]; 
     [[dataSource preferences] writeToFile:prefpath atomically:YES];
     CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
-    UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All" style:UIBarButtonItemStylePlain target:self action:@selector(enableAllApps)];
-    [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
+    [self updateSelectionButton];
 }
 - (void)removeButton
 {
@@ -1225,8 +1245,7 @@
 }
 - (void)addButton
 {
-    UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Select All" style:UIBarButtonItemStylePlain target:self action:@selector(enableAllApps)];
-    [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:YES];
+    [self updateSelectionButton];
 }
 @end
 
