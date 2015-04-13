@@ -80,12 +80,18 @@ BOOL appAlreadyAuthenticated;
 		return;
 	}
 
-	anywhereTouchWindow = [[ASTouchWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	if (!anywhereTouchWindow) {
+		anywhereTouchWindow = [[ASTouchWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	}
 
 	currentIconView = iconView;
-	fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
-	fingerglyph.secondaryColor = [UIColor grayColor];
-	fingerglyph.primaryColor = [UIColor redColor];
+
+	if (!fingerglyph) {
+		fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
+		fingerglyph.secondaryColor = [UIColor grayColor];
+		fingerglyph.primaryColor = [UIColor redColor];
+	}
+
 	CGRect fingerframe = fingerglyph.frame;
 	fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
 	fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
@@ -166,12 +172,13 @@ BOOL appAlreadyAuthenticated;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
 			[iconTouchIDController stopMonitoring];
-			fingerglyph = nil;
+			
+			[fingerglyph removeFromSuperview];
+			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
+			[fingerglyph setState:0 animated:YES completionHandler:nil];
 
 			currentIconView = nil;
-			if (anywhereTouchWindow) {
-				anywhereTouchWindow = nil;
-			}
+			[anywhereTouchWindow setHidden:YES];
 		});
 	}
 }
