@@ -60,7 +60,7 @@
 
 -(void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
-	[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
+	//[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
 }
 
 -(void)viewDidAppear:(BOOL)animated
