@@ -308,6 +308,21 @@
 {
     [super viewDidLoad];
     self.title = @"Advanced Options";
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillMove:)
+                                                 name:UIKeyboardWillChangeFrameNotification
+                                               object:nil];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -490,6 +505,27 @@
     [textfield resignFirstResponder];
     return YES;
 }
+
+-(void)keyboardWillShow:(NSNotification *)notification {
+    CGFloat height = [[notification.userInfo objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size.height;
+    [UIView animateWithDuration:0.3f animations:^ {
+        self.view.frame = CGRectMake(0, -height, self.view.frame.size.width, self.view.frame.size.height);
+    }];
+}
+
+-(void)keyboardWillMove:(NSNotification *)notification {
+    CGFloat height = [[notification.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    [UIView animateWithDuration:0.3f animations:^ {
+        self.view.frame = CGRectMake(0, -height, self.view.frame.size.width, self.view.frame.size.height);
+    }];
+}
+
+-(void)keyboardWillHide:(NSNotification *)notification {
+    [UIView animateWithDuration:0.3f animations:^ {
+        self.view.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    }];
+}
+
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     [prefs setObject:textField.text forKey:@"wifiNetwork"];
