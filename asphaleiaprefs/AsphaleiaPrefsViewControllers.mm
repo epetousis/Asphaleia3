@@ -2,7 +2,7 @@
 #import <dlfcn.h>
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
+#define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist"
 #define bundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
 
 #pragma mark Passcode Options View Controller
