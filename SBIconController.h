@@ -3,5 +3,5 @@
 -(BOOL)isEditing;
 -(void)setIsEditing:(BOOL)editing;
 // Custom method
--(void)resetAsphaleiaIconView;
+-(void)asphaleia_resetAsphaleiaIconView;
 @end

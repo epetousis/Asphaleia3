@@ -25,5 +25,5 @@
 -(void)_updateLabel;
 -(BOOL)isInDock;
 // New method
--(void)updateLabelWithText:(NSString *)text;
+-(void)asphaleia_updateLabelWithText:(NSString *)text;
 @end
