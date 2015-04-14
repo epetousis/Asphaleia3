@@ -709,6 +709,5 @@ BOOL currentBannerAuthenticated;
 		 cancelButtonTitle:@"Okay"
 		 otherButtonTitles:nil];
 		[alertView show];
-		return;
 	}];
 }
