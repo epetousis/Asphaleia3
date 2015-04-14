@@ -2,6 +2,8 @@
 #import "SBIcon.h"
 #import "SBIconView.h"
 #import "SBAppSwitcherSnapshotView.h"
+#import "PKGlyphView.h"
+#import "BTTouchIDController.h"
 
 @interface UIAlertView ()
 -(id)_alertController;
@@ -18,7 +20,10 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
 
 typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
-@interface ASCommon : NSObject
+@interface ASCommon : NSObject {
+	PKGlyphView *fingerglyph;
+	BTTouchIDController *touchIDController;
+}
 //@property UIAlertView *currentAlertView;
 +(instancetype)sharedInstance;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;

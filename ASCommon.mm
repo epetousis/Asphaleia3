@@ -1,9 +1,7 @@
 #import "ASCommon.h"
 #include <sys/sysctl.h>
 #import "UIAlertView+Blocks.h"
-#import "BTTouchIDController.h"
 #import <objc/runtime.h>
-#import "PKGlyphView.h"
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"
 #import "PreferencesHandler.h"
@@ -52,37 +50,42 @@ static ASCommon *sharedCommonObj;
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
 
-    __block PKGlyphView *fingerglyph;
     if (touchIDEnabled()) {
         imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
-        fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-        fingerglyph.secondaryColor = [UIColor grayColor];
-        fingerglyph.primaryColor = [UIColor redColor];
-        CGRect fingerframe = fingerglyph.frame;
-        fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-        fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-        fingerglyph.frame = fingerframe;
-        fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+        if (!fingerglyph) {
+            fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+            fingerglyph.secondaryColor = [UIColor grayColor];
+            fingerglyph.primaryColor = [UIColor redColor];
+            CGRect fingerframe = fingerglyph.frame;
+            fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+            fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+            fingerglyph.frame = fingerframe;
+            fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+        }
         [imgView addSubview:fingerglyph];
     }
 
-    __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+    if (!touchIDController) {
+        touchIDController = [[BTTouchIDController alloc] init];
+    }
+    __unsafe_unretained ASCommon *weakSelf = self;
+    touchIDController.biometricEventBlock = ^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown: {
                 alertView.title = titleWithSpacingForIcon(@"Scanning finger...");
                 [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
                     alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
                 } repeats:NO];
-                [fingerglyph setState:1 animated:YES completionHandler:nil];
+                [weakSelf->fingerglyph setState:1 animated:YES completionHandler:nil];
                 break;
             }
             case TouchIDFingerUp: {
-                [fingerglyph setState:0 animated:YES completionHandler:nil];
+                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
                 break;
             }
             case TouchIDNotMatched: {
                 alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
-                [fingerglyph setState:0 animated:YES completionHandler:nil];
+                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
                 if (vibrateOnBadFinger)
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                 break;
@@ -90,13 +93,14 @@ static ASCommon *sharedCommonObj;
             case TouchIDMatched: {
                 [alertView dismissWithClickedButtonIndex:-1 animated:YES];
                 [controller stopMonitoring];
+                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
                 handler(NO);
                 break;
             }
         }
-    }];
+    };
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [controller stopMonitoring];
+        [touchIDController stopMonitoring];
         self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
@@ -123,13 +127,13 @@ static ASCommon *sharedCommonObj;
         [self addSubview:imgView toAlertView:alertView];
 
         if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [controller startMonitoring];
+            [touchIDController startMonitoring];
     };
 
     if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
-            [controller startMonitoring];
+            [touchIDController startMonitoring];
         };
     }
 
@@ -190,7 +194,10 @@ static ASCommon *sharedCommonObj;
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
 
-    __block BTTouchIDController *controller = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
+    if (!touchIDController) {
+        touchIDController = [[BTTouchIDController alloc] init];
+    }
+    touchIDController.biometricEventBlock = ^void(BTTouchIDController *controller, id monitor, unsigned event) {
         switch (event) {
             case TouchIDFingerDown: {
                 alertView.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
@@ -212,9 +219,9 @@ static ASCommon *sharedCommonObj;
                 break;
             }
         }
-    }];
+    };
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [controller stopMonitoring];
+        [touchIDController stopMonitoring];
         self.currentAlertView = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
@@ -241,13 +248,13 @@ static ASCommon *sharedCommonObj;
         [self addSubview:imgView toAlertView:alertView];
 
         if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [controller startMonitoring];
+            [touchIDController startMonitoring];
     };
 
     if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
-            [controller startMonitoring];
+            [touchIDController startMonitoring];
         };
     }
 
