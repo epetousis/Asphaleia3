@@ -30,7 +30,7 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
+    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
     NSString *message;
     if (customMessage)
@@ -146,7 +146,7 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    [[objc_getClass("SBIconController") sharedInstance] resetAsphaleiaIconView];
+    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
