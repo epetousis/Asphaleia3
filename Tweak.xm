@@ -693,7 +693,7 @@ BOOL currentBannerAuthenticated;
 		[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
 		[[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
 
-		/*NSString *title = nil;
+		NSString *title = nil;
 		NSString *description = nil;
 		if (![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]) {
 			title = @"Disabled authentication";
@@ -709,7 +709,6 @@ BOOL currentBannerAuthenticated;
 		 cancelButtonTitle:@"Okay"
 		 otherButtonTitles:nil];
 		[alertView show];
-		[alertView release];*/
 		return;
 	}];
 }
