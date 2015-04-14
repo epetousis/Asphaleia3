@@ -47,7 +47,7 @@ BOOL appAlreadyAuthenticated;
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
-		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 		%orig;
 		return;
 	}
@@ -62,7 +62,7 @@ BOOL appAlreadyAuthenticated;
 				}
 			}];
 		}
-		[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 
 		return;
 	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || !iconView.icon.applicationBundleID) {
@@ -111,13 +111,13 @@ BOOL appAlreadyAuthenticated;
 				if (fingerglyph && currentIconView) {
 					appAlreadyAuthenticated = YES;
 					[currentIconView.icon launchFromLocation:currentIconView.location];
-					[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+					[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 				}
 				break;
 			case TouchIDFingerDown:
 				[fingerglyph setState:1 animated:YES completionHandler:nil];
 
-				[currentIconView updateLabelWithText:@"Scanning..."];
+				[currentIconView asphaleia_updateLabelWithText:@"Scanning..."];
 
 				break;
 			case TouchIDFingerUp:
@@ -126,7 +126,7 @@ BOOL appAlreadyAuthenticated;
 			case TouchIDNotMatched:
 				[fingerglyph setState:0 animated:YES completionHandler:nil];
 
-				[currentIconView updateLabelWithText:@"Scan finger..."];
+				[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
 
 				if (shouldVibrateOnIncorrectFingerprint())
 						AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -136,11 +136,11 @@ BOOL appAlreadyAuthenticated;
 	}
 	[iconTouchIDController startMonitoring];
 
-	[currentIconView updateLabelWithText:@"Scan finger..."];
+	[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
 
 	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
 		if (blockedTouch) {
-			[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+			[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 		}
 	}];
 }
@@ -162,7 +162,7 @@ BOOL appAlreadyAuthenticated;
 }
 
 %new
--(void)resetAsphaleiaIconView {
+-(void)asphaleia_resetAsphaleiaIconView {
 	if (fingerglyph && currentIconView) {
 		[currentIconView _updateLabel];
 
@@ -188,7 +188,7 @@ BOOL appAlreadyAuthenticated;
 %hook SBIconView
 
 %new
--(void)updateLabelWithText:(NSString *)text {
+-(void)asphaleia_updateLabelWithText:(NSString *)text {
 	SBIconLabelView *iconLabelView = [self valueForKey:@"_labelView"];
 
 	SBIconLabelImageParameters *imageParameters = [[iconLabelView imageParameters] mutableCopy];
@@ -341,7 +341,7 @@ BOOL switcherAppAlreadyAuthenticated;
 %hook SBLockScreenManager
 
 -(void)_lockUI {
-	[[%c(SBIconController) sharedInstance] resetAsphaleiaIconView];
+	[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
 	[[ASPasscodeHandler sharedInstance] dismissPasscodeView];
 	%orig;
