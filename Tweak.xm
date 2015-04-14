@@ -33,6 +33,8 @@
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
+#define Log() NSLog(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
+
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
@@ -202,6 +204,7 @@ BOOL appAlreadyAuthenticated;
 BOOL switcherAppAlreadyAuthenticated;
 
 -(void)switcherScroller:(id)scroller itemTapped:(SBDisplayLayout *)displayLayout {
+	Log();
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
@@ -227,6 +230,7 @@ BOOL switcherAppAlreadyAuthenticated;
 }
 
 -(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
+	Log();
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
@@ -251,11 +255,6 @@ BOOL switcherAppAlreadyAuthenticated;
 %end
 
 %hook SBAppSwitcherIconController
-
-/*-(void)dealloc {
-	iconController = nil;
-	%orig;
-}*/
 
 -(id)init {
 	iconController = %orig;
@@ -305,6 +304,7 @@ BOOL switcherAppAlreadyAuthenticated;
 %hook SBUIController
 
 -(BOOL)_activateAppSwitcher {
+	Log();
 	if (!shouldSecureSwitcher()) {
 		return %orig;
 	}
@@ -317,6 +317,7 @@ BOOL switcherAppAlreadyAuthenticated;
 }
 
 - (void)activateApplicationAnimated:(id)application {
+	Log();
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
 		appAlreadyAuthenticated = NO;
 		%orig;
