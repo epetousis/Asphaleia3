@@ -25,9 +25,6 @@
 
 @implementation AsphaleiaPrefsListController
 - (id)specifiers {
-	UITableView *tv = [self valueForKey:@"_table"];
-	tv.scrollEnabled = NO;
-	[self setValue:tv forKey:@"_table"];
 	if(_specifiers == nil) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"AsphaleiaPrefs" target:self] retain];
 	}
