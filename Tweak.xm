@@ -583,9 +583,11 @@ BOOL currentBannerAuthenticated;
 	appNameLabel.center = CGPointMake(10+imgView.frame.size.width+10+appNameLabel.frame.size.width/2,CGRectGetMidY(notificationBlurView.bounds));
 	[notificationBlurView.contentView addSubview:appNameLabel];
 
-	bannerFingerGlyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
-	bannerFingerGlyph.secondaryColor = [UIColor grayColor];
-	bannerFingerGlyph.primaryColor = [UIColor redColor];
+	if (!bannerFingerGlyph) {
+		bannerFingerGlyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
+		bannerFingerGlyph.secondaryColor = [UIColor grayColor];
+		bannerFingerGlyph.primaryColor = [UIColor redColor];
+	}
 	CGRect fingerframe = bannerFingerGlyph.frame;
 	fingerframe.size.height = notificationBlurView.frame.size.height-20;
 	fingerframe.size.width = notificationBlurView.frame.size.height-20;
@@ -602,6 +604,9 @@ BOOL currentBannerAuthenticated;
 					[bannerTouchIDController stopMonitoring];
 					[UIView animateWithDuration:0.3f animations:^{
 						[notificationBlurView setAlpha:0.0f];
+					} completion:^(BOOL finished){
+						if (finished)
+							[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
 					}];
 				}
 				break;
@@ -631,7 +636,7 @@ BOOL currentBannerAuthenticated;
 
 -(void)viewDidDisappear:(BOOL)animated {
 	if (bannerFingerGlyph) {
-		bannerFingerGlyph = nil;
+		[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
 	}
 
 	if (notificationBlurView) {
