@@ -302,18 +302,28 @@ BOOL switcherAppAlreadyAuthenticated;
 %end
 
 %hook SBUIController
+BOOL switcherAuthenticating;
 
--(BOOL)_activateAppSwitcher {
+-(void)_toggleSwitcher {
 	Log();
 	if (!shouldSecureSwitcher()) {
-		return %orig;
+		%orig;
 	}
+	if (!switcherAuthenticating) {
+		switcherAuthenticating = YES;
+		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+			switcherAuthenticating = NO;
+			if (!wasCancelled)
+				%orig;
+			}];
+	}
+}
 
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-		if (!wasCancelled)
-			%orig;
-		}];
-	return YES;
+-(BOOL)isAppSwitcherShowing {
+	if (switcherAuthenticating)
+		return YES;
+	else
+		return %orig;
 }
 
 - (void)activateApplicationAnimated:(id)application {
