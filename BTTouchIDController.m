@@ -27,21 +27,15 @@ https://github.com/Sassoty/BioTesting */
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
-	if(self.isMonitoring) {
+	if(_isMonitoring) {
 		return;
 	}
-	self.isMonitoring = YES;
+	_isMonitoring = YES;
 
 	// Get current monitor instance so observer can be added
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	// Save current device matching state
 	previousMatchingSetting = [monitor isMatchingEnabled];
-
-	_monitorObservers = [[[monitor valueForKey:@"_observers"] allObjects] copy];
-	for (int i=0; i<_monitorObservers.count; i++)
-	{
-		[monitor removeObserver:[_monitorObservers objectAtIndex:i]];
-	}
 
 	// Begin listening :D
 	[monitor addObserver:self];
@@ -63,22 +57,16 @@ https://github.com/Sassoty/BioTesting */
 
 -(void)stopMonitoring {
 	// If already stopped, don't stop again
-	if(!self.isMonitoring) {
+	if(!_isMonitoring) {
 		return;
 	}
-	self.isMonitoring = NO;
+	_isMonitoring = NO;
 
 	// Get current monitor instance so observer can be removed
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	
 	// Stop listening
 	[monitor removeObserver:self];
-
-	for (id observer in _monitorObservers)
-	{
-		[monitor addObserver:observer];
-	}
-
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
