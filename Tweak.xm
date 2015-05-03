@@ -308,6 +308,7 @@ BOOL switcherAuthenticating;
 	Log();
 	if (!shouldSecureSwitcher()) {
 		%orig;
+		return;
 	}
 	if (!switcherAuthenticating) {
 		switcherAuthenticating = YES;
@@ -686,6 +687,20 @@ BOOL currentBannerAuthenticated;
 				%orig;
 			}
 		}];
+}
+
+%end
+
+@interface UIView ()
+-(NSString*)recursiveDescription;
+@end
+
+%hook SBNotificationsClearButton
+
+//-(BOOL)isBulletinSection !!!!!!
+-(void)didMoveToSuperview {
+	%orig;
+	NSLog(@"[Asphaleia] %@",[[(UIView *)self superview] superview]);
 }
 
 %end
