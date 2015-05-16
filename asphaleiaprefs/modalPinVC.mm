@@ -67,13 +67,17 @@
         [navBar pushNavigationItem:item animated:NO];
         _altView = [[UIView alloc]init];
         _altView.frame = CGRectMake(0, 64, self.screenWidth, [UIScreen mainScreen].bounds.size.height - 216 - 64);
+
+        UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
+        dashContainerView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds),((_altView.frame.size.height-20)/2)+7);
+        [_altView addSubview:dashContainerView];
         
         NSMutableArray *overallAray = [[NSMutableArray alloc]init];
         NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
         for (int k = 1; k < 5; k++) {
             UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-            dashView.frame = CGRectMake(86+((k-1)*43), ((_altView.frame.size.height-20)/2)-9, 18, 19);
-            [_altView addSubview:dashView];
+            dashView.frame = CGRectMake(/*86+*/((k-1)*43), 0, 18, 19);
+            [dashContainerView addSubview:dashView];
             [pageArray addObject:dashView];
         }
         [overallAray addObject:[[NSArray alloc]initWithArray:pageArray]];
@@ -126,10 +130,13 @@
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:8];
         for (int i = 1; i < 3; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
+            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
+            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen].bounds),((_scrollView.frame.size.height-20)/2)+7);
+            [_scrollView addSubview:dashContainerView];
             for (int k = 1; k < 5; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*self.screenWidth), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
-                [_scrollView addSubview:dashView];
+                dashView.frame = CGRectMake(/*86+*/(k-1)*43, ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
+                [dashContainerView addSubview:dashView];
                 [pageArray addObject:dashView];
                 // [dashView release];
             }
@@ -180,10 +187,13 @@
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:12];
         for (int i = 1; i < 4; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
+            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
+            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen].bounds),((_scrollView.frame.size.height-20)/2)+7);
+            [_scrollView addSubview:dashContainerView];
             for (int k = 1; k < 5; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-                dashView.frame = CGRectMake(86+((k-1)*43) + ((i-1)*self.screenWidth), ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
-                [_scrollView addSubview:dashView];
+                dashView.frame = CGRectMake(/*86+*/(k-1)*43, 0, 18, 19);
+                [dashContainerView addSubview:dashView];
                 [pageArray addObject:dashView];
                 // [dashView release];
             }
@@ -213,7 +223,7 @@
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
         
-        label = [[UILabel alloc]initWithFrame:CGRectMake(640, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
+        label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth*2, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Re-enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];

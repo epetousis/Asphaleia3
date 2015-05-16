@@ -7,14 +7,18 @@ https://github.com/Sassoty/BioTesting */
 #import "ASControlPanel.h"
 #import <libactivator/libactivator.h>
 #import <dlfcn.h>
+#import <AudioToolbox/AudioServices.h>
+#import "PreferencesHandler.h"
 
 @interface BTTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
 @end
 
+#define Log(str) NSLog(@"[Asphaleia] %@",str)
+
 @implementation BTTouchIDController
 
-/*+(BTTouchIDController *)sharedInstance {
++(id)sharedInstance {
 	// Setup instance for current class once
 	static id sharedInstance = nil;
 	static dispatch_once_t token = 0;
@@ -23,7 +27,41 @@ https://github.com/Sassoty/BioTesting */
 	});
 	// Provide instance
 	return sharedInstance;
-}*/
+}
+
+-(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
+	switch(event) {
+		case TouchIDFingerDown:
+			Log(@"Finger down");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerdown" object:self];
+			break;
+		case TouchIDFingerUp:
+			Log(@"Finger up");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerup" object:self];
+			break;
+		case TouchIDFingerHeld:
+			Log(@"Finger held");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerheld" object:self];
+			break;
+		case TouchIDMatched:
+			Log(@"Finger matched");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:self];
+			[self stopMonitoring];
+			break;
+		case TouchIDNotMatched:
+			Log(@"Authentication failed");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
+			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
+				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+			break;
+		case 10: // For the new iPhone
+			Log(@"Authentication failed");
+			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
+			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
+				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+			break;
+	}
+}
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
@@ -42,17 +80,7 @@ https://github.com/Sassoty/BioTesting */
 	[monitor _setMatchingEnabled:YES];
 	[monitor _startMatching];
 
-	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
-	Class la = objc_getClass("LASharedActivator");
-	if (la) {
-		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
-			[[ASActivatorListener sharedInstance] unload];
-		
-		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
-			[[ASControlPanel sharedInstance] unload];
-	}
-
-	log(@"Started monitoring");
+	Log(@"Touch ID monitoring began");
 }
 
 -(void)stopMonitoring {
@@ -69,31 +97,7 @@ https://github.com/Sassoty/BioTesting */
 	[monitor removeObserver:self];
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
-	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
-	Class la = objc_getClass("LASharedActivator");
-	if (la) {
-		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
-			[[ASActivatorListener sharedInstance] load];
-	
-		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
-			[[ASControlPanel sharedInstance] load];
-	}
-
-	log(@"Stopped Monitoring");
-}
-
--(BTTouchIDController *)initWithEventBlock:(BTTouchIDEventBlock)block {
-	self = [super init];
-    if(self) {
-        self.biometricEventBlock = [block copy]; // very important that you _copy_ the block, otherwise you will cause a crash!
-    }
-    return self;
-}
-
--(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
-    if (self.biometricEventBlock) {
-        self.biometricEventBlock(self, monitor, event);
-    }
+	Log(@"Touch ID monitoring ended");
 }
 
 @end

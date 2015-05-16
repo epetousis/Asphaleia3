@@ -24,13 +24,19 @@ static ASCommon *sharedCommonObj;
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedCommonObj = [[ASCommon alloc] init];
+        [sharedCommonObj registerForTouchIDNotifications];
     });
 
     return sharedCommonObj;
 }
 
+-(void)dealloc {
+    [self deregisterForTouchIDNotifications];
+}
+
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    authHandler = [handler copy];
 
     NSString *message;
     if (customMessage)
@@ -43,7 +49,6 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
-    BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
     UIImage *iconImage = [iconView.icon getIconImage:2];
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
@@ -65,43 +70,9 @@ static ASCommon *sharedCommonObj;
         [imgView addSubview:fingerglyph];
     }
 
-    if (!touchIDController) {
-        touchIDController = [[BTTouchIDController alloc] init];
-    }
-    __unsafe_unretained ASCommon *weakSelf = self;
-    touchIDController.biometricEventBlock = ^void(BTTouchIDController *controller, id monitor, unsigned event) {
-        switch (event) {
-            case TouchIDFingerDown: {
-                alertView.title = titleWithSpacingForIcon(@"Scanning finger...");
-                [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-                    alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
-                } repeats:NO];
-                [weakSelf->fingerglyph setState:1 animated:YES completionHandler:nil];
-                break;
-            }
-            case TouchIDFingerUp: {
-                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
-                break;
-            }
-            case TouchIDNotMatched: {
-                alertView.title = titleWithSpacingForIcon(iconView.icon.displayName);
-                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
-                if (vibrateOnBadFinger)
-                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-                break;
-            }
-            case TouchIDMatched: {
-                [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-                [controller stopMonitoring];
-                [weakSelf->fingerglyph setState:0 animated:YES completionHandler:nil];
-                handler(NO);
-                break;
-            }
-        }
-    };
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [touchIDController stopMonitoring];
-        self.currentAlertView = nil;
+        [[BTTouchIDController sharedInstance] stopMonitoring];
+        self.currentAuthAlert = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
@@ -127,26 +98,28 @@ static ASCommon *sharedCommonObj;
         [self addSubview:imgView toAlertView:alertView];
 
         if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [touchIDController startMonitoring];
+            [[BTTouchIDController sharedInstance] startMonitoring];
     };
 
     if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
-            [touchIDController startMonitoring];
+            [[BTTouchIDController sharedInstance] startMonitoring];
         };
     }
 
-    if (self.currentAlertView)
-        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+    if (self.currentAuthAlert)
+        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
 
-    self.currentAlertView = alertView;
+    self.currentAuthAlert = alertView;
 
     [alertView show];
 }
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    authHandler = [handler copy];
+
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
@@ -188,41 +161,14 @@ static ASCommon *sharedCommonObj;
                    delegate:nil
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
-    BOOL vibrateOnBadFinger = shouldVibrateOnIncorrectFingerprint();
 
     __block UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
 
-    if (!touchIDController) {
-        touchIDController = [[BTTouchIDController alloc] init];
-    }
-    touchIDController.biometricEventBlock = ^void(BTTouchIDController *controller, id monitor, unsigned event) {
-        switch (event) {
-            case TouchIDFingerDown: {
-                alertView.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
-                [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-                    alertView.title = title;
-                } repeats:NO];
-                break;
-            }
-            case TouchIDNotMatched: {
-                alertView.title = title;
-                if (vibrateOnBadFinger)
-                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-                break;
-            }
-            case TouchIDMatched: {
-                [alertView dismissWithClickedButtonIndex:-1 animated:YES];
-                [controller stopMonitoring];
-                handler(NO);
-                break;
-            }
-        }
-    };
     alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [touchIDController stopMonitoring];
-        self.currentAlertView = nil;
+        [[BTTouchIDController sharedInstance] stopMonitoring];
+        self.currentAuthAlert = nil;
         if (buttonIndex != [alertView cancelButtonIndex]) {
             [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
                 handler(!authenticated);
@@ -248,22 +194,67 @@ static ASCommon *sharedCommonObj;
         [self addSubview:imgView toAlertView:alertView];
 
         if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [touchIDController startMonitoring];
+            [[BTTouchIDController sharedInstance] startMonitoring];
     };
 
     if (!shouldBeginMonitoringOnWillPresent) {
         alertView.didPresentBlock = ^(UIAlertView *alertView) {
         if (touchIDEnabled())
-            [touchIDController startMonitoring];
+            [[BTTouchIDController sharedInstance] startMonitoring];
         };
     }
 
-    if (self.currentAlertView)
-        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+    if (self.currentAuthAlert)
+        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
 
-    self.currentAlertView = alertView;
+    self.currentAuthAlert = alertView;
 
     [alertView show];
+}
+
+-(void)receiveTouchIDNotification:(NSNotification *)notification
+{
+    if (!self.currentAuthAlert) {
+        return;
+    }
+    NSString *origTitle = self.currentAuthAlert.title;
+    if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+        if ([origTitle containsString:@"\n\n\n"]) {
+            self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
+        } else {
+            self.currentAuthAlert.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
+        }
+        [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+            self.currentAuthAlert.title = origTitle;
+        } repeats:NO];
+        if (fingerglyph)
+            [fingerglyph setState:1 animated:YES completionHandler:nil];
+    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+        if (fingerglyph)
+            [fingerglyph setState:0 animated:YES completionHandler:nil];
+    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+        [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
+        [[BTTouchIDController sharedInstance] stopMonitoring];
+        if (fingerglyph)
+            [fingerglyph setState:0 animated:YES completionHandler:nil];
+        authHandler(NO);
+        self.currentAuthAlert = nil;
+    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+        self.currentAuthAlert.title = origTitle;
+        if (fingerglyph)
+            [fingerglyph setState:0 animated:YES completionHandler:nil];
+    }
+}
+
+-(void)registerForTouchIDNotifications {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.fingerup" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.authsuccess" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.authfailed" object:nil];
+}
+
+-(void)deregisterForTouchIDNotifications {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(BOOL)isTouchIDDevice {
@@ -303,8 +294,8 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)dismissAnyAuthenticationAlerts {
-    if (self.currentAlertView)
-        [self.currentAlertView dismissWithClickedButtonIndex:[self.currentAlertView cancelButtonIndex] animated:YES];
+    if (self.currentAuthAlert)
+        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
 }
 
 - (NSArray *)allSubviewsOfView:(UIView *)view

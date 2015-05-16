@@ -22,9 +22,9 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject {
 	PKGlyphView *fingerglyph;
-	BTTouchIDController *touchIDController;
+	ASCommonAuthenticationHandler authHandler;
 }
-//@property UIAlertView *currentAlertView;
+@property UIAlertView *currentAuthAlert;
 +(instancetype)sharedInstance;
 -(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler;
