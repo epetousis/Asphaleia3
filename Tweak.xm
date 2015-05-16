@@ -38,14 +38,30 @@
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
-BTTouchIDController *iconTouchIDController;
 NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 BOOL appAlreadyAuthenticated;
 
+void RegisterForTouchIDNotifications(id observer, SEL selector) {
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerup" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.authsuccess" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.authfailed" object:nil];
+}
+
+void DeregisterForTouchIDNotifications(id observer) {
+	[[NSNotificationCenter defaultCenter] removeObserver:observer];
+}
+
 %hook SBIconController
+
+-(id)init {
+	SBIconController *controller = %orig;
+	RegisterForTouchIDNotifications(controller, @selector(receiveTouchIDNotification:));
+	return controller;
+}
 
 -(void)iconTapped:(SBIconView *)iconView {
 	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
@@ -106,37 +122,7 @@ BOOL appAlreadyAuthenticated;
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
-	if (!iconTouchIDController) {
-		iconTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-			switch (event) {
-			case TouchIDMatched:
-				if (fingerglyph && currentIconView) {
-					appAlreadyAuthenticated = YES;
-					[currentIconView.icon launchFromLocation:currentIconView.location];
-					[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
-				}
-				break;
-			case TouchIDFingerDown:
-				[fingerglyph setState:1 animated:YES completionHandler:nil];
-
-				[currentIconView asphaleia_updateLabelWithText:@"Scanning..."];
-
-				break;
-			case TouchIDFingerUp:
-				[fingerglyph setState:0 animated:YES completionHandler:nil];
-				break;
-			case TouchIDNotMatched:
-				[fingerglyph setState:0 animated:YES completionHandler:nil];
-
-				[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
-
-				if (shouldVibrateOnIncorrectFingerprint())
-						AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-				break;
-			}
-		}];
-	}
-	[iconTouchIDController startMonitoring];
+	[[BTTouchIDController sharedInstance] startMonitoring];
 
 	[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
 
@@ -173,7 +159,7 @@ BOOL appAlreadyAuthenticated;
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
-			[iconTouchIDController stopMonitoring];
+			[[BTTouchIDController sharedInstance] stopMonitoring];
 
 			[fingerglyph removeFromSuperview];
 			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
@@ -182,6 +168,31 @@ BOOL appAlreadyAuthenticated;
 			currentIconView = nil;
 			[anywhereTouchWindow setHidden:YES];
 		});
+	}
+}
+
+%new
+-(void)receiveTouchIDNotification:(NSNotification *)notification
+{
+	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+		if (fingerglyph && currentIconView) {
+			[fingerglyph setState:1 animated:YES completionHandler:nil];
+			[currentIconView asphaleia_updateLabelWithText:@"Scanning..."];
+		}
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+		if (fingerglyph)
+			[fingerglyph setState:0 animated:YES completionHandler:nil];
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+		if (fingerglyph && currentIconView) {
+			appAlreadyAuthenticated = YES;
+			[currentIconView.icon launchFromLocation:currentIconView.location];
+			[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
+		}
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+		if (fingerglyph && currentIconView) {
+			[fingerglyph setState:0 animated:YES completionHandler:nil];
+			[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
+		}
 	}
 }
 
@@ -559,8 +570,13 @@ static BOOL openURLHasAuthenticated;
 %hook SBBannerContainerViewController
 UIVisualEffectView *notificationBlurView;
 PKGlyphView *bannerFingerGlyph;
-BTTouchIDController *bannerTouchIDController;
 BOOL currentBannerAuthenticated;
+
+-(id)initWithNibName:(id)nibName bundle:(id)bundle {
+	SBBannerContainerViewController *controller = %orig;
+	RegisterForTouchIDNotifications(controller, @selector(receiveTouchIDNotification:));
+	return controller;
+}
 
 -(void)loadView {
 	%orig;
@@ -581,9 +597,9 @@ BOOL currentBannerAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 	UIImage *iconImage = [iconView.icon getIconImage:2];
-    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-    imgView.frame = CGRectMake(0,0,notificationBlurView.frame.size.height-20,notificationBlurView.frame.size.height-20);
-    imgView.center = CGPointMake(imgView.frame.size.width/2+10,CGRectGetMidY(notificationBlurView.bounds));
+	UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+	imgView.frame = CGRectMake(0,0,notificationBlurView.frame.size.height-20,notificationBlurView.frame.size.height-20);
+	imgView.center = CGPointMake(imgView.frame.size.width/2+10,CGRectGetMidY(notificationBlurView.bounds));
 	[notificationBlurView.contentView addSubview:imgView];
 
 	NSString *displayName = [application displayName];
@@ -605,39 +621,9 @@ BOOL currentBannerAuthenticated;
 	bannerFingerGlyph.frame = fingerframe;
 	bannerFingerGlyph.center = CGPointMake(notificationBlurView.bounds.size.width-fingerframe.size.height/2-10,CGRectGetMidY(notificationBlurView.bounds));
 	[notificationBlurView.contentView addSubview:bannerFingerGlyph];
+	[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
 
-	if (!bannerTouchIDController) {
-		bannerTouchIDController = [[BTTouchIDController alloc] initWithEventBlock:^void(BTTouchIDController *controller, id monitor, unsigned event) {
-			switch (event) {
-			case TouchIDMatched:
-				if (bannerFingerGlyph && notificationBlurView) {
-					currentBannerAuthenticated = YES;
-					[bannerTouchIDController stopMonitoring];
-					[UIView animateWithDuration:0.3f animations:^{
-						[notificationBlurView setAlpha:0.0f];
-					} completion:^(BOOL finished){
-						if (finished)
-							[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
-					}];
-				}
-				break;
-			case TouchIDFingerDown:
-				[bannerFingerGlyph setState:1 animated:YES completionHandler:nil];
-	
-				break;
-			case TouchIDFingerUp:
-				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
-				break;
-			case TouchIDNotMatched:
-				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
-	
-				if (shouldVibrateOnIncorrectFingerprint())
-						AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-				break;
-			}
-		}];
-	}
-	[bannerTouchIDController startMonitoring];
+	[[BTTouchIDController sharedInstance] startMonitoring];
 }
 
 -(void)_handleBannerTapGesture:(id)gesture {
@@ -665,6 +651,32 @@ BOOL currentBannerAuthenticated;
 -(void)setBannerPullPercentage:(float)percentage {
 	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
 		%orig;
+}
+
+%new
+-(void)receiveTouchIDNotification:(NSNotification *)notification
+{
+	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+		if (bannerFingerGlyph)
+			[bannerFingerGlyph setState:1 animated:YES completionHandler:nil];
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+		if (bannerFingerGlyph)
+			[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+		if (bannerFingerGlyph && notificationBlurView) {
+			currentBannerAuthenticated = YES;
+			[[BTTouchIDController sharedInstance] stopMonitoring];
+			[UIView animateWithDuration:0.3f animations:^{
+				[notificationBlurView setAlpha:0.0f];
+			} completion:^(BOOL finished){
+				if (finished)
+					[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
+			}];
+		}
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+		if (bannerFingerGlyph)
+			[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
+	}
 }
 
 %end
