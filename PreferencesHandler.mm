@@ -1,4 +1,5 @@
 #import "PreferencesHandler.h"
+#import "BiometricKit.h"
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[ASPreferencesHandler sharedInstance].prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];
@@ -27,7 +28,7 @@ BOOL passcodeEnabled(void) {
 }
 
 BOOL touchIDEnabled(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] boolValue] : NO;
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] boolValue] : NO && [[[objc_getClass("BiometricKit") manager] identities:nil] count] > 0;
 }
 
 NSString *getPasscode(void) {

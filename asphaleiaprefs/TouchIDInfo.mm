@@ -16,5 +16,5 @@ BOOL isTouchIDDevice(void) {
 
     NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
 
-    return [touchIDModels containsObject:results];
+    return [touchIDModels containsObject:results] && [[[objc_getClass("BiometricKit") manager] identities:nil] count] > 0;
 }
