@@ -651,6 +651,11 @@ BOOL currentBannerAuthenticated;
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
+	%orig;
+	if (![[%c(SBBannerController) sharedInstance] isShowingBanner]) {
+		[[BTTouchIDController sharedInstance] stopMonitoring];
+	}
+
 	if (bannerFingerGlyph) {
 		[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
 	}
@@ -659,7 +664,6 @@ BOOL currentBannerAuthenticated;
 		[notificationBlurView removeFromSuperview];
 		notificationBlurView = nil;
 	}
-	%orig;
 }
 
 -(void)setBannerPullDisplacement:(float)displacement {
