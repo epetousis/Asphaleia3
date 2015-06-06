@@ -1,5 +1,5 @@
 #import "PreferencesHandler.h"
-#import "BiometricKit.h"
+#import "Asphaleia.h"
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[ASPreferencesHandler sharedInstance].prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];

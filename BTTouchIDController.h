@@ -1,5 +1,6 @@
 /* Modified from Sassoty's code
 https://github.com/Sassoty/BioTesting */
+#import "Asphaleia.h"
 @class BTTouchIDController;
 @protocol SBUIBiometricEventMonitorDelegate
 @required
@@ -16,10 +17,6 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 - (void)_startMatching;
 - (void)_setMatchingEnabled:(BOOL)arg1;
 - (BOOL)isMatchingEnabled;
-@end
-
-@interface BiometricKit : NSObject
-+ (id)manager;
 @end
 
 #define TouchIDFingerDown  1
