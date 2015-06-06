@@ -156,3 +156,8 @@
 +(id)sharedInstance;
 -(BOOL)isShowingBanner;
 @end
+
+@interface BiometricKit : NSObject
++(id)manager;
+-(NSDictionary *)identities:(id)object;
+@end
