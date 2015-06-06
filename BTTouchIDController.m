@@ -14,6 +14,11 @@ https://github.com/Sassoty/BioTesting */
 @property (readwrite) BOOL isMonitoring;
 @end
 
+@interface SBScreenFlash
++(id)mainScreenFlasher;
+-(void)flashWhiteWithCompletion:(id)completion;
+@end
+
 #define Log(str) NSLog(@"[Asphaleia] %@",str)
 
 @implementation BTTouchIDController
@@ -30,6 +35,7 @@ https://github.com/Sassoty/BioTesting */
 }
 
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
+	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
 	switch(event) {
 		case TouchIDFingerDown:
 			Log(@"Finger down");
@@ -65,10 +71,10 @@ https://github.com/Sassoty/BioTesting */
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
-	if(_isMonitoring) {
+	if(self.isMonitoring) {
 		return;
 	}
-	_isMonitoring = YES;
+	self.isMonitoring = YES;
 
 	// Get current monitor instance so observer can be added
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
@@ -80,15 +86,25 @@ https://github.com/Sassoty/BioTesting */
 	[monitor _setMatchingEnabled:YES];
 	[monitor _startMatching];
 
+	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	Class la = objc_getClass("LASharedActivator");
+	if (la) {
+		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+			[[ASActivatorListener sharedInstance] unload];
+		
+		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+			[[ASControlPanel sharedInstance] unload];
+	}
+
 	Log(@"Touch ID monitoring began");
 }
 
 -(void)stopMonitoring {
 	// If already stopped, don't stop again
-	if(!_isMonitoring) {
+	if(!self.isMonitoring) {
 		return;
 	}
-	_isMonitoring = NO;
+	self.isMonitoring = NO;
 
 	// Get current monitor instance so observer can be removed
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
@@ -96,6 +112,16 @@ https://github.com/Sassoty/BioTesting */
 	// Stop listening
 	[monitor removeObserver:self];
 	[monitor _setMatchingEnabled:previousMatchingSetting];
+
+	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	Class la = objc_getClass("LASharedActivator");
+	if (la) {
+		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+			[[ASActivatorListener sharedInstance] load];
+	
+		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+			[[ASControlPanel sharedInstance] load];
+	}
 
 	Log(@"Touch ID monitoring ended");
 }

@@ -46,10 +46,11 @@ static ASCommon *sharedCommonObj;
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:titleWithSpacingForIcon(iconView.icon.displayName)
                    message:message
-                   delegate:nil
+                   delegate:self
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
+    currentIconView = iconView;
     UIImage *iconImage = [iconView.icon getIconImage:2];
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
@@ -68,44 +69,19 @@ static ASCommon *sharedCommonObj;
             fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
         }
         [imgView addSubview:fingerglyph];
+        alertViewAccessory = imgView;
     }
 
-    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [[BTTouchIDController sharedInstance] stopMonitoring];
-        self.currentAuthAlert = nil;
-        if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-                handler(!authenticated);
-            }];
-        } else {
-            handler(YES);
-        }
-    };
-
     if (!touchIDEnabled() && !passcodeEnabled()) {
-        handler(NO);
+        authHandler(NO);
         return;
     }
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-                handler(!authenticated);
+                authHandler(!authenticated);
             }];
         return;
-    }
-
-    alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        [self addSubview:imgView toAlertView:alertView];
-
-        if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [[BTTouchIDController sharedInstance] startMonitoring];
-    };
-
-    if (!shouldBeginMonitoringOnWillPresent) {
-        alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        if (touchIDEnabled())
-            [[BTTouchIDController sharedInstance] startMonitoring];
-        };
     }
 
     if (self.currentAuthAlert)
@@ -158,50 +134,25 @@ static ASCommon *sharedCommonObj;
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:@"Scan fingerprint to access."
-                   delegate:nil
+                   delegate:self
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
     __block UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
-
-    alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-        [[BTTouchIDController sharedInstance] stopMonitoring];
-        self.currentAuthAlert = nil;
-        if (buttonIndex != [alertView cancelButtonIndex]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
-                handler(!authenticated);
-            }];
-        } else {
-            handler(YES);
-        }
-    };
+    alertViewAccessory = imgView;
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
-        handler(NO);
+        authHandler(NO);
         return;
     }
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
-                handler(!authenticated);
+                authHandler(!authenticated);
             }];
         return;
-    }
-
-    alertView.willPresentBlock = ^(UIAlertView *alertView) {
-        [self addSubview:imgView toAlertView:alertView];
-
-        if (shouldBeginMonitoringOnWillPresent && touchIDEnabled())
-            [[BTTouchIDController sharedInstance] startMonitoring];
-    };
-
-    if (!shouldBeginMonitoringOnWillPresent) {
-        alertView.didPresentBlock = ^(UIAlertView *alertView) {
-        if (touchIDEnabled())
-            [[BTTouchIDController sharedInstance] startMonitoring];
-        };
     }
 
     if (self.currentAuthAlert)
@@ -319,6 +270,33 @@ static ASCommon *sharedCommonObj;
     if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
         [labelSuperview addSubview:view];
     }
+}
+
+// UIAlertView delegate methods
+- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+    SBIconView *iconView = currentIconView;
+    currentIconView = nil;
+    [[BTTouchIDController sharedInstance] stopMonitoring];
+    self.currentAuthAlert = nil;
+    if (buttonIndex == [alertView firstOtherButtonIndex]) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            authHandler(!authenticated);
+        }];
+    } else if (buttonIndex == [alertView cancelButtonIndex]) {
+        authHandler(YES);
+    }
+}
+
+- (void)willPresentAlertView:(UIAlertView *)alertView {
+    [self addSubview:alertViewAccessory toAlertView:alertView];
+
+    if (touchIDEnabled())
+        [[BTTouchIDController sharedInstance] startMonitoring];
+}
+
+- (void)didPresentAlertView:(UIAlertView *)alertView {
+    if (touchIDEnabled())
+        [[BTTouchIDController sharedInstance] startMonitoring];
 }
 
 @end

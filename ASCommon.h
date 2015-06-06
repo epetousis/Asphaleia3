@@ -20,9 +20,11 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
 
 typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
-@interface ASCommon : NSObject {
+@interface ASCommon : NSObject <UIAlertViewDelegate> {
 	PKGlyphView *fingerglyph;
 	ASCommonAuthenticationHandler authHandler;
+	UIView *alertViewAccessory;
+	SBIconView *currentIconView;
 }
 @property UIAlertView *currentAuthAlert;
 +(instancetype)sharedInstance;
