@@ -165,6 +165,8 @@ void DeregisterForTouchIDNotifications(id observer) {
 			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 
+			[currentIconView _updateLabel];
+
 			currentIconView = nil;
 			[anywhereTouchWindow setHidden:YES];
 		});
