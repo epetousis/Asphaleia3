@@ -1,7 +1,6 @@
 #import "ASPasscodeHandler.h"
 #import "ASCommon.h"
 #import "UIAlertView+Blocks.h"
-#import "SpringBoard.h"
 #import "PreferencesHandler.h"
 #import "SBUIPasscodeEntryField.h"
 #import "SBUIPasscodeLockNumberPad.h"

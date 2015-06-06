@@ -1,7 +1,7 @@
 #import "ASControlPanel.h"
 #import "ASCommon.h"
 #import "UIAlertView+Blocks.h"
-#import "SpringBoard.h"
+#import "Asphaleia.h"
 #import "PreferencesHandler.h"
 #import <objc/runtime.h>
 #import <dlfcn.h>

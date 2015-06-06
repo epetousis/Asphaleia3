@@ -6,7 +6,6 @@
 #import "NSTimer+Blocks.h"
 #import "PreferencesHandler.h"
 #import "ASPasscodeHandler.h"
-#import "SBIconController.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 #define titleWithSpacingForIcon(t) [NSString stringWithFormat:@"\n\n\n%@",t]

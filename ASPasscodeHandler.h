@@ -1,7 +1,7 @@
 #import <libactivator/libactivator.h>
 #import <UIKit/UIKit.h>
 #import "SBUIPasscodeLockViewSimple4DigitKeypad.h"
-#import "SBIconView.h"
+#import "Asphaleia.h"
 
 typedef void (^ASPasscodeHandlerEventBlock) (BOOL authenticated);
  
