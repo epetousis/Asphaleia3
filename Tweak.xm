@@ -362,8 +362,10 @@ BOOL switcherAuthenticating;
 %end
 
 %hook SBLockScreenManager
+UIWindow *blurredWindow;
 
 -(void)_lockUI {
+	[[BTTouchIDController sharedInstance] stopMonitoring];
 	[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
 	[[ASPasscodeHandler sharedInstance] dismissPasscodeView];
@@ -386,27 +388,42 @@ BOOL switcherAuthenticating;
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
-		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
-		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-		[iconView _setIcon:appIcon animated:YES];
-
-		__block UIWindow *blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+		blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 		blurredWindow.backgroundColor = [UIColor clearColor];
 
 		UIVisualEffect *blurEffect;
 		blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-		
+
 		UIVisualEffectView *visualEffectView;
 		visualEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-		
+
 		visualEffectView.frame = [[UIScreen mainScreen] bounds];
 
 		blurredWindow.windowLevel = UIWindowLevelAlert-1;
 		[blurredWindow addSubview:visualEffectView];
 		[blurredWindow makeKeyAndVisible];
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.15 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
+	}
+}
+
+%end
+
+%hook SBLockScreenViewController
+
+-(void)viewDidDisappear:(BOOL)animated {
+	%orig;
+	
+	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
+		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
+		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+		[iconView _setIcon:appIcon animated:YES];
+
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.05 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
 			[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-				blurredWindow.hidden = YES;
+				if (blurredWindow) {
+					blurredWindow.hidden = YES;
+					blurredWindow = nil;
+				}
 
 				if (wasCancelled) {
 					[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
@@ -703,7 +720,7 @@ BOOL currentBannerAuthenticated;
 
 %end
 
-@interface UIView ()
+/*@interface UIView ()
 -(NSString*)recursiveDescription;
 @end
 
@@ -715,7 +732,7 @@ BOOL currentBannerAuthenticated;
 	NSLog(@"[Asphaleia] %@",[[(UIView *)self superview] superview]);
 }
 
-%end
+%end*/
 
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
