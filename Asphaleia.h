@@ -67,6 +67,9 @@
 @end
 
 @interface SBIcon : NSObject
+// 8.3+
+-(void)launchFromLocation:(int)location context:(id)context;
+// 8.1 and lower
 -(void)launchFromLocation:(int)location;
 -(NSString *)applicationBundleID;
 -(NSString *)displayName;

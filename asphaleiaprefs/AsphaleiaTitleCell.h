@@ -1,4 +1,4 @@
-#import <Preferences/Preferences.h>
+#import <Preferences/PSTableCell.h>
 
 @protocol PreferencesTableCustomView
 - (id)initWithSpecifier:(id)arg1;

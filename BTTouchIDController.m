@@ -19,8 +19,6 @@ https://github.com/Sassoty/BioTesting */
 -(void)flashWhiteWithCompletion:(id)completion;
 @end
 
-#define Log(str) NSLog(@"[Asphaleia] %@",str)
-
 @implementation BTTouchIDController
 
 +(id)sharedInstance {
@@ -38,30 +36,30 @@ https://github.com/Sassoty/BioTesting */
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
 	switch(event) {
 		case TouchIDFingerDown:
-			Log(@"Finger down");
+			asphaleiaLogMsg(@"Finger down");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerdown" object:self];
 			break;
 		case TouchIDFingerUp:
-			Log(@"Finger up");
+			asphaleiaLogMsg(@"Finger up");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerup" object:self];
 			break;
 		case TouchIDFingerHeld:
-			Log(@"Finger held");
+			asphaleiaLogMsg(@"Finger held");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerheld" object:self];
 			break;
 		case TouchIDMatched:
-			Log(@"Finger matched");
+			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:self];
 			[self stopMonitoring];
 			break;
 		case TouchIDNotMatched:
-			Log(@"Authentication failed");
+			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
 			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 		case 10: // For the new iPhone
-			Log(@"Authentication failed");
+			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
 			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
@@ -96,7 +94,7 @@ https://github.com/Sassoty/BioTesting */
 			[[ASControlPanel sharedInstance] unload];
 	}
 
-	Log(@"Touch ID monitoring began");
+	asphaleiaLogMsg(@"Touch ID monitoring began");
 }
 
 -(void)stopMonitoring {
@@ -123,7 +121,7 @@ https://github.com/Sassoty/BioTesting */
 			[[ASControlPanel sharedInstance] load];
 	}
 
-	Log(@"Touch ID monitoring ended");
+	asphaleiaLogMsg(@"Touch ID monitoring ended");
 }
 
 @end

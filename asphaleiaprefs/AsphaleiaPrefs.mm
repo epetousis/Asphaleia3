@@ -1,5 +1,5 @@
-#import <Preferences/Preferences.h>
 #import <Preferences/PSTableCell.h>
+#import <Preferences/PSListController.h>
 #import <Twitter/Twitter.h>
 #import "modalPinVC.h"
 #import "TouchIDInfo.h"
@@ -104,17 +104,17 @@
 
 -(void)showSecurity
 {
-	[self pushController:[[securedAppsAL alloc]init]];
+	[self pushController:(PSViewController *)[[securedAppsAL alloc]init]];
 }
 
 -(void)showCreators
 {
-	[self pushController:[[creatorsVC alloc]init]];
+	[self pushController:(PSViewController *)[[creatorsVC alloc]init]];
 }
 
 -(void)showPasscodeOptions
 {
-	[self pushController:[[passcodeOptionsVC alloc]init]];
+	[self pushController:(PSViewController *)[[passcodeOptionsVC alloc]init]];
 }
 
 /*static inline void LoadDeviceKey(NSMutableDictionary *dict, NSString *key)

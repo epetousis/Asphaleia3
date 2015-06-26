@@ -15,7 +15,9 @@
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
-#define Log() NSLog(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
+#define asphaleiaLog() NSLog(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
+
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
 PKGlyphView *fingerglyph;
 SBIconView *currentIconView;
@@ -58,7 +60,11 @@ void DeregisterForTouchIDNotifications(id observer) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 				if (authenticated) {
 					appAlreadyAuthenticated = YES;
-					[iconView.icon launchFromLocation:iconView.location];
+					if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
+						[iconView.icon launchFromLocation:iconView.location context:nil];
+					} else {
+						[iconView.icon launchFromLocation:iconView.location];
+					}
 				}
 			}];
 		}
@@ -169,7 +175,11 @@ void DeregisterForTouchIDNotifications(id observer) {
 	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
 		if (fingerglyph && currentIconView) {
 			appAlreadyAuthenticated = YES;
-			[currentIconView.icon launchFromLocation:currentIconView.location];
+			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
+				[currentIconView.icon launchFromLocation:currentIconView.location context:nil];
+			} else {
+				[currentIconView.icon launchFromLocation:currentIconView.location];
+			}
 			[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 		}
 	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
@@ -199,7 +209,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 BOOL switcherAppAlreadyAuthenticated;
 
 -(void)switcherScroller:(id)scroller itemTapped:(SBDisplayLayout *)displayLayout {
-	Log();
+	asphaleiaLog();
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
@@ -225,7 +235,7 @@ BOOL switcherAppAlreadyAuthenticated;
 }
 
 -(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
-	Log();
+	asphaleiaLog();
 	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
 	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
 
@@ -265,7 +275,7 @@ BOOL switcherAppAlreadyAuthenticated;
 		%orig;
 }
 
-+ (id)appSwitcherSnapshotViewForDisplayItem:(SBDisplayItem*)displayItem orientation:(int)orientation loadAsync:(BOOL)async withQueue:(id)queue statusBarCache:(id)cache {
++ (id)appSwitcherSnapshotViewForDisplayItem:(SBDisplayItem*)displayItem orientation:(UIInterfaceOrientation)orientation loadAsync:(BOOL)async withQueue:(id)queue statusBarCache:(id)cache {
 	if ((![getProtectedApps() containsObject:displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return %orig;
 	}
@@ -273,9 +283,9 @@ BOOL switcherAppAlreadyAuthenticated;
 	UIImageView *snapshot = (UIImageView *)%orig();
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:@10 forKey:@"inputRadius"];
-	UIImageView *snapshotImageView2 = [snapshot valueForKey:@"_containerView"];
-	snapshotImageView2.layer.filters = [NSArray arrayWithObject:filter];
-	[snapshot setValue:snapshotImageView2 forKey:@"_containerView"];
+	UIImageView *snapshotImageView = [snapshot valueForKey:@"_snapshotImageView"];
+	UIImageView *snapshotContainerView = [snapshot valueForKey:@"_containerView"];
+	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 
 	NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 	UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
@@ -290,7 +300,12 @@ BOOL switcherAppAlreadyAuthenticated;
 	[obscurityView addSubview:imageView];
 
 	obscurityView.tag = 80085; // ;)
-	[snapshot addSubview:obscurityView];
+
+	obscurityView.center = snapshotContainerView.center;
+	if (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight) {
+		imageView.transform = CGAffineTransformMakeRotation(M_PI * (90) / 180.0);
+	}
+	[snapshotContainerView addSubview:obscurityView];
 	return snapshot;
 }
 
@@ -300,7 +315,7 @@ BOOL switcherAppAlreadyAuthenticated;
 BOOL switcherAuthenticating;
 
 -(void)_toggleSwitcher {
-	Log();
+	asphaleiaLog();
 	if (!shouldSecureSwitcher()) {
 		%orig;
 		return;
@@ -323,7 +338,7 @@ BOOL switcherAuthenticating;
 }
 
 - (void)activateApplicationAnimated:(id)application {
-	Log();
+	asphaleiaLog();
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
 		appAlreadyAuthenticated = NO;
 		%orig;
