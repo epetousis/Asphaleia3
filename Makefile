@@ -1,8 +1,7 @@
-include $(THEOS)/makefiles/common.mk
-
 ARCHS = armv7 armv7s arm64
+TARGET = iphone:clang:8.1:8.1
 
-TARGET = iphone:clang:latest:8.0
+include $(THEOS)/makefiles/common.mk
 
 LIBRARY_NAME = libasphaleiaui
 libasphaleiaui_FILES = ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm BTTouchIDController.m ASPasscodeHandler.mm ASTouchWindow.m

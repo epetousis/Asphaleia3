@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-#import <Preferences/Preferences.h>
 #import "DevicePINController.h"
 #import "modalPinVC.h"
 #include <sys/socket.h> 
@@ -8,7 +7,6 @@
 #import <libactivator/libactivator.h>
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
-#import <Preferences/Preferences.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <objc/message.h>
 #import <Twitter/Twitter.h>

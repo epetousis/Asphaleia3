@@ -8,7 +8,7 @@
 
 #import "modalPinVC.h"
 #import <AudioToolbox/AudioToolbox.h>
-#import <Preferences/Preferences.h>
+#import <Preferences/PSListController.h>
 #import <sys/socket.h> 
 #import <sys/sysctl.h>
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist"
@@ -53,6 +53,7 @@
     
     _textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     _textField.keyboardType = UIKeyboardTypeNumberPad;
+    _textField.secureTextEntry = YES;
     _textField.delegate = self;
     [self.view addSubview:_textField];
     [_textField becomeFirstResponder];
@@ -135,7 +136,7 @@
             [_scrollView addSubview:dashContainerView];
             for (int k = 1; k < 5; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
-                dashView.frame = CGRectMake(/*86+*/(k-1)*43, ((_scrollView.frame.size.height-20)/2)-9, 18, 19);
+                dashView.frame = CGRectMake(/*86+*/(k-1)*43, 0, 18, 19);
                 [dashContainerView addSubview:dashView];
                 [pageArray addObject:dashView];
                 // [dashView release];

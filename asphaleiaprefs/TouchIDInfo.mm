@@ -1,5 +1,6 @@
 #import "TouchIDInfo.h"
 #include <sys/sysctl.h>
+#import <objc/runtime.h>
 
 BOOL isTouchIDDevice(void) {
     int sysctlbyname(const char *, void *, size_t *, void *, size_t);
