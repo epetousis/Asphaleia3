@@ -15,7 +15,7 @@
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
-#define asphaleiaLog() NSLog(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
+#define asphaleiaLog() HBLogInfo(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
@@ -205,60 +205,6 @@ void DeregisterForTouchIDNotifications(id observer) {
 
 %end
 
-%hook SBAppSwitcherController
-BOOL switcherAppAlreadyAuthenticated;
-
--(void)switcherScroller:(id)scroller itemTapped:(SBDisplayLayout *)displayLayout {
-	asphaleiaLog();
-	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
-	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
-
-	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-
-	SBIconView *iconView = [iconViews objectForKey:displayLayout];
-
-	if ((![getProtectedApps() containsObject:item.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [item.displayIdentifier isEqual:[frontmostApp bundleIdentifier]] || !iconView.icon.displayName) {
-		%orig;
-		return;
-	}
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
-	switcherAppAlreadyAuthenticated = YES;
-	if (!wasCancelled)
-		%orig;
-	}];
-}
-
--(void)switcherWasDismissed:(BOOL)dismissed {
-	switcherAppAlreadyAuthenticated = NO;
-	%orig;
-}
-
--(void)_askDelegateToDismissToDisplayLayout:(SBDisplayLayout *)displayLayout displayIDsToURLs:(id)urls displayIDsToActions:(id)actions {
-	asphaleiaLog();
-	SBDisplayItem *item = [displayLayout.displayItems objectAtIndex:0];
-	NSMutableDictionary *iconViews = [iconController valueForKey:@"_iconViews"];
-
-	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-
-	SBIconView *iconView = [iconViews objectForKey:displayLayout];
-
-	if ((![getProtectedApps() containsObject:item.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:item.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [item.displayIdentifier isEqual:[frontmostApp bundleIdentifier]] || !iconView.icon.displayName || switcherAppAlreadyAuthenticated) {
-		%orig;
-		return;
-	}
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
-	switcherAppAlreadyAuthenticated = NO;
-	if (!wasCancelled)
-		%orig;
-	else
-		[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
-	}];
-}
-
-%end
-
 %hook SBAppSwitcherIconController
 
 -(id)init {
@@ -335,27 +281,6 @@ BOOL switcherAuthenticating;
 		return YES;
 	else
 		return %orig;
-}
-
-- (void)activateApplicationAnimated:(id)application {
-	asphaleiaLog();
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
-		appAlreadyAuthenticated = NO;
-		%orig;
-		return;
-	}
-
-	appAlreadyAuthenticated = NO;
-
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-			if (!wasCancelled) {
-				%orig;
-			}
-		}];
 }
 
 %end
@@ -563,6 +488,7 @@ static BOOL openURLHasAuthenticated;
 }
 
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
+	asphaleiaLog();
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated) {
 		%orig;
 		return;
@@ -715,6 +641,36 @@ BOOL currentBannerAuthenticated;
 	[iconView _setIcon:appIcon animated:YES];
 
 	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:@"Scan fingerprint to show notification." beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+			if (!wasCancelled) {
+				%orig;
+			}
+		}];
+}
+
+%end
+
+%hook SBWorkspace
+
+-(void)setCurrentTransaction:(id)transaction {
+	if (![transaction isKindOfClass:[%c(SBAppToAppWorkspaceTransaction) class]]) {
+		%orig;
+		return;
+	}
+
+	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
+		appAlreadyAuthenticated = NO;
+		%orig;
+		return;
+	}
+
+	appAlreadyAuthenticated = NO;
+
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
