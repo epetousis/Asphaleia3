@@ -67,12 +67,15 @@
 @end
 
 @interface SBIcon : NSObject
+// 8.4+
+-(NSString *)displayNameForLocation:(int)location;
 // 8.3+
 -(void)launchFromLocation:(int)location context:(id)context;
 // 8.1 and lower
 -(void)launchFromLocation:(int)location;
--(NSString *)applicationBundleID;
 -(NSString *)displayName;
+// All
+-(NSString *)applicationBundleID;
 -(void)setBadge:(id)badge;
 -(id)getIconImage:(int)image;
 @end
@@ -163,4 +166,10 @@
 @interface BiometricKit : NSObject
 +(id)manager;
 -(NSDictionary *)identities:(id)object;
+@end
+
+@interface SBLockScreenManager : NSObject
+@property(readonly, assign) BOOL isUILocked;
+@property(assign, nonatomic, getter=isUIUnlocking) BOOL UIUnlocking;
++(id)sharedInstance;
 @end
