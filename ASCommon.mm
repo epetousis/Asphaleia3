@@ -11,6 +11,8 @@
 #define titleWithSpacingForIcon(t) [NSString stringWithFormat:@"\n\n\n%@",t]
 #define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
 
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+
 @interface ASCommon ()
 @property UIAlertView *currentAlertView;
 @end
@@ -37,13 +39,20 @@ static ASCommon *sharedCommonObj;
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
     authHandler = [handler copy];
 
+    NSString *title;
     NSString *message;
     if (customMessage)
         message = customMessage;
     else
         message = @"Scan fingerprint to open.";
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:titleWithSpacingForIcon(iconView.icon.displayName)
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
+        title = titleWithSpacingForIcon([iconView.icon displayNameForLocation:0]);
+    } else {
+        title = titleWithSpacingForIcon(iconView.icon.displayName);
+    }
+
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:message
                    delegate:self
          cancelButtonTitle:@"Cancel"
