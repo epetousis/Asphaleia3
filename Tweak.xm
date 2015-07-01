@@ -27,6 +27,7 @@ NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 BOOL appAlreadyAuthenticated;
+BOOL unlockingToAppFromNotification;
 
 void RegisterForTouchIDNotifications(id observer, SEL selector) {
 	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
@@ -337,23 +338,21 @@ UIWindow *blurredWindow;
 	%orig;
 	
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && !unlockingToAppFromNotification) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
 
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.05 * NSEC_PER_SEC), dispatch_get_main_queue(), ^(void){
-			[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
-				if (blurredWindow) {
-					blurredWindow.hidden = YES;
-					blurredWindow = nil;
-				}
+		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+			if (blurredWindow) {
+				blurredWindow.hidden = YES;
+				blurredWindow = nil;
+			}
 
-				if (wasCancelled) {
-					[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
-				}
-			}];
-		});
+			if (wasCancelled) {
+				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
+			}
+		}];
 	}
 }
 
@@ -487,11 +486,18 @@ static BOOL openURLHasAuthenticated;
 	openURLHasAuthenticated = NO;
 }
 
+// this conflicts with viewDidDisappear on SBLockScreenManager when you have the unlock to application unsecured setting off.
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
 	asphaleiaLog();
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated) {
 		%orig;
 		return;
+	}
+
+	if ([[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
+		unlockingToAppFromNotification = YES;
+		if (shouldUnsecurelyUnlockIntoApp())
+			return;
 	}
 
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
@@ -500,6 +506,10 @@ static BOOL openURLHasAuthenticated;
 
 	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
+				if (blurredWindow && [[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
+					blurredWindow.hidden = YES;
+					blurredWindow = nil;
+				}
 				// using %orig; crashes springboard, so this is my alternative.
 				openURLHasAuthenticated = YES;
 				[self applicationOpenURL:url];
@@ -658,8 +668,9 @@ BOOL currentBannerAuthenticated;
 	}
 
 	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated) {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated || unlockingToAppFromNotification) {
 		appAlreadyAuthenticated = NO;
+		unlockingToAppFromNotification = NO;
 		%orig;
 		return;
 	}
@@ -675,6 +686,19 @@ BOOL currentBannerAuthenticated;
 				%orig;
 			}
 		}];
+}
+
+%end
+
+%hook SBUIBiometricEventMonitor
+
+- (void)_setMatchingEnabled:(BOOL)arg1 {
+	BOOL deviceLocked = [[self valueForKey:@"_deviceLocked"] boolValue];
+	BOOL screenOff = [[self valueForKey:@"_screenIsOff"] boolValue];
+	if (!arg1 && !deviceLocked && !screenOff)
+		return;
+	else
+		%orig;
 }
 
 %end
