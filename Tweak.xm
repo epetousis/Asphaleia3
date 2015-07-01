@@ -486,7 +486,6 @@ static BOOL openURLHasAuthenticated;
 	openURLHasAuthenticated = NO;
 }
 
-// this conflicts with viewDidDisappear on SBLockScreenManager when you have the unlock to application unsecured setting off.
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
 	asphaleiaLog();
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated) {
@@ -496,7 +495,8 @@ static BOOL openURLHasAuthenticated;
 
 	if ([[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
 		unlockingToAppFromNotification = YES;
-		if (shouldUnsecurelyUnlockIntoApp())
+		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+		if (shouldUnsecurelyUnlockIntoApp() && [getProtectedApps() containsObject:[frontmostApp bundleIdentifier]])
 			return;
 	}
 
