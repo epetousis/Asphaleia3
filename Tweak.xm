@@ -49,7 +49,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 }
 
 -(void)iconTapped:(SBIconView *)iconView {
-	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
 		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 		%orig;
 		return;
