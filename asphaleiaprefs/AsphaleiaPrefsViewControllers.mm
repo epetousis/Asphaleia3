@@ -1150,7 +1150,7 @@
                     total++;
             }
         }
-        if (total == securedAppDict.count-1) {
+        if (total == securedAppDict.count) {
             UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Deselect All" style:UIBarButtonItemStylePlain target:self action:@selector(disableAllApps)];
             [(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
         } else {
