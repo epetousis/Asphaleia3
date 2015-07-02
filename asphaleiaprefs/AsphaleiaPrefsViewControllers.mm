@@ -1352,6 +1352,7 @@
 {
    [CPPrefs writeToFile:prefpath atomically:YES];
    CFNotificationCenterPostNotification (CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL,true);
+   [[NSNotificationCenter defaultCenter] postNotificationName:@"AdvancedSecuritySettingChanged" object:self];
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -1830,9 +1831,25 @@ static inline UITableViewCell *CellWithClassName(NSString *className, UITableVie
             isIphone5S = YES;
         }
         free(machine);
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadSettingsForAdvancedSecurity:) name:@"AdvancedSecuritySettingChanged" object:nil];
     }
     return self;
 }
+
+-(void)dealloc {
+    [super dealloc];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void)reloadSettingsForAdvancedSecurity:(NSNotification *)notification {
+    if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
+        prefs = [[NSMutableDictionary alloc]initWithContentsOfFile:prefpath];
+    } else {
+        prefs = [[NSMutableDictionary alloc]init];
+    }
+}
+
 @synthesize tableView = _tableView, localizationBundle = _localizationBundle, loadsAsynchronously = _loadsAsynchronously;
 - (void)setSectionDescriptors:(NSArray *)sectionDescriptors
 {
