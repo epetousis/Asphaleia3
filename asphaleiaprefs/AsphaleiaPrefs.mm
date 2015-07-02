@@ -155,6 +155,10 @@
 {
 	[controller dismissViewControllerAnimated:YES completion:NULL];
 }
+
+- (BOOL)canBeShownFromSuspendedState {
+	return NO;
+}
 @end
 
 // vim:ft=objc
