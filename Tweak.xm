@@ -27,7 +27,7 @@ NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 BOOL appAlreadyAuthenticated;
-BOOL unlockingToAppFromNotification;
+BOOL catchAllIgnoreRequest;
 
 void RegisterForTouchIDNotifications(id observer, SEL selector) {
 	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
@@ -338,7 +338,7 @@ UIWindow *blurredWindow;
 	%orig;
 	
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && !unlockingToAppFromNotification) {
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && !catchAllIgnoreRequest) {
 		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
@@ -493,8 +493,8 @@ static BOOL openURLHasAuthenticated;
 		return;
 	}
 
+	catchAllIgnoreRequest = YES;
 	if ([[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
-		unlockingToAppFromNotification = YES;
 		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 		if (shouldUnsecurelyUnlockIntoApp() && [getProtectedApps() containsObject:[frontmostApp bundleIdentifier]])
 			return;
@@ -668,9 +668,9 @@ BOOL currentBannerAuthenticated;
 	}
 
 	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated || unlockingToAppFromNotification) {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated || catchAllIgnoreRequest) {
 		appAlreadyAuthenticated = NO;
-		unlockingToAppFromNotification = NO;
+		catchAllIgnoreRequest = NO;
 		%orig;
 		return;
 	}
