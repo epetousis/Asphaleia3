@@ -78,6 +78,7 @@
 -(NSString *)applicationBundleID;
 -(void)setBadge:(id)badge;
 -(id)getIconImage:(int)image;
+- (BOOL)isDownloadingIcon;
 @end
 
 @interface SBIconController : NSObject
