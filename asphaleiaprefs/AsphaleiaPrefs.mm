@@ -34,7 +34,7 @@
 	[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
 	[(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
 	[(UINavigationItem*)self.navigationItem setLeftBarButtonItem:nil];
-	[(UINavigationItem*)self.navigationItem setBackBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Asphaleia"
+	[(UINavigationItem*)self.navigationItem setBackBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Asphaleia 2"
 			   style:UIBarButtonItemStylePlain
 			   target:nil
 			   action:nil]];
@@ -50,7 +50,7 @@
 		
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You don't seem to be able to tweet right now." delegate:nil cancelButtonTitle:@"Okay." otherButtonTitles:nil];
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You don't seem to be able to tweet right now." delegate:nil cancelButtonTitle:@"Okay." otherButtonTitles:nil];
 		[alert show];
 	}
 }
