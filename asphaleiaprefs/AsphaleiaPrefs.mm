@@ -46,7 +46,7 @@
 {
 	if ([TWTweetComposeViewController canSendTweet]) {		
 		TWTweetComposeViewController *controller = [[TWTweetComposeViewController alloc] init];
-		[controller setInitialText:@"Securing my apps with #Asphaleia from @A3tweaks!"];
+		[controller setInitialText:@"Securing my apps with #Asphaleia2 from @A3tweaks!"];
 		
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
