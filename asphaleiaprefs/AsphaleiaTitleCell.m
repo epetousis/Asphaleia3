@@ -18,7 +18,7 @@
 		tweakTitle = [[UILabel alloc] initWithFrame:frame];
 		[tweakTitle setNumberOfLines:1];
 		[tweakTitle setFont:[UIFont fontWithName:@"HelveticaNeue-UltraLight" size:48]];
-		[tweakTitle setText:@"Asphaleia"];
+		[tweakTitle setText:@"Asphaleia 2"];
 		[tweakTitle setBackgroundColor:[UIColor clearColor]];
 		[tweakTitle setTextColor:[UIColor blackColor]];
 		[tweakTitle setTextAlignment:NSTextAlignmentCenter];
