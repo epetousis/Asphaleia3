@@ -1,10 +1,9 @@
-Package: com.a3tweaks.asphaleia8
-Name: Asphaleia (iOS 8)
-Depends: firmware (>= 8.0), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist 
-Version: 0.0.1
+Package: com.a3tweaks.asphaleia2
+Name: Asphaleia 2 (iOS 8)
+Depends: firmware (>= 8.1), mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.2), applist
+Version: 1.0.0
 Architecture: iphoneos-arm
 Description: customizable locking system for apps & more
 Maintainer: A3tweaks <asphaleia@a3tweaks.com>
 Author: A3tweaks <asphaleia@a3tweaks.com>
 Section: Tweaks
-Depiction: http://privrepo.evanpetousis.me/depiction.php
