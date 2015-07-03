@@ -28,6 +28,7 @@ NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
 BOOL appAlreadyAuthenticated;
 BOOL catchAllIgnoreRequest;
+SBBannerContainerViewController *controller;
 
 void RegisterForTouchIDNotifications(id observer, SEL selector) {
 	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
@@ -525,7 +526,7 @@ PKGlyphView *bannerFingerGlyph;
 BOOL currentBannerAuthenticated;
 
 -(id)initWithNibName:(id)nibName bundle:(id)bundle {
-	SBBannerContainerViewController *controller = %orig;
+	controller = %orig;
 	RegisterForTouchIDNotifications(controller, @selector(receiveTouchIDNotification:));
 	return controller;
 }
@@ -599,16 +600,6 @@ BOOL currentBannerAuthenticated;
 	}
 }
 
--(void)setBannerPullDisplacement:(float)displacement {
-	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
-		%orig;
-}
-
--(void)setBannerPullPercentage:(float)percentage {
-	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
-		%orig;
-}
-
 %new
 -(void)receiveTouchIDNotification:(NSNotification *)notification
 {
@@ -633,6 +624,17 @@ BOOL currentBannerAuthenticated;
 		if (bannerFingerGlyph)
 			[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
 	}
+}
+
+%end
+
+%hook SBBannerController
+
+- (BOOL)gestureRecognizerShouldBegin:(id)gestureRecognizer {
+	if ((![getProtectedApps() containsObject:[[controller _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[controller _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated)
+		return %orig;
+	else
+		return NO;
 }
 
 %end
