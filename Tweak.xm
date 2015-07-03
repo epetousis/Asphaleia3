@@ -668,7 +668,14 @@ BOOL currentBannerAuthenticated;
 	}
 
 	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || appAlreadyAuthenticated || catchAllIgnoreRequest) {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) ||
+		[temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] ||
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled ||
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled ||
+		appAlreadyAuthenticated ||
+		catchAllIgnoreRequest ||
+		![application bundleIdentifier]) {
+
 		appAlreadyAuthenticated = NO;
 		catchAllIgnoreRequest = NO;
 		%orig;
