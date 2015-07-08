@@ -28,6 +28,7 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 
 @interface BTTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
 	BOOL previousMatchingSetting;
+	NSArray *activatorListenerNames;
 }
 @property (nonatomic, strong) BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;

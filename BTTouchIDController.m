@@ -79,6 +79,19 @@ https://github.com/Sassoty/BioTesting */
 	// Save current device matching state
 	previousMatchingSetting = [monitor isMatchingEnabled];
 
+	id activator = [objc_getClass("LAActivator") sharedInstance];
+	if (activator)
+    {
+		id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
+		if (event)
+        {
+			activatorListenerNames = [activator assignedListenerNamesForEvent:event];
+			if (activatorListenerNames)
+				for (NSString *listenerName in activatorListenerNames)
+					[activator removeListenerAssignment:listenerName fromEvent:event];
+		}
+	}
+
 	// Begin listening :D
 	[monitor addObserver:self];
 	[monitor _setMatchingEnabled:YES];
@@ -120,6 +133,17 @@ https://github.com/Sassoty/BioTesting */
 		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
 			[[ASControlPanel sharedInstance] load];
 	}
+
+	id activator = [objc_getClass("LAActivator") sharedInstance];
+    if (activator && activatorListenerNames)
+    {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
+           id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
+           if (event)
+               for (NSString *listenerName in activatorListenerNames)
+                   [activator addListenerAssignment:listenerName toEvent:event];
+        });
+    }
 
 	asphaleiaLogMsg(@"Touch ID monitoring ended");
 }
