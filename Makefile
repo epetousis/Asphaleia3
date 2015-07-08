@@ -26,4 +26,5 @@ include $(THEOS)/makefiles/bundle.mk
 after-install::
 	install.exec "killall -9 backboardd"
 SUBPROJECTS += asphaleiaprefs
+#SUBPROJECTS += asphaleiaphotosprotection
 include $(THEOS_MAKE_PATH)/aggregate.mk
