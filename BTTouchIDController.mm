@@ -9,6 +9,7 @@ https://github.com/Sassoty/BioTesting */
 #import <dlfcn.h>
 #import <AudioToolbox/AudioServices.h>
 #import "PreferencesHandler.h"
+#import <substrate.h>
 
 @interface BTTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
@@ -92,20 +93,24 @@ https://github.com/Sassoty/BioTesting */
 		}
 	}
 
-	// Begin listening :D
-	[monitor addObserver:self];
-	[monitor _setMatchingEnabled:YES];
-	[monitor _startMatching];
+	oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
+	for (id observer in oldObservers)
+		[monitor removeObserver:observer];
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");
 	if (la) {
-		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
 			[[ASActivatorListener sharedInstance] unload];
 		
-		if ([objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+		if ([(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
 			[[ASControlPanel sharedInstance] unload];
 	}
+
+	// Begin listening :D
+	[monitor addObserver:self];
+	[monitor _setMatchingEnabled:YES];
+	[monitor _startMatching];
 
 	asphaleiaLogMsg(@"Touch ID monitoring began");
 }
@@ -121,16 +126,22 @@ https://github.com/Sassoty/BioTesting */
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	
 	// Stop listening
-	[monitor removeObserver:self];
+	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
+	if (observers && [observers containsObject:self])
+		[monitor removeObserver:self];
+	if (oldObservers && observers)
+		for (id observer in oldObservers)
+			[monitor addObserver:observer];
+	oldObservers = nil;
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");
 	if (la) {
-		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
 			[[ASActivatorListener sharedInstance] load];
 	
-		if (![objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
 			[[ASControlPanel sharedInstance] load];
 	}
 
