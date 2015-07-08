@@ -27,8 +27,15 @@
 - (id)fetchPHObjectsForUUIDs:(id)arg1 entityName:(id)arg2 { %log; return nil; }
 - (id)fetchResults { %log; return nil; }
 - (id)fetchUpdatedObject:(id)arg1 { %log; return nil; }*/
-- (id)initSharedLibrary {
+/*- (id)initSharedLibrary {
 	return nil;
+}*/
+
+- (void)_beginTransaction {
+	return;
+}
+- (void)_commitTransaction:(id /* block */)arg1 {
+	return;
 }
 
 %end
