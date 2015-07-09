@@ -78,12 +78,21 @@ https://github.com/Sassoty/BioTesting */
 	if (activator)
     {
 		id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
+		id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
 		if (event)
         {
 			activatorListenerNames = [activator assignedListenerNamesForEvent:event];
 			if (activatorListenerNames)
 				for (NSString *listenerName in activatorListenerNames)
 					[activator removeListenerAssignment:listenerName fromEvent:event];
+		}
+
+		if (eventSpringBoard)
+        {
+			activatorListenerNamesSpringBoard = [activator assignedListenerNamesForEvent:eventSpringBoard];
+			if (activatorListenerNamesSpringBoard)
+				for (NSString *listenerName in activatorListenerNamesSpringBoard)
+					[activator removeListenerAssignment:listenerName fromEvent:eventSpringBoard];
 		}
 	}
 	self.isMonitoring = YES;
@@ -130,13 +139,18 @@ https://github.com/Sassoty/BioTesting */
 	[monitor _setMatchingEnabled:previousMatchingSetting];
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
-    if (activator && activatorListenerNames)
+    if (activator && activatorListenerNames && activatorListenerNamesSpringBoard)
     {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
-           id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
-           if (event)
-               for (NSString *listenerName in activatorListenerNames)
-                   [activator addListenerAssignment:listenerName toEvent:event];
+			id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
+			id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
+			if (event)
+				for (NSString *listenerName in activatorListenerNames) 
+					[activator addListenerAssignment:listenerName toEvent:event];
+
+			if (eventSpringBoard)
+				for (NSString *listenerName in activatorListenerNamesSpringBoard) 
+					[activator addListenerAssignment:listenerName toEvent:eventSpringBoard];
         });
     }
 
