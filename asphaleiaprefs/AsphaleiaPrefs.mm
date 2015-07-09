@@ -95,6 +95,7 @@
 {
 	// NSLog(@"=========poping view");
 	[[[self parentController] navigationController] popViewControllerAnimated:YES];
+	[[[self parentController] splitViewController] popRecursivelyToRootController];
 }
 
 -(void)authenticated
