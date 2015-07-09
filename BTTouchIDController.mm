@@ -73,12 +73,6 @@ https://github.com/Sassoty/BioTesting */
 	if(self.isMonitoring) {
 		return;
 	}
-	self.isMonitoring = YES;
-
-	// Get current monitor instance so observer can be added
-	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
-	// Save current device matching state
-	previousMatchingSetting = [monitor isMatchingEnabled];
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
 	if (activator)
@@ -92,9 +86,13 @@ https://github.com/Sassoty/BioTesting */
 					[activator removeListenerAssignment:listenerName fromEvent:event];
 		}
 	}
+	self.isMonitoring = YES;
 
-	oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
-	for (id observer in oldObservers)
+	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
+	previousMatchingSetting = [monitor isMatchingEnabled];
+
+	_oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
+	for (id observer in _oldObservers)
 		[monitor removeObserver:observer];
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
@@ -116,34 +114,20 @@ https://github.com/Sassoty/BioTesting */
 }
 
 -(void)stopMonitoring {
-	// If already stopped, don't stop again
 	if(!self.isMonitoring) {
 		return;
 	}
 	self.isMonitoring = NO;
 
-	// Get current monitor instance so observer can be removed
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
-	
-	// Stop listening
 	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
 	if (observers && [observers containsObject:self])
 		[monitor removeObserver:self];
-	if (oldObservers && observers)
-		for (id observer in oldObservers)
-			[monitor addObserver:observer];
-	oldObservers = nil;
+	if (_oldObservers && observers)
+		for (id observer in _oldObservers)
+				[monitor addObserver:observer];
+	_oldObservers = nil;
 	[monitor _setMatchingEnabled:previousMatchingSetting];
-
-	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
-	Class la = objc_getClass("LASharedActivator");
-	if (la) {
-		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
-			[[ASActivatorListener sharedInstance] load];
-	
-		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
-			[[ASControlPanel sharedInstance] load];
-	}
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
     if (activator && activatorListenerNames)
@@ -155,6 +139,16 @@ https://github.com/Sassoty/BioTesting */
                    [activator addListenerAssignment:listenerName toEvent:event];
         });
     }
+
+	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	Class la = objc_getClass("LASharedActivator");
+	if (la) {
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Dynamic Selection"])
+			[[ASActivatorListener sharedInstance] load];
+
+		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
+			[[ASControlPanel sharedInstance] load];
+	}
 
 	asphaleiaLogMsg(@"Touch ID monitoring ended");
 }
