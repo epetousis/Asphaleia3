@@ -6,7 +6,7 @@ BUNDLE_NAME = AsphaleiaPrefs
 AsphaleiaPrefs_FILES = AsphaleiaPrefs.mm AsphaleiaTitleCell.m AsphaleiaPrefsViewControllers.mm asphaleiaTVC.m modalPinVC.mm TouchIDInfo.mm
 AsphaleiaPrefs_INSTALL_PATH = /Library/PreferenceBundles
 AsphaleiaPrefs_FRAMEWORKS = UIKit CoreGraphics AudioToolbox QuartzCore Twitter MessageUI SystemConfiguration
-AsphaleiaPrefs_PRIVATE_FRAMEWORKS = Preferences BiometricKit
+AsphaleiaPrefs_PRIVATE_FRAMEWORKS = Preferences
 AsphaleiaPrefs_LDFLAGS = -lapplist -L/Users/evanpetousis/theos/lib -lmobilegestalt
 
 include $(THEOS_MAKE_PATH)/bundle.mk
