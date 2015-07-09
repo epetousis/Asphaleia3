@@ -712,20 +712,6 @@ BOOL currentBannerAuthenticated;
 
 %end
 
-/*@interface UIView ()
--(NSString*)recursiveDescription;
-@end
-
-%hook SBNotificationsClearButton
-
-//-(BOOL)isBulletinSection !!!!!!
--(void)didMoveToSuperview {
-	%orig;
-	NSLog(@"[Asphaleia] %@",[[(UIView *)self superview] superview]);
-}
-
-%end*/
-
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();
