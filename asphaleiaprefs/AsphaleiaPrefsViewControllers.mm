@@ -1006,7 +1006,9 @@
             prefs = [[NSMutableDictionary alloc]init];
         }
         // prefs = [[NSMutableDictionary alloc]initWithDictionary:@{@"removeLSAuth":[NSNumber numberWithBool:NO],@"obscureAppContent":[NSNumber numberWithBool:YES],@"delayAfterLock":[NSNumber numberWithBool:NO],@"timeIntervalLock":[NSNumber numberWithInt:60]}];
-        fingerPrints = [NSArray arrayWithArray:[[objc_getClass("BiometricKit") manager] identities:nil]];
+        dlopen("/System/Library/PrivateFrameworks/BiometricKit.framework/BiometricKit", RTLD_LAZY);
+        Class bk = objc_getClass("BiometricKit");
+        fingerPrints = [NSArray arrayWithArray:[[bk manager] identities:nil]];
     }
     return self;
 }
