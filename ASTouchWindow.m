@@ -3,10 +3,7 @@
 @implementation ASTouchWindow
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-    CGRect frame = self.viewToAllowTouchIn.frame;
-    if (self.viewToAllowTouchIn.isInDock) {
-        frame = CGRectMake(frame.origin.x,[UIScreen mainScreen].bounds.size.height-self.viewToAllowTouchIn.superview.frame.size.height+frame.origin.y,frame.size.width,frame.size.height);
-    }
+    CGRect frame = [self.viewToAllowTouchIn.superview convertRect:self.viewToAllowTouchIn.frame toView:self];
     if (!CGRectContainsPoint(frame, point)) {
         self.handler(self, YES);
         return YES;
