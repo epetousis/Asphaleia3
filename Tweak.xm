@@ -198,7 +198,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 
 %new
 -(void)asphaleia_updateLabelWithText:(NSString *)text {
-	SBIconLabelView *iconLabelView = [self valueForKey:@"_labelView"];
+	SBIconLabelView *iconLabelView = MSHookIvar<SBIconLabelView *>(self,"_labelView");
 
 	SBIconLabelImageParameters *imageParameters = [[iconLabelView imageParameters] mutableCopy];
 	[imageParameters setText:text];
@@ -223,16 +223,16 @@ void DeregisterForTouchIDNotifications(id observer) {
 		%orig;
 }
 
-+ (id)appSwitcherSnapshotViewForDisplayItem:(SBDisplayItem*)displayItem orientation:(UIInterfaceOrientation)orientation loadAsync:(BOOL)async withQueue:(id)queue statusBarCache:(id)cache {
-	if ((![getProtectedApps() containsObject:displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
-		return %orig;
+-(void)layoutSubviews {
+	%orig;
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		return;
 	}
 
-	UIImageView *snapshot = (UIImageView *)%orig();
+	SBAppSwitcherSnapshotView *snapshot = self;
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:@10 forKey:@"inputRadius"];
-	UIImageView *snapshotImageView = [snapshot valueForKey:@"_snapshotImageView"];
-	UIImageView *snapshotContainerView = [snapshot valueForKey:@"_containerView"];
+	UIImageView *snapshotImageView = MSHookIvar<UIImageView *>(snapshot,"_snapshotImageView");
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 
 	NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
@@ -249,12 +249,13 @@ void DeregisterForTouchIDNotifications(id observer) {
 
 	obscurityView.tag = 80085; // ;)
 
-	obscurityView.center = snapshotContainerView.center;
-	if (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight) {
-		imageView.transform = CGAffineTransformMakeRotation(M_PI * (90) / 180.0);
+	[self addSubview:obscurityView];
+}
+- (void)respondToBecomingInvisibleIfNecessary {
+	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
+		if (view.tag == 80085)
+			[view removeFromSuperview];
 	}
-	[snapshotContainerView addSubview:obscurityView];
-	return snapshot;
 }
 
 %end
@@ -702,8 +703,8 @@ BOOL currentBannerAuthenticated;
 %hook SBUIBiometricEventMonitor
 
 - (void)_setMatchingEnabled:(BOOL)arg1 {
-	BOOL deviceLocked = [[self valueForKey:@"_deviceLocked"] boolValue];
-	BOOL screenOff = [[self valueForKey:@"_screenIsOff"] boolValue];
+	BOOL deviceLocked = MSHookIvar<BOOL>(self, "_deviceLocked");
+	BOOL screenOff = MSHookIvar<BOOL>(self, "_screenIsOff");
 	if (!arg1 && !deviceLocked && !screenOff)
 		return;
 	else
