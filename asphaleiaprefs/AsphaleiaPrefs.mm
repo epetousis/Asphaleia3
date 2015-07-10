@@ -94,6 +94,9 @@
 - (void)goBack
 {
 	// NSLog(@"=========poping view");
+	_enteredCorrectly = NO;
+	self.alreadyAnimatedOnce = NO;
+	self.passcodeViewIsTransitioning = NO;
 	[[[self parentController] navigationController] popViewControllerAnimated:YES];
 	[[[self parentController] splitViewController] popRecursivelyToRootController];
 }
