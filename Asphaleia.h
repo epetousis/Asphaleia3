@@ -178,3 +178,7 @@
 @interface UIWindow ()
 - (void)_setSecure:(BOOL)arg1;
 @end
+
+@interface SBLockScreenSlideUpToAppController : NSObject
+- (void)_finishSlideDownWithCompletion:(id)completion;
+@end

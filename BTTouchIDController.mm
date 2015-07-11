@@ -52,6 +52,7 @@ https://github.com/Sassoty/BioTesting */
 			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:self];
 			[self stopMonitoring];
+			_shouldBlockLockscreenMonitor = NO;
 			break;
 		case TouchIDNotMatched:
 			asphaleiaLogMsg(@"Authentication failed");
