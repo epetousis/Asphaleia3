@@ -729,6 +729,48 @@ BOOL currentBannerAuthenticated;
 
 %end
 
+%hook SBLockScreenSlideUpToAppController
+
+- (void)_activateApp:(id)app withAppInfo:(id)appInfo andURL:(id)url animated:(BOOL)animated {
+	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		%orig;
+		return;
+	}
+
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:app];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+			[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+			if (!wasCancelled) {
+				catchAllIgnoreRequest = YES;
+				%orig;
+			} else {
+				[self _finishSlideDownWithCompletion:nil];
+			}
+		}];
+}
+
+- (void)_handleAppLaunchedUnderLockScreenWithResult:(int)result {
+	SBApplication *app = MSHookIvar<SBApplication *>(self, "_targetApp");
+	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+		%orig;
+	}
+}
+
+%end
+
+%hook SBLockScreenManager
+
+- (void)unlockUIFromSource:(int)source withOptions:(id)options {
+	if (source != 14 || ![[BTTouchIDController sharedInstance] shouldBlockLockscreenMonitor] || ![[BTTouchIDController sharedInstance] isMonitoring])
+		%orig;
+}
+
+%end
+
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();

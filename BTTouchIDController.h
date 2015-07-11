@@ -34,6 +34,7 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 @property (nonatomic, strong) BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;
 @property (readonly) NSHashTable *oldObservers;
+@property BOOL shouldBlockLockscreenMonitor;
 +(instancetype)sharedInstance;
 -(void)startMonitoring;
 -(void)stopMonitoring;
