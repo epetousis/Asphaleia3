@@ -271,7 +271,7 @@ BOOL switcherAuthenticating;
 	}
 	if (!switcherAuthenticating) {
 		switcherAuthenticating = YES;
-		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 			switcherAuthenticating = NO;
 			if (!wasCancelled)
 				%orig;
@@ -332,6 +332,11 @@ UIWindow *blurredWindow;
 	}
 }
 
+- (void)unlockUIFromSource:(int)source withOptions:(id)options {
+	if (source != 14 || ![[BTTouchIDController sharedInstance] shouldBlockLockscreenMonitor] || ![[BTTouchIDController sharedInstance] isMonitoring])
+		%orig;
+}
+
 %end
 
 %hook SBLockScreenViewController
@@ -345,7 +350,7 @@ UIWindow *blurredWindow;
 		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 		[iconView _setIcon:appIcon animated:YES];
 
-		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
 			if (blurredWindow) {
 				blurredWindow.hidden = YES;
 				blurredWindow = nil;
@@ -402,7 +407,9 @@ static BOOL searchControllerAuthenticating;
 		return;
 	}
 
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) {
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -425,8 +432,10 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		%orig;
@@ -441,8 +450,10 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
+	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		[self presentAnimated:YES];
@@ -758,15 +769,6 @@ BOOL currentBannerAuthenticated;
 	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		%orig;
 	}
-}
-
-%end
-
-%hook SBLockScreenManager
-
-- (void)unlockUIFromSource:(int)source withOptions:(id)options {
-	if (source != 14 || ![[BTTouchIDController sharedInstance] shouldBlockLockscreenMonitor] || ![[BTTouchIDController sharedInstance] isMonitoring])
-		%orig;
 }
 
 %end
