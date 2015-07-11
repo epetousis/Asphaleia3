@@ -5,6 +5,7 @@
 #import "SBUIPasscodeEntryField.h"
 #import "SBUIPasscodeLockNumberPad.h"
 #import <AudioToolbox/AudioServices.h>
+#import "Asphaleia.h"
 
 @interface ASPasscodeHandler ()
 @property SBUIPasscodeLockViewSimple4DigitKeypad *passcodeView;
@@ -36,6 +37,7 @@
 
 	self.passcodeWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.passcodeWindow.windowLevel = UIWindowLevelAlert;
+	[self.passcodeWindow _setSecure:YES];
 	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimple4DigitKeypad") alloc] init];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];

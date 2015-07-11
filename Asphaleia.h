@@ -174,3 +174,7 @@
 @property(assign, nonatomic, getter=isUIUnlocking) BOOL UIUnlocking;
 +(id)sharedInstance;
 @end
+
+@interface UIWindow ()
+- (void)_setSecure:(BOOL)arg1;
+@end
