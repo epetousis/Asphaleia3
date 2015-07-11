@@ -328,7 +328,7 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     // Return the number of sections.
-    return 4;
+    return 5;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -363,6 +363,8 @@
         return [[prefs objectForKey:@"easyUnlockIntoApp"]boolValue];
     } else if(tag == 20 && [prefs objectForKey:@"wifiUnlock"]) {
         return [[prefs objectForKey:@"wifiUnlock"]boolValue];
+    } else if(tag == 30 && [prefs objectForKey:@"obscureBanners"]) {
+        return [[prefs objectForKey:@"obscureBanners"]boolValue];
     } else {
         return NO;
     }
@@ -392,7 +394,7 @@
     static NSString *CellIdentifier = @"A3SwitchCell";
     static NSString *checkCell = @"A3checkCell";
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-    if (indexPath.section == 0 || indexPath.section == 1) {
+    if (indexPath.section == 0 || indexPath.section == 1 || indexPath.section == 4) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
         UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
         [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
@@ -402,6 +404,9 @@
         } else if (indexPath.section == 1) {
             cell.textLabel.text = @"Unlock to App Unsecured";
             switchview.tag = 10;
+        } else if (indexPath.section == 4) {
+            cell.textLabel.text = @"Obscure Notifications";
+            switchview.tag = 30;
         }
         [switchview setOn:[self switchStateForTag:switchview.tag] animated:NO];
         cell.accessoryView = switchview;
@@ -544,6 +549,8 @@
         [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:3] withRowAnimation:UITableViewRowAnimationAutomatic];
     } else if (selSwitch.tag == 10) {
         [prefs setObject:[NSNumber numberWithBool:selSwitch.on] forKey:@"easyUnlockIntoApp"];
+    } else if (selSwitch.tag == 30) {
+        [prefs setObject:[NSNumber numberWithBool:selSwitch.on] forKey:@"obscureBanners"];
     }
     [self updateSettings];
 }
@@ -564,6 +571,9 @@
             break;        
         case 3:
             return @"Unprotect everything when on your home network. Add multiple networks seperating them with a comma and a space e.g. 'A, B'";
+            break;
+        case 4:
+            return @"Black out notifications for secured apps.";
             break;
         case 1:
             return @"Do not require re-authorization of a secured app if it is already open upon unlocking.";
