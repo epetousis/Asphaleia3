@@ -10,6 +10,7 @@
 #define kSecureSwitcherKey @"secureSwitcher"
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
+#define kObscureBannerKey @"obscureBanners"
 #define kUnsecureUnlockToAppKey @"easyUnlockIntoApp"
 #define kWifiUnlockKey @"wifiUnlock"
 #define kWifiUnlockNetworkKey @"wifiNetwork"
@@ -51,6 +52,7 @@ BOOL shouldSecurePowerDownView(void);
 BOOL shouldSecureSpotlight(void);
 BOOL shouldUnsecurelyUnlockIntoApp(void);
 BOOL shouldObscureAppContent(void);
+BOOL shouldObscureNotifications(void);
 BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
 NSArray *getProtectedAppsNoBullshit(void);

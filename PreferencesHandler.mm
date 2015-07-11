@@ -125,6 +125,12 @@ BOOL shouldObscureAppContent(void) {
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] boolValue] : YES;
 }
 
+BOOL shouldObscureNotifications(void) {
+	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
+		return NO;
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] boolValue] : YES;
+}
+
 BOOL shouldSecureSwitcher(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
