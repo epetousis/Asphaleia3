@@ -7,6 +7,7 @@
 #define loadPreferences() preferencesChangedCallback(NULL, NULL, NULL, NULL, NULL)
 
 #define kSecuredAppsKey @"securedApps"
+#define kSecuredFoldersKey @"securedFolders"
 #define kSecureSwitcherKey @"secureSwitcher"
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
@@ -57,6 +58,7 @@ BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
 NSArray *getProtectedAppsNoBullshit(void);
 NSArray *getProtectedApps(void);
+NSArray *getProtectedFolders(void);
 
 @interface ASPreferencesHandler : NSObject
 @property (retain) NSMutableDictionary *prefs;

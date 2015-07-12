@@ -164,6 +164,18 @@ NSArray *getProtectedApps(void) {
 	return [NSArray arrayWithArray:protectedApps];
 }
 
+NSArray *getProtectedFolders(void) {
+	if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey] || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+		return [NSArray array];
+
+	NSMutableArray *protectedFolders = [NSMutableArray array];
+	for (NSString *folder in [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey]) {
+		if ([[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey] objectForKey:folder] boolValue])
+			[protectedFolders addObject:folder];
+	}
+	return [NSArray arrayWithArray:protectedFolders];
+}
+
 @implementation ASPreferencesHandler
 
 +(instancetype)sharedInstance {

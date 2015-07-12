@@ -73,7 +73,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 
 		return;
-	} else if ((![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || !iconView.icon.applicationBundleID) {
+	} else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:[iconView.icon displayNameForLocation:iconView.location]])) {
 		%orig;
 		return;
 	} else if (!touchIDEnabled() && passcodeEnabled()) {
