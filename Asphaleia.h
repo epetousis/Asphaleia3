@@ -75,6 +75,8 @@
 -(void)launchFromLocation:(int)location;
 -(NSString *)displayName;
 // All
+- (BOOL)isFolderIcon;
+- (BOOL)isApplicationIcon;
 -(NSString *)applicationBundleID;
 -(void)setBadge:(id)badge;
 -(id)getIconImage:(int)image;
