@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Open Secured Items with a 4-digit number.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>id</key>
+			<string>changePasscodeButton</string>
+			<key>action</key>
+			<string>changePasscode</string>
+			<key>label</key>
+			<string>Change Passcode</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>simplePasscode</string>
+			<key>label</key>
+			<string>Passcode</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>id</key>
+			<string>touchIDGroupCell</string>
+			<key>footerText</key>
+			<string>Open Secured Items by scanning your fingerprint. Tap icon again to enter passcode instead, or tap anywhere to cancel.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>id</key>
+			<string>touchIDSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>touchID</string>
+			<key>label</key>
+			<string>Touch ID</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>id</key>
+			<string>vibrateSwitchCell</string>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>vibrateOnFail</string>
+			<key>label</key>
+			<string>Vibrate On Fail</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>timeInterval</string>
+			<key>label</key>
+			<string>Require Authorisation</string>
+			<key>validTitles</key>
+			<array>
+				<string>Immediately</string>
+				<string>After 10 seconds</string>
+				<string>After 30 seconds</string>
+				<string>After 1 minute</string>
+				<string>After 5 minutes</string>
+				<string>After 15 minutes</string>
+				<string>After 30 minutes</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<integer>0</integer>
+				<integer>10</integer>
+				<integer>30</integer>
+				<integer>60</integer>
+				<integer>300</integer>
+				<integer>900</integer>
+				<integer>1800</integer>
+			</array>
+			<key>staticTextMessage</key>
+			<string>Set how long after exiting an app before authorisation is required to open again.</string>
+			<key>default</key>
+			<string>Immediately</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>detail</key>
+			<string>ASAdvancedOptionsListController</string>
+			<key>isController</key>
+			<true/>
+			<key>label</key>
+			<string>Advanced Options</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>detail</key>
+			<string>ASControlPanelListController</string>
+			<key>isController</key>
+			<true/>
+			<key>label</key>
+			<string>Asphaleia Control Panel</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>id</key>
+			<string>resetSettingsButton</string>
+			<key>action</key>
+			<string>resetAllSettings</string>
+			<key>label</key>
+			<string>Reset All Settings</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Passcode Options</string>
+</dict>
+</plist>

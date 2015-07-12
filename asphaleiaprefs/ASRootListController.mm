@@ -1,32 +1,21 @@
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSListController.h>
 #import <Twitter/Twitter.h>
+#import <MessageUI/MessageUI.h>
+#import <MobileGestalt/MobileGestalt.h>
+#import <sys/sysctl.h>
 #import "modalPinVC.h"
 #import "TouchIDInfo.h"
-#import "AsphaleiaPrefsViewControllers.h"
+#import "ASRootListController.h"
+#import "ASCreatorsListController.h"
+#import "ASPasscodeOptionsListController.h"
+#import "ASSecuredItemsListController.h"
 
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
-#define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist"
-#define bundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
+@implementation ASRootListController
 
-@interface PSListController ()
--(void)viewDidDisappear:(BOOL)animated;
--(void)viewDidAppear:(BOOL)animated;
-@end
-
-@interface AsphaleiaPrefsListController: PSListController {
-	BOOL _enteredCorrectly;
-	modalPinVC *pinVC;
-	NSDate *_resignDate;
-}
-@property BOOL passcodeViewIsTransitioning;
-@property BOOL alreadyAnimatedOnce;
-@end
-
-@implementation AsphaleiaPrefsListController
 - (id)specifiers {
 	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"AsphaleiaPrefs" target:self] retain];
+		_specifiers = [[self loadSpecifiersFromPlistName:@"Root" target:self] retain];
 	}
 	UIBarButtonItem *nextBarButton = [[UIBarButtonItem alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/NavHeart@2x.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(loveMeh)];
 	UIImageView *A3ImageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/NavA3tweaks@2x.png"]];
@@ -57,7 +46,6 @@
 
 -(void)viewDidDisappear:(BOOL)animated {
 	[super viewDidDisappear:animated];
-	//[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -80,7 +68,7 @@
 -(void)presentAuthView
 {
 	// NSLog(@"================presentAuthView");
-	if([[NSFileManager defaultManager]fileExistsAtPath:prefpath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:prefpath] objectForKey:@"passcode"] length] == 4) {
+	if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:kPreferencesPath] objectForKey:@"passcode"] length] == 4) {
 		// NSLog(@"================presentAuthView def");
 		pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
 		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
@@ -93,7 +81,6 @@
 
 - (void)goBack
 {
-	// NSLog(@"=========poping view");
 	_enteredCorrectly = NO;
 	self.alreadyAnimatedOnce = NO;
 	self.passcodeViewIsTransitioning = NO;
@@ -108,27 +95,18 @@
 
 -(void)showSecurity
 {
-	[self pushController:(PSViewController *)[[securedAppsAL alloc]init]];
+	[self pushController:[[ASSecuredItemsListController alloc]init]];
 }
 
 -(void)showCreators
 {
-	[self pushController:(PSViewController *)[[creatorsVC alloc]init]];
+	[self pushController:[[ASCreatorsListController alloc]init]];
 }
 
 -(void)showPasscodeOptions
 {
-	[self pushController:(PSViewController *)[[passcodeOptionsVC alloc]init]];
+	[self pushController:[[ASPasscodeOptionsListController alloc]init]];
 }
-
-/*static inline void LoadDeviceKey(NSMutableDictionary *dict, NSString *key)
-{
-	CFStringRef result = (const __CFString *)@"";
-	result = (const __CFString *)MGCopyAnswer((__bridge CFStringRef)key);
-	if (result) {
-		[dict setObject:[NSString stringWithString:(__bridge NSString *)result] forKey:key];
-	}
-}*/
 
 - (void)showMailDialog
 {
@@ -143,7 +121,7 @@
 		sysctlbyname("hw.machine", NULL, &size, NULL, 0);
 		char *machine = (char *)malloc(size);
 		sysctlbyname("hw.machine", machine, &size, NULL, 0);
-		CFStringRef udid = (const __CFString *)MGCopyAnswer(kMGUniqueDeviceID);
+		CFStringRef udid = (const struct __CFString *)MGCopyAnswer(kMGUniqueDeviceID);
 
 		[mailViewController setMessageBody:[NSString stringWithFormat:@"\n\n UUID: %@\nDevice: %@\nFirmware: %@",udid, [NSString stringWithCString:machine encoding:NSUTF8StringEncoding], [[UIDevice currentDevice] systemVersion] ] isHTML:NO];
 		[(UINavigationController *)self presentViewController:mailViewController animated:YES completion:NULL];
@@ -164,5 +142,3 @@
 	return NO;
 }
 @end
-
-// vim:ft=objc
