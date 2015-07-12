@@ -3,8 +3,6 @@
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
 
-#define bundlePath @"/Library/PreferenceBundles/Asphaleia2Prefs.bundle"
-
 @implementation ASAdvancedSecurityListController
 
 - (id)specifiers {
@@ -19,15 +17,15 @@
 {
     UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
     if (indexPath.section == 0) {
-        cell.imageView.image = [UIImage imageNamed:@"IconEditMode.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+        cell.imageView.image = [UIImage imageNamed:@"IconEditMode.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath]];
     } else if (indexPath.section == 1) {
-        cell.imageView.image = [UIImage imageNamed:@"IconPowerOff.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+        cell.imageView.image = [UIImage imageNamed:@"IconPowerOff.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath]];
     } else if (indexPath.section == 2) {
-        cell.imageView.image = [UIImage imageNamed:@"IconMultitasking.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+        cell.imageView.image = [UIImage imageNamed:@"IconMultitasking.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath]];
     } else if (indexPath.section == 3) {
-        cell.imageView.image = [UIImage imageNamed:@"IconControlCenter.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+        cell.imageView.image = [UIImage imageNamed:@"IconControlCenter.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath]];
     } else if (indexPath.section == 4) {
-        cell.imageView.image = [UIImage imageNamed:@"IconSpotlight.png" inBundle:[[NSBundle alloc] initWithPath:bundlePath]];
+        cell.imageView.image = [UIImage imageNamed:@"IconSpotlight.png" inBundle:[[NSBundle alloc] initWithPath:kBundlePath]];
     }
     return cell;
 }
