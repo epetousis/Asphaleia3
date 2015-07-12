@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Black out multitasking previews for secured apps.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>obscureAppContent</string>
+			<key>label</key>
+			<string>Obscure App Content</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Do not require re-authorisation of a secured app if it is already open upon unlocking.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>easyUnlockIntoApp</string>
+			<key>label</key>
+			<string>Unlock to App Unsecured</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Set a limited amount of time after unlocking before App Security is enabled.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>delayAfterLock</string>
+			<key>label</key>
+			<string>Delay Asphaleia</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>timeIntervalLock</string>
+			<key>label</key>
+			<string>Delay Length</string>
+			<key>validTitles</key>
+			<array>
+				<string>For 10 seconds</string>
+				<string>For 30 seconds</string>
+				<string>For 1 minute</string>
+				<string>For 5 minutes</string>
+				<string>For 15 minutes</string>
+				<string>For 30 minutes</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<integer>10</integer>
+				<integer>30</integer>
+				<integer>60</integer>
+				<integer>300</integer>
+				<integer>900</integer>
+				<integer>1800</integer>
+			</array>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Unprotect everything when on your home network. Add multiple networks separating them with a comma and a space e.g. 'A, B'</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>wifiUnlock</string>
+			<key>label</key>
+			<string>Wi-Fi Unlock</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>id</key>
+			<string>WiFiNetworkTextCell</string>
+			<key>label</key>
+			<string>Network Name:</string>
+			<key>noAutoCorrect</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>wifiNetwork</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>id</key>
+			<string>addCurrentNetworkButton</string>
+			<key>action</key>
+			<string>addCurrentNetwork</string>
+			<key>label</key>
+			<string>Add Current Network</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Black out notifications for secured apps.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>obscureBanners</string>
+			<key>label</key>
+			<string>Obscure Notifications</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Advanced Options</string>
+</dict>
+</plist>

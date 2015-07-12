@@ -1,13 +1,12 @@
-ARCHS = armv7 armv7s arm64
 GO_EASY_ON_ME = 1
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = AsphaleiaPrefs
-AsphaleiaPrefs_FILES = AsphaleiaPrefs.mm AsphaleiaTitleCell.m AsphaleiaPrefsViewControllers.mm asphaleiaTVC.m modalPinVC.mm TouchIDInfo.mm
+AsphaleiaPrefs_FILES = ASRootListController.mm AsphaleiaTitleCell.m ASCreatorsListController.mm ASPasscodeOptionsListController.mm ASAdvancedOptionsListController.mm ASControlPanelListController.mm ASAdvancedSecurityListController.mm ASSecuredItemsListController.mm ASSecuredFoldersListController.mm ASSecuredAppsListController.mm asphaleiaTVC.m modalPinVC.mm TouchIDInfo.mm
 AsphaleiaPrefs_INSTALL_PATH = /Library/PreferenceBundles
 AsphaleiaPrefs_FRAMEWORKS = UIKit CoreGraphics AudioToolbox QuartzCore Twitter MessageUI SystemConfiguration
 AsphaleiaPrefs_PRIVATE_FRAMEWORKS = Preferences
-AsphaleiaPrefs_LDFLAGS = -lapplist -L/Users/evanpetousis/theos/lib -lmobilegestalt
+AsphaleiaPrefs_LDFLAGS = -lapplist -lmobilegestalt
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

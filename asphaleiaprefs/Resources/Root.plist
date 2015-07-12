@@ -14,7 +14,7 @@
 			<key>cell</key>
 			<string>PSLinkCell</string>
 			<key>label</key>
-			<string>Secured Apps</string>
+			<string>Secured Items</string>
 			<key>icon</key>
 			<string>SecuredApps@2x.png</string>
 			<key>action</key>
