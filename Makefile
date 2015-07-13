@@ -27,4 +27,5 @@ after-install::
 	install.exec "killall -9 backboardd"
 SUBPROJECTS += asphaleiaprefs
 #SUBPROJECTS += asphaleiaphotosprotection
+SUBPROJECTS += asphaleiaflipswitch
 include $(THEOS_MAKE_PATH)/aggregate.mk
