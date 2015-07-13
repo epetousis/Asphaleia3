@@ -3,7 +3,13 @@
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
-	[self dismissViewControllerAnimated:YES completion:nil];
+	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		if (!wasCancelled) {
+			%orig;
+		} else {
+			[self dismissViewControllerAnimated:YES completion:nil];
+		}
+	}];
 	return;
 }
 
@@ -21,21 +27,21 @@
 
 %end
 
-%hook PHPhotoLibrary
+/*%hook PHPhotoLibrary
 
-/*- (id)fetchPHObjectsForOIDs:(id)arg1 propertyHint:(unsigned int)arg2 includeTrash:(BOOL)arg3 { %log; return nil; }
+- (id)fetchPHObjectsForOIDs:(id)arg1 propertyHint:(unsigned int)arg2 includeTrash:(BOOL)arg3 { %log; return nil; }
 - (id)fetchPHObjectsForUUIDs:(id)arg1 entityName:(id)arg2 { %log; return nil; }
 - (id)fetchResults { %log; return nil; }
-- (id)fetchUpdatedObject:(id)arg1 { %log; return nil; }*/
-/*- (id)initSharedLibrary {
+- (id)fetchUpdatedObject:(id)arg1 { %log; return nil; }
+- (id)initSharedLibrary {
 	return nil;
-}*/
+}
 
 - (void)_beginTransaction {
 	return;
 }
-- (void)_commitTransaction:(id /* block */)arg1 {
+- (void)_commitTransaction:(id)arg1 {
 	return;
 }
 
-%end
+%end*/
