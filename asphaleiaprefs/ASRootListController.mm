@@ -115,7 +115,7 @@
 	{
 		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
 		mailViewController.mailComposeDelegate = (id<MFMailComposeViewControllerDelegate>)self;
-		[mailViewController setSubject:@"Asphaleia Support"];
+		[mailViewController setSubject:@"Asphaleia 2 Support"];
 		[mailViewController setToRecipients:[NSArray arrayWithObject:@"asphaleia@a3tweaks.com"]];
 		size_t size;
 		sysctlbyname("hw.machine", NULL, &size, NULL, 0);
