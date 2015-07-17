@@ -722,14 +722,6 @@ BOOL currentBannerAuthenticated;
 		%orig;
 }
 
-/*- (void)addObserver:(id)arg1 {
-	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
-	if ([[BTTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[BTTouchIDController sharedInstance]])
-		[[[BTTouchIDController sharedInstance] oldObservers] addObject:arg1];
-	else
-		%orig;
-}*/
-
 - (void)removeObserver:(id)arg1 {
 	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
 	if ([[BTTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[BTTouchIDController sharedInstance]])
