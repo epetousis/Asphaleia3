@@ -10,6 +10,10 @@ https://github.com/Sassoty/BioTesting */
 #import <AudioToolbox/AudioServices.h>
 #import "PreferencesHandler.h"
 #import <substrate.h>
+#import <notify.h>
+
+#define ENABLE_VH "virtualhome.enable"
+#define DISABLE_VH "virtualhome.disable"
 
 @interface BTTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
@@ -75,6 +79,8 @@ https://github.com/Sassoty/BioTesting */
 		return;
 	}
 
+	notify_post(DISABLE_VH);
+
 	id activator = [objc_getClass("LAActivator") sharedInstance];
 	if (activator)
     {
@@ -138,6 +144,7 @@ https://github.com/Sassoty/BioTesting */
 				[monitor addObserver:observer];
 	_oldObservers = nil;
 	[monitor _setMatchingEnabled:previousMatchingSetting];
+	notify_post(ENABLE_VH);
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
     if (activator && activatorListenerNames && activatorListenerNamesSpringBoard)
