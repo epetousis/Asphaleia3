@@ -30,6 +30,7 @@
 #define kPasscodeKey @"passcode"
 #define kPasscodeEnabledKey @"simplePasscode"
 #define kTouchIDEnabledKey @"touchID"
+#define kSecurePhotosKey @"securePhotos"
 
 static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist";
 
@@ -56,12 +57,13 @@ BOOL shouldObscureAppContent(void);
 BOOL shouldObscureNotifications(void);
 BOOL shouldSecureSwitcher(void);
 BOOL shouldSecureAppArrangement(void);
+BOOL shouldSecurePhotos(void);
 NSArray *getProtectedAppsNoBullshit(void);
 NSArray *getProtectedApps(void);
 NSArray *getProtectedFolders(void);
 
 @interface ASPreferencesHandler : NSObject
-@property (retain) NSMutableDictionary *prefs;
+@property (retain) NSDictionary *prefs;
 @property BOOL asphaleiaDisabled;
 @property BOOL appSecurityDisabled;
 +(instancetype)sharedInstance;
