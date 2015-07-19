@@ -24,6 +24,14 @@ https://github.com/Sassoty/BioTesting */
 -(void)flashWhiteWithCompletion:(id)completion;
 @end
 
+void startMonitoringNotification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	[[BTTouchIDController sharedInstance] startMonitoring];
+}
+
+void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	[[BTTouchIDController sharedInstance] stopMonitoring];
+}
+
 @implementation BTTouchIDController
 
 +(id)sharedInstance {
@@ -32,6 +40,8 @@ https://github.com/Sassoty/BioTesting */
 	static dispatch_once_t token = 0;
 	dispatch_once(&token, ^{
 		sharedInstance = [self new];
+		addObserver(startMonitoringNotification,"com.a3tweaks.asphaleia8.startmonitoring");
+		addObserver(stopMonitoringNotification,"com.a3tweaks.asphaleia8.stopmonitoring");
 	});
 	// Provide instance
 	return sharedInstance;
@@ -43,30 +53,36 @@ https://github.com/Sassoty/BioTesting */
 		case TouchIDFingerDown:
 			asphaleiaLogMsg(@"Finger down");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerdown" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.fingerdown"), NULL, NULL, YES);
 			break;
 		case TouchIDFingerUp:
 			asphaleiaLogMsg(@"Finger up");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerup" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.fingerup"), NULL, NULL, YES);
 			break;
 		case TouchIDFingerHeld:
 			asphaleiaLogMsg(@"Finger held");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerheld" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.fingerheld"), NULL, NULL, YES);
 			break;
 		case TouchIDMatched:
 			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authsuccess"), NULL, NULL, YES);
 			[self stopMonitoring];
 			_shouldBlockLockscreenMonitor = NO;
 			break;
 		case TouchIDNotMatched:
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authfailed"), NULL, NULL, YES);
 			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 		case 10: // For the new iPhone
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authfailed"), NULL, NULL, YES);
 			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;

@@ -94,6 +94,26 @@
 			<key>PostNotification</key>
 			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Photos protection does not work everywhere, and may cause crashes or app instability. Use at your own risk.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>securePhotos</string>
+			<key>label</key>
+			<string>Photos</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>Advanced</string>

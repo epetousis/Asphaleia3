@@ -13,6 +13,16 @@
 @property (nonatomic, strong) ASPasscodeHandlerEventBlock eventBlock;
 @end
 
+void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+        if (authenticated) {
+        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.passcodeauthsuccess"), NULL, NULL, YES);
+        } else {
+        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.passcodeauthfailed"), NULL, NULL, YES);
+        }
+    }];
+}
+
 @implementation ASPasscodeHandler
 
 +(instancetype)sharedInstance {
@@ -20,6 +30,7 @@
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedInstance = [self new];
+        addObserver(showPasscodeView,"com.a3tweaks.asphaleia8.showpasscodeview");
     });
     return sharedInstance;
 }

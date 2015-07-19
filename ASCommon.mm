@@ -35,9 +35,10 @@ static ASCommon *sharedCommonObj;
     [self deregisterForTouchIDNotifications];
 }
 
--(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
-    authHandler = [handler copy];
+-(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate {
+    /*if (!touchIDEnabled()) {
+        return nil;
+    }*/
 
     NSString *title;
     NSString *message;
@@ -54,7 +55,7 @@ static ASCommon *sharedCommonObj;
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:message
-                   delegate:self
+                   delegate:delegate
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
@@ -80,29 +81,13 @@ static ASCommon *sharedCommonObj;
         alertViewAccessory = imgView;
     }
 
-    if (!touchIDEnabled() && !passcodeEnabled()) {
-        authHandler(NO);
-        return;
-    }
-
-    if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-                authHandler(!authenticated);
-            }];
-        return;
-    }
-
-    if (self.currentAuthAlert)
-        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
-
-    self.currentAuthAlert = alertView;
-
-    [alertView show];
+    return alertView;
 }
 
--(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
-    authHandler = [handler copy];
+-(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate {
+    /*if (!touchIDEnabled()) {
+        return nil;
+    }*/
 
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
@@ -133,6 +118,10 @@ static ASCommon *sharedCommonObj;
             title = @"Asphaleia Control Panel";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
+        case ASAuthenticationAlertPhotos:
+            title = @"Photo Library";
+            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            break;
         default:
             title = @"Asphaleia";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
@@ -142,7 +131,7 @@ static ASCommon *sharedCommonObj;
 
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:@"Scan fingerprint to access."
-                   delegate:self
+                   delegate:delegate
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
@@ -150,6 +139,36 @@ static ASCommon *sharedCommonObj;
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
     alertViewAccessory = imgView;
+
+    return alertView;
+}
+
+-(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    authHandler = [handler copy];
+
+    UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
+
+    if (!touchIDEnabled() && !passcodeEnabled()) {
+        authHandler(NO);
+        return;
+    }
+
+    if (!touchIDEnabled()) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+                authHandler(!authenticated);
+            }];
+        return;
+    }
+
+    [alertView show];
+}
+
+-(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    authHandler = [handler copy];
+
+    UIAlertView *alertView = [self returnAuthenticationAlertOfType:alertType delegate:self];
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         authHandler(NO);
@@ -162,11 +181,6 @@ static ASCommon *sharedCommonObj;
             }];
         return;
     }
-
-    if (self.currentAuthAlert)
-        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
-
-    self.currentAuthAlert = alertView;
 
     [alertView show];
 }
@@ -298,13 +312,18 @@ static ASCommon *sharedCommonObj;
 - (void)willPresentAlertView:(UIAlertView *)alertView {
     [self addSubview:alertViewAccessory toAlertView:alertView];
 
+    if (self.currentAuthAlert)
+        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
+
+    self.currentAuthAlert = alertView;
+
     if (touchIDEnabled())
         [[BTTouchIDController sharedInstance] startMonitoring];
 }
 
-- (void)didPresentAlertView:(UIAlertView *)alertView {
+/*- (void)didPresentAlertView:(UIAlertView *)alertView {
     if (touchIDEnabled())
         [[BTTouchIDController sharedInstance] startMonitoring];
-}
+}*/
 
 @end

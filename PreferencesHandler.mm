@@ -4,7 +4,7 @@
 #import <FlipSwitch/FlipSwitch.h>
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	[ASPreferencesHandler sharedInstance].prefs = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesFilePath];
+	[ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
 	[ASPreferencesHandler sharedInstance].asphaleiaDisabled = !passcodeEnabled() && !touchIDEnabled();
 	if ([[objc_getClass("FSSwitchPanel") sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.asphaleiaflipswitch"] == FSSwitchStateOff)
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
@@ -144,6 +144,12 @@ BOOL shouldSecureAppArrangement(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
     return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
+}
+
+BOOL shouldSecurePhotos(void) {
+	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+		return NO;
+    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] boolValue] : NO;
 }
 
 NSArray *getProtectedAppsNoBullshit(void) {
