@@ -98,7 +98,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Photos protection does not work everywhere, and may cause crashes or app instability. Use at your own risk.</string>
+			<string>Photos protection does not work everywhere, and may cause crashes, app instability, or may require you to reopen the screen you were in. Use at your own risk.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
