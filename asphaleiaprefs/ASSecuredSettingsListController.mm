@@ -43,6 +43,12 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [[[self navigationController] rootListController] tableView:[[[self navigationController] rootListController] table] cellForRowAtIndexPath:indexPath];
+    if ([cell.accessoryView isKindOfClass:[UISwitch class]]) {
+        cell.userInteractionEnabled = NO;
+        cell.textLabel.enabled = NO;
+        cell.detailTextLabel.enabled = NO;
+        [(UISwitch *)cell.accessoryView setEnabled:NO];
+    }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
     [settingsPanelNames insertObject:[[(PSTableCell *)cell specifier] identifier] atIndex:[self getRowIndexFromAllRows:indexPath]];
