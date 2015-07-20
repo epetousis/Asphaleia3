@@ -1,14 +1,23 @@
-#include "ASSecuredItemsListController.h"
+#include "ASSecuredSettingsListController.h"
 #import "ASRootListController.h"
 #import <Preferences/PSSpecifier.h>
-#import <dlfcn.h>
-#import <objc/runtime.h>
-#import <libactivator/libactivator.h>
+#import <Preferences/PSRootController.h>
+#import <Preferences/PSTableCell.h>
 
-//[[[[self navigationController] topViewController] rootListController] specifiers]
-//[[[[self navigationController] topViewController] rootListController] numberOfSectionsInTableView:[[[[self navigationController] topViewController] rootListController] table]]
-//[[[[self navigationController] topViewController] rootListController] tableView:[[[[self navigationController] topViewController] rootListController] table] numberOfRowsInSection:0]
-//[[[[self navigationController] topViewController] rootListController] tableView:[[[[self navigationController] topViewController] rootListController] table] cellForRowAtIndexPath]
+#define kIconStateFile @"/private/var/mobile/Library/SpringBoard/IconState.plist"
+
+@interface PrefsListController : PSListController
+-(id)table;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView;
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+@end
+@interface PrefsRootController : PSRootController
+-(PrefsListController *)rootListController;
+@end
+@interface PSListController ()
+-(PrefsRootController *)navigationController;
+@end
 
 @implementation ASSecuredSettingsListController
 
@@ -16,21 +25,68 @@
 	return nil;
 }
 
--(id) readPreferenceValue:(PSSpecifier*)specifier {
-    NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:PreferencesPath];
-    if (!settings[specifier.properties[@"key"]]) {
-        return specifier.properties[@"default"];
-    }
-    return settings[specifier.properties[@"key"]];
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    settingsPanelNames = [[NSMutableArray alloc] init];
+    asphaleiaSettings = [[NSMutableDictionary alloc] initWithContentsOfFile:kPreferencesPath];
+    securedSettings = [asphaleiaSettings objectForKey:@"securedPanels"] ? [asphaleiaSettings objectForKey:@"securedPanels"] : [[NSMutableDictionary alloc] init];
 }
- 
--(void) setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
-    NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
-    [defaults addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:PreferencesPath]];
-    [defaults setObject:value forKey:specifier.properties[@"key"]];
-    [defaults writeToFile:PreferencesPath atomically:YES];
-    CFStringRef toPost = (CFStringRef)specifier.properties[@"PostNotification"];
-    if(toPost) CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
+
+-(int)getRowIndexFromAllRows:(NSIndexPath *)indexPath {
+    int total = 0;
+    for (int i = 0; i < indexPath.section; i++) {
+        total += [self tableView:[self table] numberOfRowsInSection:i];
+    }
+    total += indexPath.row;
+    return total;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [[[self navigationController] rootListController] tableView:[[[self navigationController] rootListController] table] cellForRowAtIndexPath:indexPath];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
+    [settingsPanelNames insertObject:[[(PSTableCell *)cell specifier] identifier] atIndex:[self getRowIndexFromAllRows:indexPath]];
+    [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
+    switchview.tag = [self getRowIndexFromAllRows:indexPath];
+    [switchview setOn:[securedSettings[settingsPanelNames[[self getRowIndexFromAllRows:indexPath]]] boolValue] animated:NO];
+    cell.detailTextLabel.text = nil;
+    cell.accessoryView = switchview;
+    return cell;
+}
+
+- (void)updateSwitchAtIndexPath:(UISwitch *)sender {
+    [securedSettings setObject:[NSNumber numberWithBool:sender.on] forKey:[settingsPanelNames objectAtIndex:[sender tag]]];
+    [asphaleiaSettings setObject:securedSettings forKey:@"securedPanels"];
+    [asphaleiaSettings writeToFile:kPreferencesPath atomically:YES];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL, YES);
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return [[[self navigationController] rootListController] numberOfSectionsInTableView:[[[self navigationController] rootListController] table]];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [[[self navigationController] rootListController] tableView:[[[self navigationController] rootListController] table] numberOfRowsInSection:section];
+}
+
+- (id)tableView:(id)arg1 titleForHeaderInSection:(NSInteger)arg2 {
+    return nil;
+}
+
+- (id)tableView:(id)arg1 titleForFooterInSection:(NSInteger)arg2 {
+    return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 44.f;
+}
+
+- (void)tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2 {
+    return;
+}
+
+- (id)_tableView:(id)arg1 viewForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
+    return nil;
 }
 
 @end

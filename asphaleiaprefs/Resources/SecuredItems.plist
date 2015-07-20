@@ -76,6 +76,16 @@
 			<key>label</key>
 			<string>Secured Folders</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>detail</key>
+			<string>ASSecuredSettingsListController</string>
+			<key>isController</key>
+			<true/>
+			<key>label</key>
+			<string>Secured Settings Panels</string>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>Secured Items</string>
