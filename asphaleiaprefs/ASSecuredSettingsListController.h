@@ -1,4 +1,8 @@
 #import <Preferences/PSListController.h>
 
-@interface ASSecuredSettingsListController : PSListController
+@interface ASSecuredSettingsListController : PSListController {
+	NSMutableArray *settingsPanelNames;
+	NSMutableDictionary *securedSettings;
+	NSMutableDictionary *asphaleiaSettings;
+}
 @end

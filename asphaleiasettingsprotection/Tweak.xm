@@ -17,7 +17,7 @@
 
 BOOL useTouchID;
 BOOL usePasscode;
-NSArray *securedPanels;
+NSDictionary *securedPanels;
 UIAlertView *alertView;
 ASCommonAuthenticationHandler authHandler;
 NSString *origTitle;
@@ -40,7 +40,7 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 %hook PrefsListController
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (![securedPanels containsObject:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]] || (!useTouchID && !usePasscode)) {
+	if (![securedPanels[[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]] boolValue] || (!useTouchID && !usePasscode)) {
 		%orig;
 		return;
 	}
@@ -85,6 +85,7 @@ void updatePrefs(CFNotificationCenterRef center, void *observer, CFStringRef nam
 	useTouchID = [preferences[kTouchIDEnabledKey] boolValue];
 	usePasscode = [preferences[kPasscodeEnabledKey] boolValue];
 	securedPanels = preferences[kSecuredPanelsKey] ? preferences[kSecuredPanelsKey] : [[NSDictionary alloc] init];
+	NSLog(@"TehDictionary: %@",securedPanels);
 }
 
 %ctor {
