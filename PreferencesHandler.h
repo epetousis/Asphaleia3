@@ -8,6 +8,7 @@
 
 #define kSecuredAppsKey @"securedApps"
 #define kSecuredFoldersKey @"securedFolders"
+#define kSecuredPanelsKey @"securedPanels"
 #define kSecureSwitcherKey @"secureSwitcher"
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
