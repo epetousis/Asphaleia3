@@ -91,9 +91,10 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
-	if(self.isMonitoring) {
+	if(self.isMonitoring || starting) {
 		return;
 	}
+	starting = YES;
 
 	notify_post(DISABLE_VH);
 
@@ -118,7 +119,6 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 					[activator removeListenerAssignment:listenerName fromEvent:eventSpringBoard];
 		}
 	}
-	self.isMonitoring = YES;
 
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	previousMatchingSetting = [monitor isMatchingEnabled];
@@ -142,14 +142,17 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	[monitor _setMatchingEnabled:YES];
 	[monitor _startMatching];
 
+	starting = NO;
+	self.isMonitoring = YES;
+
 	asphaleiaLogMsg(@"Touch ID monitoring began");
 }
 
 -(void)stopMonitoring {
-	if(!self.isMonitoring) {
+	if(!self.isMonitoring || stopping) {
 		return;
 	}
-	self.isMonitoring = NO;
+	stopping = YES;
 
 	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
@@ -187,6 +190,9 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 		if (![(LAActivator *)objc_getClass("LASharedActivator") hasListenerWithName:@"Control Panel"])
 			[[ASControlPanel sharedInstance] load];
 	}
+
+	stopping = NO;
+	self.isMonitoring = NO;
 
 	asphaleiaLogMsg(@"Touch ID monitoring ended");
 }

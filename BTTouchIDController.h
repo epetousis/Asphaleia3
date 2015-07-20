@@ -27,6 +27,8 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 #define TouchIDNotMatched  9
 
 @interface BTTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
+	BOOL starting;
+	BOOL stopping;
 	BOOL previousMatchingSetting;
 	NSArray *activatorListenerNames;
 	NSArray *activatorListenerNamesSpringBoard;
