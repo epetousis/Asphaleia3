@@ -28,4 +28,5 @@ after-install::
 SUBPROJECTS += asphaleiaprefs
 SUBPROJECTS += asphaleiaphotosprotection
 SUBPROJECTS += asphaleiaflipswitch
+SUBPROJECTS += asphaleiasettingsprotection
 include $(THEOS_MAKE_PATH)/aggregate.mk
