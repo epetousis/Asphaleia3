@@ -49,6 +49,9 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
+	if (!self.isMonitoring)
+		return;
+
 	switch(event) {
 		case TouchIDFingerDown:
 			asphaleiaLogMsg(@"Finger down");
