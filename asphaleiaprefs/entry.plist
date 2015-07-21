@@ -10,8 +10,6 @@
 		<string>PSLinkCell</string>
 		<key>detail</key>
 		<string>ASRootListController</string>
-		<key>pane</key>
-		<string>modalPinVC</string>
 		<key>icon</key>
 		<string>AsphaleiaPrefs@2x.png</string>
 		<key>isController</key>
