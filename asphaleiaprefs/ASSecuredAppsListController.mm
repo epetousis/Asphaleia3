@@ -202,6 +202,7 @@ static UIImage *defaultImage;
     [asphaleiaSettings setObject:securedApps forKey:@"securedApps"];
     [asphaleiaSettings writeToFile:kPreferencesPath atomically:YES];
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia/ReloadPrefs"), NULL, NULL, YES);
+    [self updateSelectionButton];
 }
 
 // AppList code, kindly borrowed from https://github.com/rpetrich/AppList/blob/master/ALApplicationTableDataSource.m
