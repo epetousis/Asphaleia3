@@ -26,7 +26,7 @@ NSString *temporarilyUnlockedAppBundleID;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
 ASTouchWindow *anywhereTouchWindow;
-BOOL appAlreadyAuthenticated;
+NSString *appUserAuthorisedID;
 BOOL catchAllIgnoreRequest;
 SBBannerContainerViewController *controller;
 
@@ -61,7 +61,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		if ([iconView isEqual:currentIconView]) {
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 				if (authenticated) {
-					appAlreadyAuthenticated = YES;
+					appUserAuthorisedID = iconView.icon.applicationBundleID;
 					if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
 						[iconView.icon launchFromLocation:iconView.location context:nil];
 					} else {
@@ -81,7 +81,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 			[iconView setHighlighted:NO];
 
 			if (authenticated){
-				appAlreadyAuthenticated = YES;
+				appUserAuthorisedID = iconView.icon.applicationBundleID;
 				%orig;
 			}
 		}];
@@ -176,7 +176,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 			[fingerglyph setState:0 animated:YES completionHandler:nil];
 	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
 		if (fingerglyph && currentIconView) {
-			appAlreadyAuthenticated = YES;
+			appUserAuthorisedID = currentIconView.icon.applicationBundleID;
 			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
 				[currentIconView.icon launchFromLocation:currentIconView.location context:nil];
 			} else {
@@ -501,7 +501,7 @@ static BOOL openURLHasAuthenticated;
 
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
 	asphaleiaLog();
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated) {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated || [appUserAuthorisedID isEqualToString:[application bundleIdentifier]]) {
 		%orig;
 		return;
 	}
@@ -598,6 +598,9 @@ BOOL currentBannerAuthenticated;
 
 -(void)viewDidDisappear:(BOOL)animated {
 	%orig;
+	currentBannerAuthenticated = NO;
+	appUserAuthorisedID = nil;
+
 	if (![[%c(SBBannerController) sharedInstance] isShowingBanner]) {
 		[[BTTouchIDController sharedInstance] stopMonitoring];
 	}
@@ -624,6 +627,7 @@ BOOL currentBannerAuthenticated;
 	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
 		if (bannerFingerGlyph && notificationBlurView) {
 			currentBannerAuthenticated = YES;
+			appUserAuthorisedID = [[self _bulletin] sectionID];
 			[[BTTouchIDController sharedInstance] stopMonitoring];
 			[UIView animateWithDuration:0.3f animations:^{
 				[notificationBlurView setAlpha:0.0f];
@@ -686,17 +690,17 @@ BOOL currentBannerAuthenticated;
 		[temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] ||
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled ||
 		[ASPreferencesHandler sharedInstance].appSecurityDisabled ||
-		appAlreadyAuthenticated ||
+		[appUserAuthorisedID isEqualToString:[application bundleIdentifier]] ||
 		catchAllIgnoreRequest ||
 		![application bundleIdentifier]) {
 
-		appAlreadyAuthenticated = NO;
+		appUserAuthorisedID = nil;
 		catchAllIgnoreRequest = NO;
 		%orig;
 		return;
 	}
 
-	appAlreadyAuthenticated = NO;
+	appUserAuthorisedID = nil;
 
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
