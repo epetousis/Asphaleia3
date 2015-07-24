@@ -68,19 +68,31 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     NSString *bundleID = [frontmostApp bundleIdentifier];
     NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
     switch (buttonIndex) {
-    case 1:
-        [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
-    case 2:
-        [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
-        [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-    case 3:
-        if (![tempPrefs objectForKey:kSecuredAppsKey])
-            [tempPrefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
+        case 1:
+            [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
+            if ([ASPreferencesHandler sharedInstance].appSecurityDisabled && shouldProtectAllApps()) {
+                [tempPrefs setObject:[NSNumber numberWithBool:NO] forKey:kProtectAllAppsKey];
+                [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
+                [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            }
+            break;
+        case 2:
+            [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
+            [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
+            [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
 
-        [[tempPrefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
-        [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            if ([ASPreferencesHandler sharedInstance].appSecurityDisabled && shouldProtectAllApps()) {
+                [ASPreferencesHandler sharedInstance].appSecurityDisabled = NO;
+            }
+            break;
+        case 3:
+            if (![tempPrefs objectForKey:kSecuredAppsKey])
+                [tempPrefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
+
+            [[tempPrefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
+            [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
+            [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            break;
     }
 }
 
