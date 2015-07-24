@@ -50,53 +50,48 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 
             self.alertView = [[UIAlertView alloc] initWithTitle:titleWithSpacingForSmallIcon(@"Asphaleia Control Panel")
                                 message:nil
-                                delegate:nil
+                                delegate:self
                                 cancelButtonTitle:@"Cancel"
                                 otherButtonTitles:nil];
             for (NSString *buttonTitle in buttonTitleArray)
                 [self.alertView addButtonWithTitle:buttonTitle];
-
-            self.alertView.tapBlock = ^(UIAlertView *alertView, NSInteger buttonIndex) {
-                    if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:addRemoveFromSecureAppsTitle]) {
-                        if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey])
-                            [[ASPreferencesHandler sharedInstance].prefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
-
-                        [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
-                        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-                    } else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:mySecuredAppsTitle]) {
-                        [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
-                    } else if ([[alertView buttonTitleAtIndex:buttonIndex] isEqualToString:enableGlobalAppsTitle]) {
-                        NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
-                        [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
-                        [ASPreferencesHandler sharedInstance].prefs = tempPrefs;
-                        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-                    }
-
-                };
-
-            NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
-            UIImage *iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
-            UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-            imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-            imgView.center = CGPointMake(270/2,32);
-
-            self.alertView.willPresentBlock = ^(UIAlertView *alertView) {
-                UIView *labelSuperview;
-                for (id subview in [[ASCommon sharedInstance] allSubviewsOfView:[[alertView _alertController] view]]){
-                    if ([subview isKindOfClass:[UILabel class]]) {
-                        labelSuperview = [subview superview];
-                    }
-                }
-                if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-                    [labelSuperview addSubview:imgView];
-                }
-            };
 
             [self.alertView show];
         }
     }];
  
     [event setHandled:YES];
+}
+
+- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+    SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+    NSString *bundleID = [frontmostApp bundleIdentifier];
+    NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
+    switch (buttonIndex) {
+    case 1:
+        [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
+    case 2:
+        [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
+        [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
+        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+    case 3:
+        if (![tempPrefs objectForKey:kSecuredAppsKey])
+            [tempPrefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
+
+        [[tempPrefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
+        [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
+        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+    }
+}
+
+- (void)willPresentAlertView:(UIAlertView *)alertView {
+    NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
+    UIImage *iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+    imgView.center = CGPointMake(270/2,32);
+
+    [[ASCommon sharedInstance] addSubview:imgView toAlertView:alertView];
 }
  
 -(void)activator:(LAActivator *)activator abortEvent:(LAEvent *)event {
