@@ -224,7 +224,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		%orig;
 }
 
--(void)layoutSubviews {
+- (void)_layoutContainer {
 	%orig;
 	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		return;
@@ -251,12 +251,6 @@ void DeregisterForTouchIDNotifications(id observer) {
 	obscurityView.tag = 80085; // ;)
 
 	[self addSubview:obscurityView];
-}
-- (void)respondToBecomingInvisibleIfNecessary {
-	for (UIView *view in [[ASCommon sharedInstance] allSubviewsOfView:self]) {
-		if (view.tag == 80085)
-			[view removeFromSuperview];
-	}
 }
 
 %end
