@@ -172,13 +172,15 @@ void fingerScanned(CFNotificationCenterRef center, void *observer, CFStringRef n
 %end*/
 
 void updatePrefs(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
-	useTouchID = [preferences[kTouchIDEnabledKey] boolValue];
-	usePasscode = [preferences[kPasscodeEnabledKey] boolValue];
-	securePhotos = [preferences[kSecurePhotosKey] boolValue];
+	//NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
+	loadPreferences();
+	useTouchID = touchIDEnabled();
+	usePasscode = passcodeEnabled();
+	securePhotos = shouldSecurePhotos();
+	NSLog(@"Prefs: %@ touchid:%i passcode:%i securephotos:%i",[ASPreferencesHandler sharedInstance].prefs,useTouchID,usePasscode,securePhotos);
 }
 
 %ctor {
 	updatePrefs(NULL,NULL,NULL,NULL,NULL);
-	addObserver(updatePrefs,"com.a3tweaks.asphaleia/ReloadPrefs");
+	//addObserver(updatePrefs,"com.a3tweaks.asphaleia/ReloadPrefs");
 }

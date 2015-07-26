@@ -2,13 +2,14 @@
 #import "PreferencesHandler.h"
 #import "Asphaleia.h"
 #import <FlipSwitch/FlipSwitch.h>
+#import <dlfcn.h>
 
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
-	[ASPreferencesHandler sharedInstance].asphaleiaDisabled = !passcodeEnabled() && !touchIDEnabled();
-	if ([[objc_getClass("FSSwitchPanel") sharedPanel] stateForSwitchIdentifier:@"com.a3tweaks.asphaleiaflipswitch"] == FSSwitchStateOff)
+	if (!passcodeEnabled() && !touchIDEnabled()) {
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
-	[ASPreferencesHandler sharedInstance].appSecurityDisabled = !passcodeEnabled() && !touchIDEnabled();
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled = YES;
+	}
 }
 
 BOOL shouldRequireAuthorisationOnWifi(void) {
@@ -16,6 +17,8 @@ BOOL shouldRequireAuthorisationOnWifi(void) {
 	NSString *unlockSSIDValue = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] ? [[ASPreferencesHandler sharedInstance].prefs objectForKey:kWifiUnlockNetworkKey] : @"";
 	NSArray *unlockSSIDs = [unlockSSIDValue componentsSeparatedByString:@", "];
 	CFArrayRef interfaceArray = CNCopySupportedInterfaces();
+	if (!interfaceArray)
+		return YES;
 	CFDictionaryRef networkInfoDictionary = CNCopyCurrentNetworkInfo((CFStringRef)CFArrayGetValueAtIndex(interfaceArray, 0));
 	NSDictionary *ssidList = (__bridge NSDictionary*)networkInfoDictionary;
 	NSString *currentSSID = [ssidList valueForKey:@"SSID"];
@@ -28,6 +31,9 @@ BOOL shouldRequireAuthorisationOnWifi(void) {
 }
 
 BOOL isTouchIDDevice(void) {
+	dlopen("/System/Library/PrivateFrameworks/BiometricKit.framework/BiometricKit", RTLD_LAZY);
+	Class bk = objc_getClass("BiometricKit");
+
     int sysctlbyname(const char *, void *, size_t *, void *, size_t);
 
     size_t size;
@@ -42,7 +48,7 @@ BOOL isTouchIDDevice(void) {
 
     NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
 
-    return [touchIDModels containsObject:results] && [[[objc_getClass("BiometricKit") manager] identities:nil] count] > 0;
+    return [touchIDModels containsObject:results] && [[[bk manager] identities:nil] count] > 0;
 }
 
 BOOL passcodeEnabled(void) {

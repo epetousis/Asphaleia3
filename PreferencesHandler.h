@@ -64,7 +64,7 @@ NSArray *getProtectedApps(void);
 NSArray *getProtectedFolders(void);
 
 @interface ASPreferencesHandler : NSObject
-@property (retain) NSDictionary *prefs;
+@property (nonatomic, retain) NSDictionary *prefs;
 @property BOOL asphaleiaDisabled;
 @property BOOL appSecurityDisabled;
 +(instancetype)sharedInstance;
