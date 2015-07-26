@@ -114,7 +114,7 @@
 			<key>staticTextMessage</key>
 			<string>Set how long after exiting an app before authorisation is required to open again.</string>
 			<key>default</key>
-			<string>Immediately</string>
+			<integer>0</integer>
 			<key>PostNotification</key>
 			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
 		</dict>

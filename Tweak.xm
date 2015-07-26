@@ -77,6 +77,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		%orig;
 		return;
 	} else if (!touchIDEnabled() && passcodeEnabled()) {
+		[iconView setHighlighted:NO];
 		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
 			[iconView setHighlighted:NO];
 
