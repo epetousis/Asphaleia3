@@ -1,5 +1,6 @@
 #import "FSSwitchDataSource.h"
 #import "FSSwitchPanel.h"
+#import "../PreferencesHandler.h"
 
 @interface NSUserDefaults (Tweak_Category)
 - (id)objectForKey:(NSString *)key inDomain:(NSString *)domain;
@@ -15,21 +16,21 @@ static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
 
 @implementation AsphaleiaFlipswitchSwitch
 
--(instancetype)init {
+/*-(instancetype)init {
 	AsphaleiaFlipswitchSwitch *flipswitch = [super init];
 	if (flipswitch) {
-		state = YES;
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)nsNotificationString, NULL, NULL, YES);
 	}
 	return flipswitch;
-}
+}*/
 
 - (NSString *)titleForSwitchIdentifier:(NSString *)switchIdentifier {
 	return @"Asphaleia 2";
 }
 
 - (FSSwitchState)stateForSwitchIdentifier:(NSString *)switchIdentifier {
-	return (state) ? FSSwitchStateOn : FSSwitchStateOff;
+	return (![ASPreferencesHandler sharedInstance].asphaleiaDisabled) ? FSSwitchStateOn : FSSwitchStateOff;
 }
 
 - (void)applyState:(FSSwitchState)newState forSwitchIdentifier:(NSString *)switchIdentifier {
@@ -37,11 +38,11 @@ static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
 	case FSSwitchStateIndeterminate:
 		break;
 	case FSSwitchStateOn:
-		state = YES;
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = NO;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)nsNotificationString, NULL, NULL, YES);
 		break;
 	case FSSwitchStateOff:
-		state = NO;
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)nsNotificationString, NULL, NULL, YES);
 		break;
 	}
