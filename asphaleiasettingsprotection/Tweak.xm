@@ -15,8 +15,6 @@
 -(id)table;
 @end
 
-BOOL useTouchID;
-BOOL usePasscode;
 NSDictionary *securedPanels;
 UIAlertView *alertView;
 ASCommonAuthenticationHandler authHandler;
@@ -41,12 +39,12 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 %hook PrefsListController
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (![securedPanels[[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]] boolValue] || (!useTouchID && !usePasscode)) {
+	if (![getProtectedPanels() containsObject:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]] || (!touchIDEnabled() && !passcodeEnabled())) {
 		%orig;
 		return;
 	}
 	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertSettingsPanel delegate:(id<UIAlertViewDelegate>)self];
-	if (alertView && useTouchID) {
+	if (alertView && touchIDEnabled()) {
 		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
 		origTitle = alertView.title;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
@@ -82,14 +80,7 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 
 %end
 
-void updatePrefs(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
-	useTouchID = [preferences[kTouchIDEnabledKey] boolValue];
-	usePasscode = [preferences[kPasscodeEnabledKey] boolValue];
-	securedPanels = preferences[kSecuredPanelsKey] ? preferences[kSecuredPanelsKey] : [[NSDictionary alloc] init];
-}
-
 %ctor {
-	updatePrefs(NULL,NULL,NULL,NULL,NULL);
-	addObserver(updatePrefs,"com.a3tweaks.asphaleia/ReloadPrefs");
+	loadPreferences();
+	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 }

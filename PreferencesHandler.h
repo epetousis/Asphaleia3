@@ -62,6 +62,7 @@ BOOL shouldSecurePhotos(void);
 NSArray *getProtectedAppsNoBullshit(void);
 NSArray *getProtectedApps(void);
 NSArray *getProtectedFolders(void);
+NSArray *getProtectedPanels(void);
 
 @interface ASPreferencesHandler : NSObject
 @property (nonatomic, retain) NSDictionary *prefs;

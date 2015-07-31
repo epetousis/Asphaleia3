@@ -170,6 +170,8 @@ void fingerScanned(CFNotificationCenterRef center, void *observer, CFStringRef n
 
 %ctor {
 	if (NSClassFromString(@"ALAssetsLibrary") != nil || NSClassFromString(@"UIImagePickerController") != nil) {
+		loadPreferences();
+		addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 		%init;
 	}
 }
