@@ -48,7 +48,10 @@ BOOL isTouchIDDevice(void) {
 
     NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
 
-    return [touchIDModels containsObject:results] && [[[bk manager] identities:nil] count] > 0;
+    if (bk)
+        return [touchIDModels containsObject:results] && [[[bk manager] identities:nil] count] > 0;
+
+    return [touchIDModels containsObject:results];
 }
 
 BOOL passcodeEnabled(void) {
@@ -159,36 +162,52 @@ BOOL shouldSecurePhotos(void) {
 }
 
 NSArray *getProtectedAppsNoBullshit(void) {
+	NSDictionary *apps = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey];
 	NSMutableArray *protectedApps = [NSMutableArray array];
-	for (NSString *app in [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey]) {
-		if ([[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:app] boolValue])
+	for (NSString *app in apps) {
+		if ([[apps objectForKey:app] boolValue])
 			[protectedApps addObject:app];
 	}
 	return [NSArray arrayWithArray:protectedApps];
 }
 
 NSArray *getProtectedApps(void) {
-	if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+	NSDictionary *apps = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey];
+	if (!apps || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return [NSArray array];
 
 	NSMutableArray *protectedApps = [NSMutableArray array];
-	for (NSString *app in [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey]) {
-		if ([[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:app] boolValue])
+	for (NSString *app in apps) {
+		if ([[apps objectForKey:app] boolValue])
 			[protectedApps addObject:app];
 	}
 	return [NSArray arrayWithArray:protectedApps];
 }
 
 NSArray *getProtectedFolders(void) {
-	if (![[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey] || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+	NSDictionary *folders = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey];
+	if (!folders || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return [NSArray array];
 
 	NSMutableArray *protectedFolders = [NSMutableArray array];
-	for (NSString *folder in [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey]) {
-		if ([[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredFoldersKey] objectForKey:folder] boolValue])
+	for (NSString *folder in folders) {
+		if ([[folders objectForKey:folder] boolValue])
 			[protectedFolders addObject:folder];
 	}
 	return [NSArray arrayWithArray:protectedFolders];
+}
+
+NSArray *getProtectedPanels(void) {
+	NSDictionary *panels = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredPanelsKey];
+	if (!panels || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+		return [NSArray array];
+
+	NSMutableArray *protectedPanels = [NSMutableArray array];
+	for (NSString *panel in panels) {
+		if ([[panels objectForKey:panel] boolValue])
+			[protectedPanels addObject:panel];
+	}
+	return [NSArray arrayWithArray:protectedPanels];
 }
 
 @implementation ASPreferencesHandler
