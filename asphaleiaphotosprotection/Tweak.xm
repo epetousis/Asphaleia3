@@ -6,9 +6,6 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "../NSTimer+Blocks.h"
 
-BOOL useTouchID;
-BOOL usePasscode;
-BOOL securePhotos;
 UIAlertView *alertView;
 BOOL authenticated;
 ASCommonAuthenticationHandler authHandler;
@@ -33,12 +30,12 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
-	if (authenticated || (!useTouchID && !usePasscode) || !securePhotos) {
+	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos()) {
 		%orig;
 		return;
 	}
 	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	if (alertView && useTouchID) {
+	if (alertView && touchIDEnabled()) {
 		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
 		origTitle = alertView.title;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
@@ -79,7 +76,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 %hook ALAssetsLibrary
 
 - (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id /* block */)arg2 failureBlock:(id /* block */)arg3 {
-	if (authenticated || (!useTouchID && !usePasscode) || !securePhotos) {
+	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos()) {
 		%orig;
 		return;
 	}
@@ -87,7 +84,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 		return;
 
 	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	if (alertView && useTouchID) {
+	if (alertView && touchIDEnabled()) {
 		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
 		origTitle = alertView.title;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
@@ -171,16 +168,8 @@ void fingerScanned(CFNotificationCenterRef center, void *observer, CFStringRef n
 
 %end*/
 
-void updatePrefs(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	//NSDictionary *preferences = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
-	loadPreferences();
-	useTouchID = touchIDEnabled();
-	usePasscode = passcodeEnabled();
-	securePhotos = shouldSecurePhotos();
-	NSLog(@"Prefs: %@ touchid:%i passcode:%i securephotos:%i",[ASPreferencesHandler sharedInstance].prefs,useTouchID,usePasscode,securePhotos);
-}
-
 %ctor {
-	updatePrefs(NULL,NULL,NULL,NULL,NULL);
-	//addObserver(updatePrefs,"com.a3tweaks.asphaleia/ReloadPrefs");
+	if (NSClassFromString(@"ALAssetsLibrary") != nil || NSClassFromString(@"UIImagePickerController") != nil) {
+		%init;
+	}
 }
