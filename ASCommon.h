@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "Asphaleia.h"
 #import "PKGlyphView.h"
-#import "BTTouchIDController.h"
+#import "ASTouchIDController.h"
 
 @interface UIAlertView ()
 -(id)_alertController;

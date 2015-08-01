@@ -211,7 +211,7 @@ static ASCommon *sharedCommonObj;
             [fingerglyph setState:0 animated:YES completionHandler:nil];
     } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
         [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
-        [[BTTouchIDController sharedInstance] stopMonitoring];
+        [[ASTouchIDController sharedInstance] stopMonitoring];
         if (fingerglyph)
             [fingerglyph setState:0 animated:YES completionHandler:nil];
         authHandler(NO);
@@ -302,7 +302,7 @@ static ASCommon *sharedCommonObj;
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
     SBIconView *iconView = currentIconView;
     currentIconView = nil;
-    [[BTTouchIDController sharedInstance] stopMonitoring];
+    [[ASTouchIDController sharedInstance] stopMonitoring];
     self.currentAuthAlert = nil;
     if (buttonIndex == [alertView firstOtherButtonIndex]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
@@ -322,12 +322,12 @@ static ASCommon *sharedCommonObj;
     self.currentAuthAlert = alertView;
 
     if (touchIDEnabled())
-        [[BTTouchIDController sharedInstance] startMonitoring];
+        [[ASTouchIDController sharedInstance] startMonitoring];
 }
 
 /*- (void)didPresentAlertView:(UIAlertView *)alertView {
     if (touchIDEnabled())
-        [[BTTouchIDController sharedInstance] startMonitoring];
+        [[ASTouchIDController sharedInstance] startMonitoring];
 }*/
 
 @end

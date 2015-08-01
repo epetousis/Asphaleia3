@@ -1,13 +1,13 @@
 /* Modified from Sassoty's code
 https://github.com/Sassoty/BioTesting */
 #import "Asphaleia.h"
-@class BTTouchIDController;
+@class ASTouchIDController;
 @protocol SBUIBiometricEventMonitorDelegate
 @required
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
 @end
 
-typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor, unsigned event);
+typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor, unsigned event);
 
 #define asphaleiaLogMsg(str) HBLogInfo(@"[Asphaleia] %@",str)
 
@@ -26,7 +26,7 @@ typedef void (^BTTouchIDEventBlock) (BTTouchIDController *controller, id monitor
 #define TouchIDMaybeMatched 4
 #define TouchIDNotMatched  9
 
-@interface BTTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
+@interface ASTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
 	BOOL starting;
 	BOOL stopping;
 	BOOL previousMatchingSetting;
