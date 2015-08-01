@@ -570,6 +570,19 @@ BOOL currentBannerAuthenticated;
 	appNameLabel.center = CGPointMake(10+imgView.frame.size.width+10+appNameLabel.frame.size.width/2,CGRectGetMidY(notificationBlurView.bounds));
 	[notificationBlurView.contentView addSubview:appNameLabel];
 
+	if (!touchIDEnabled()) {
+		UILabel *authPassLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+		authPassLabel.text = @"Tap to show";
+		[authPassLabel sizeToFit];
+		authPassLabel.center = notificationBlurView.contentView.center;
+		CGRect frame = authPassLabel.frame;
+		frame.origin.x = notificationBlurView.frame.size.width - frame.size.width - 10;
+		authPassLabel.frame = frame;
+		authPassLabel.textColor = [UIColor whiteColor];
+		[notificationBlurView.contentView addSubview:authPassLabel];
+		return;
+	}
+
 	if (!bannerFingerGlyph) {
 		bannerFingerGlyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
 		bannerFingerGlyph.secondaryColor = [UIColor grayColor];
@@ -587,8 +600,28 @@ BOOL currentBannerAuthenticated;
 }
 
 -(void)_handleBannerTapGesture:(id)gesture {
-	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications())
+	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications()) {
 		%orig;
+	} else {
+		[[ASTouchIDController sharedInstance] stopMonitoring];
+		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+			if (authenticated) {
+				if (notificationBlurView) {
+					currentBannerAuthenticated = YES;
+					appUserAuthorisedID = [[self _bulletin] sectionID];
+					[UIView animateWithDuration:0.3f animations:^{
+						[notificationBlurView setAlpha:0.0f];
+					} completion:^(BOOL finished){
+						if (finished && bannerFingerGlyph)
+							[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
+					}];
+				}
+			} else {
+				if ([[%c(SBBannerController) sharedInstance] isShowingBanner] && touchIDEnabled())
+					[[ASTouchIDController sharedInstance] startMonitoring];
+			}
+		}];
+	}
 }
 
 -(void)viewDidDisappear:(BOOL)animated {

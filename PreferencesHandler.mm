@@ -9,6 +9,9 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 	if (!passcodeEnabled() && !touchIDEnabled()) {
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
 		[ASPreferencesHandler sharedInstance].appSecurityDisabled = YES;
+	} else {
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = NO;
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled = NO;
 	}
 }
 
