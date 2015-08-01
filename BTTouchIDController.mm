@@ -49,7 +49,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
-	if (!self.isMonitoring)
+	if (!self.isMonitoring || !isTouchIDDevice())
 		return;
 
 	switch(event) {
@@ -94,7 +94,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
-	if(self.isMonitoring || starting) {
+	if(self.isMonitoring || starting || !isTouchIDDevice()) {
 		return;
 	}
 	starting = YES;
@@ -152,7 +152,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 }
 
 -(void)stopMonitoring {
-	if(!self.isMonitoring || stopping) {
+	if(!self.isMonitoring || stopping || !isTouchIDDevice()) {
 		return;
 	}
 	stopping = YES;
