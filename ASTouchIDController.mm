@@ -1,6 +1,6 @@
 /* Modified from Sassoty's code
 https://github.com/Sassoty/BioTesting */
-#import "BTTouchIDController.h"
+#import "ASTouchIDController.h"
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import "ASActivatorListener.h"
@@ -15,7 +15,7 @@ https://github.com/Sassoty/BioTesting */
 #define ENABLE_VH "virtualhome.enable"
 #define DISABLE_VH "virtualhome.disable"
 
-@interface BTTouchIDController ()
+@interface ASTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
 @end
 
@@ -25,14 +25,14 @@ https://github.com/Sassoty/BioTesting */
 @end
 
 void startMonitoringNotification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	[[BTTouchIDController sharedInstance] startMonitoring];
+	[[ASTouchIDController sharedInstance] startMonitoring];
 }
 
 void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	[[BTTouchIDController sharedInstance] stopMonitoring];
+	[[ASTouchIDController sharedInstance] stopMonitoring];
 }
 
-@implementation BTTouchIDController
+@implementation ASTouchIDController
 
 +(id)sharedInstance {
 	// Setup instance for current class once

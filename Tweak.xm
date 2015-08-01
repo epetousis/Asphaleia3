@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "PKGlyphView.h"
-#import "BTTouchIDController.h"
+#import "ASTouchIDController.h"
 #import "ASCommon.h"
 #import "PreferencesHandler.h"
 #import "substrate.h"
@@ -113,7 +113,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
 	}];
 
-	[[BTTouchIDController sharedInstance] startMonitoring];
+	[[ASTouchIDController sharedInstance] startMonitoring];
 
 	[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
 
@@ -150,7 +150,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[currentIconView setHighlighted:NO];
-			[[BTTouchIDController sharedInstance] stopMonitoring];
+			[[ASTouchIDController sharedInstance] stopMonitoring];
 
 			[fingerglyph removeFromSuperview];
 			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
@@ -287,7 +287,7 @@ BOOL switcherAuthenticating;
 UIWindow *blurredWindow;
 
 -(void)_lockUI {
-	[[BTTouchIDController sharedInstance] stopMonitoring];
+	[[ASTouchIDController sharedInstance] stopMonitoring];
 	[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
 	[[ASPasscodeHandler sharedInstance] dismissPasscodeView];
@@ -328,7 +328,7 @@ UIWindow *blurredWindow;
 }
 
 - (void)unlockUIFromSource:(int)source withOptions:(id)options {
-	if (source != 14 || ![[BTTouchIDController sharedInstance] shouldBlockLockscreenMonitor] || ![[BTTouchIDController sharedInstance] isMonitoring])
+	if (source != 14 || ![[ASTouchIDController sharedInstance] shouldBlockLockscreenMonitor] || ![[ASTouchIDController sharedInstance] isMonitoring])
 		%orig;
 }
 
@@ -402,9 +402,9 @@ static BOOL searchControllerAuthenticating;
 		return;
 	}
 
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled)
 		%orig;
 	}];
@@ -427,10 +427,10 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		%orig;
@@ -445,10 +445,10 @@ static BOOL controlCentreHasAuthenticated;
 	}
 
 	controlCentreAuthenticating = YES;
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
 		controlCentreHasAuthenticated = YES;
 		[self presentAnimated:YES];
@@ -583,7 +583,7 @@ BOOL currentBannerAuthenticated;
 	[notificationBlurView.contentView addSubview:bannerFingerGlyph];
 	[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
 
-	[[BTTouchIDController sharedInstance] startMonitoring];
+	[[ASTouchIDController sharedInstance] startMonitoring];
 }
 
 -(void)_handleBannerTapGesture:(id)gesture {
@@ -597,7 +597,7 @@ BOOL currentBannerAuthenticated;
 	appUserAuthorisedID = nil;
 
 	if (![[%c(SBBannerController) sharedInstance] isShowingBanner]) {
-		[[BTTouchIDController sharedInstance] stopMonitoring];
+		[[ASTouchIDController sharedInstance] stopMonitoring];
 	}
 
 	if (bannerFingerGlyph) {
@@ -623,7 +623,7 @@ BOOL currentBannerAuthenticated;
 		if (bannerFingerGlyph && notificationBlurView) {
 			currentBannerAuthenticated = YES;
 			appUserAuthorisedID = [[self _bulletin] sectionID];
-			[[BTTouchIDController sharedInstance] stopMonitoring];
+			[[ASTouchIDController sharedInstance] stopMonitoring];
 			[UIView animateWithDuration:0.3f animations:^{
 				[notificationBlurView setAlpha:0.0f];
 			} completion:^(BOOL finished){
@@ -723,8 +723,8 @@ BOOL currentBannerAuthenticated;
 
 - (void)removeObserver:(id)arg1 {
 	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
-	if ([[BTTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[BTTouchIDController sharedInstance]])
-		[[[BTTouchIDController sharedInstance] oldObservers] removeObject:arg1];
+	if ([[ASTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[ASTouchIDController sharedInstance]])
+		[[[ASTouchIDController sharedInstance] oldObservers] removeObject:arg1];
 	else
 		%orig;
 }
@@ -743,9 +743,9 @@ BOOL currentBannerAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
-			[[BTTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+			[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 			if (!wasCancelled) {
 				catchAllIgnoreRequest = YES;
 				%orig;
