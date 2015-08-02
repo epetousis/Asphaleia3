@@ -164,7 +164,7 @@ PHAuthBlock authBlock;
 	}
 	accessDenied = NO;
 	if (!authenticated)
-		return PHAuthorizationStatusNotDetermined;
+		return PHAuthorizationStatusDenied;
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
@@ -192,6 +192,7 @@ PHAuthBlock authBlock;
 	authHandler = ^(BOOL wasCancelled){
 		if (!wasCancelled) {
 			%orig(authBlock);
+			authenticated = YES;
 			if (shouldShowPhotosProtectMsg()) {
 				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 				[alert show];
@@ -319,7 +320,7 @@ SEL origSelector;
 %end
 
 %ctor {
-	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"] || [[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.MobileSMS"])
+	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"])
 		return;
 	if (NSClassFromString(@"PHPhotoLibrary") != nil || NSClassFromString(@"ALAssetsLibrary") != nil || NSClassFromString(@"UIImagePickerController") != nil) {
 		loadPreferences();
