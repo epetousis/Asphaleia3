@@ -10,10 +10,11 @@ libasphaleiaui_INSTALL_PATH = /usr/lib
 libasphaleiaui_CFLAGS = -fobjc-arc
 
 TWEAK_NAME = Asphaleia
-Asphaleia_FILES = Tweak.xm
+Asphaleia_FILES = Tweak.xm ASXPCHandler.mm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
+Asphaleia_PRIVATE_FRAMEWORKS = AppSupport
 Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)
-Asphaleia_LIBRARIES = asphaleiaui
+Asphaleia_LIBRARIES = asphaleiaui rocketbootstrap
 Asphaleia_CFLAGS = -fobjc-arc
 
 BUNDLE_NAME = AsphaleiaAssets
