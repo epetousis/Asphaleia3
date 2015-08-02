@@ -14,7 +14,7 @@ Asphaleia_FILES = Tweak.xm ASXPCHandler.mm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
 Asphaleia_PRIVATE_FRAMEWORKS = AppSupport
 Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)
-Asphaleia_LIBRARIES = asphaleiaui rocketbootstrap
+Asphaleia_LIBRARIES = asphaleiaui rocketbootstrap auxo
 Asphaleia_CFLAGS = -fobjc-arc
 
 BUNDLE_NAME = AsphaleiaAssets

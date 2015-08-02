@@ -184,3 +184,16 @@
 @interface SBLockScreenSlideUpToAppController : NSObject
 - (void)_finishSlideDownWithCompletion:(id)completion;
 @end
+
+// Auxo LE
+@interface AuxoCardView : UIView
+@property(readonly, nonatomic) NSString *displayIdentifier;
+@end
+
+@interface AuxoCollectionViewCell : NSObject
+@property(readonly, nonatomic) AuxoCardView *cardView;
+@end
+
+@interface AuxoCollectionView : UICollectionView
+- (void)activateApplicationWithDisplayIdentifier:(NSString *)arg1 fromCell:(AuxoCollectionViewCell *)arg2;
+@end

@@ -807,6 +807,41 @@ BOOL currentBannerAuthenticated;
 
 %end
 
+%hook AuxoCollectionView
+
+- (BOOL)startInteractiveActivationWithCell:(id)arg1 {
+	AuxoCollectionViewCell *cell = arg1;
+	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+
+	if ((![getProtectedApps() containsObject:cell.cardView.displayIdentifier] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:cell.cardView.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [cell.cardView.displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
+		return %orig;
+	}
+	[self activateApplicationWithDisplayIdentifier:cell.cardView.displayIdentifier fromCell:cell];
+	return YES;
+}
+
+- (void)activateApplicationWithDisplayIdentifier:(NSString *)displayIdentifier fromCell:(id)arg2 {
+	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+
+	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:displayIdentifier];
+	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	[iconView _setIcon:appIcon animated:YES];
+
+	if ((![getProtectedApps() containsObject:displayIdentifier] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
+		%orig;
+		return;
+	}
+
+	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	appUserAuthorisedID = displayIdentifier;
+	if (!wasCancelled)
+		%orig;
+	}];
+}
+
+%end
+
 %ctor {
 	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();
