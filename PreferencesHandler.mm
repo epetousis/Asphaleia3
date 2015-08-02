@@ -30,39 +30,39 @@ BOOL shouldRequireAuthorisationOnWifi(void) {
 		if (unlockOnWifi && [currentSSID isEqualToString:SSID])
 			return NO;
 	}
-    return YES;
+	return YES;
 }
 
 BOOL isTouchIDDevice(void) {
 	dlopen("/System/Library/PrivateFrameworks/BiometricKit.framework/BiometricKit", RTLD_LAZY);
 	Class bk = objc_getClass("BiometricKit");
 
-    int sysctlbyname(const char *, void *, size_t *, void *, size_t);
+	int sysctlbyname(const char *, void *, size_t *, void *, size_t);
 
-    size_t size;
-    sysctlbyname("hw.machine", NULL, &size, NULL, 0);
+	size_t size;
+	sysctlbyname("hw.machine", NULL, &size, NULL, 0);
 
-    char *answer = (char *)malloc(size);
-    sysctlbyname("hw.machine", answer, &size, NULL, 0);
+	char *answer = (char *)malloc(size);
+	sysctlbyname("hw.machine", answer, &size, NULL, 0);
 
-    NSString *results = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
+	NSString *results = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
 
-    free(answer);
+	free(answer);
 
-    NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
+	NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
 
-    if (bk && [[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
-        return [touchIDModels containsObject:results] && [[[bk manager] identities:nil] count] > 0;
+	if (bk && [[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
+		return [touchIDModels containsObject:results] && [[[bk manager] identities:nil] count] > 0;
 
-    return [touchIDModels containsObject:results];
+	return [touchIDModels containsObject:results];
 }
 
 BOOL passcodeEnabled(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kPasscodeEnabledKey] boolValue] : NO;
 }
 
 BOOL touchIDEnabled(void) {
-    return ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] && isTouchIDDevice()) ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] boolValue] : NO;
+	return ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] && isTouchIDDevice()) ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kTouchIDEnabledKey] boolValue] : NO;
 }
 
 NSString *getPasscode(void) {
@@ -70,98 +70,102 @@ NSString *getPasscode(void) {
 }
 
 BOOL shouldEnableControlPanel(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kEnableControlPanelKey] boolValue] : NO;
 }
 
 BOOL shouldAllowControlPanelInApps(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kControlPanelInAppsKey] boolValue] : NO;
 }
 
 NSInteger appSecurityDelayTimeInterval(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] integerValue] : 10;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockTimeKey] integerValue] : 10;
 }
 
 BOOL shouldDelayAppSecurity(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDelayAfterLockKey] boolValue] : NO;
 }
 
 BOOL shouldResetAppExitTimerOnLock(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kResetAppExitTimerOnLockKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kResetAppExitTimerOnLockKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kResetAppExitTimerOnLockKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kResetAppExitTimerOnLockKey] boolValue] : NO;
 }
 
 NSInteger appExitUnlockTimeInterval(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kAppExitUnlockTimeKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kAppExitUnlockTimeKey] integerValue] : 0;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kAppExitUnlockTimeKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kAppExitUnlockTimeKey] integerValue] : 0;
 }
 
 BOOL shouldUseDynamicSelection(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDynamicSelectionKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDynamicSelectionKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kDynamicSelectionKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kDynamicSelectionKey] boolValue] : NO;
 }
 
 BOOL shouldProtectAllApps(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kProtectAllAppsKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kProtectAllAppsKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kProtectAllAppsKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kProtectAllAppsKey] boolValue] : NO;
 }
 
 BOOL shouldVibrateOnIncorrectFingerprint(void) {
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO;
 }
 
 BOOL shouldSecureControlCentre(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureControlCentreKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureControlCentreKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureControlCentreKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureControlCentreKey] boolValue] : NO;
 }
 
 BOOL shouldSecurePowerDownView(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePowerDownKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePowerDownKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePowerDownKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePowerDownKey] boolValue] : NO;
 }
 
 BOOL shouldSecureSpotlight(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSpotlightKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSpotlightKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSpotlightKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSpotlightKey] boolValue] : NO;
 }
 
 BOOL shouldUnsecurelyUnlockIntoApp(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		return YES;
 
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kUnsecureUnlockToAppKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kUnsecureUnlockToAppKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kUnsecureUnlockToAppKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kUnsecureUnlockToAppKey] boolValue] : NO;
 }
 
 BOOL shouldObscureAppContent(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] boolValue] : YES;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureAppContentKey] boolValue] : YES;
 }
 
 BOOL shouldObscureNotifications(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] boolValue] : YES;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kObscureBannerKey] boolValue] : YES;
 }
 
 BOOL shouldSecureSwitcher(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSwitcherKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSwitcherKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSwitcherKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureSwitcherKey] boolValue] : NO;
 }
 
 BOOL shouldSecureAppArrangement(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecureAppArrangementKey] boolValue] : NO;
 }
 
 BOOL shouldSecurePhotos(void) {
 	if (!shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
 		return NO;
-    return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] boolValue] : NO;
+	return [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecurePhotosKey] boolValue] : NO;
+}
+
+BOOL shouldShowPhotosProtectMsg(void) {
+	return [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kPhotosMessageCount] intValue] <= 3 ? YES : NO;
 }
 
 NSArray *getProtectedAppsNoBullshit(void) {

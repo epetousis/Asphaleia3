@@ -12,6 +12,9 @@
 #import "ASPasscodeHandler.h"
 #import "ASTouchWindow.h"
 #import "Asphaleia.h"
+#import <RocketBootstrap/RocketBootstrap.h>
+#import <AppSupport/CPDistributedMessagingCenter.h>
+#import "ASXPCHandler.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
@@ -29,6 +32,7 @@ ASTouchWindow *anywhereTouchWindow;
 NSString *appUserAuthorisedID;
 BOOL catchAllIgnoreRequest;
 SBBannerContainerViewController *controller;
+CPDistributedMessagingCenter *centre;
 
 void RegisterForTouchIDNotifications(id observer, SEL selector) {
 	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
@@ -287,6 +291,7 @@ BOOL switcherAuthenticating;
 UIWindow *blurredWindow;
 
 -(void)_lockUI {
+	[ASXPCHandler sharedInstance].slideUpControllerActive = NO;
 	[[ASTouchIDController sharedInstance] stopMonitoring];
 	[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
@@ -766,6 +771,11 @@ BOOL currentBannerAuthenticated;
 
 %hook SBLockScreenSlideUpToAppController
 
+- (void)beginPresentationWithTouchLocation:(CGPoint)touchLocation {
+	%orig;
+	[ASXPCHandler sharedInstance].slideUpControllerActive = YES;
+}
+
 - (void)_activateApp:(id)app withAppInfo:(id)appInfo andURL:(id)url animated:(BOOL)animated {
 	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		%orig;
@@ -832,4 +842,8 @@ BOOL currentBannerAuthenticated;
 		 otherButtonTitles:nil];
 		[alertView show];
 	}];
+	centre = [CPDistributedMessagingCenter centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	rocketbootstrap_distributedmessagingcenter_apply(centre);
+	[centre runServerOnCurrentThread];
+	[centre registerForMessageName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" target:[ASXPCHandler sharedInstance] selector:@selector(handleMessageNamed:withUserInfo:)];
 }

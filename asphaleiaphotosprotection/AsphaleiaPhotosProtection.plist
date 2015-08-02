@@ -1,1 +1,1 @@
-{ Filter = { Bundles = ( "com.apple.UIKit", "com.apple.Photos", "com.apple.AssetsLibrary" ); }; }
+{ Filter = { Bundles = ( "com.apple.UIKit", "com.apple.Photos", "com.apple.AssetsLibrary", "com.apple.CameraKit", "com.apple.camera" ); }; }
