@@ -4,7 +4,7 @@ BUNDLE_NAME = AsphaleiaFlipswitch
 AsphaleiaFlipswitch_FILES = Switch.xm
 AsphaleiaFlipswitch_FRAMEWORKS = UIKit
 AsphaleiaFlipswitch_LDFLAGS = -L"../.theos/obj/debug"
-AsphaleiaFlipswitch_LIBRARIES = flipswitch asphaleiaui
+AsphaleiaFlipswitch_LIBRARIES = flipswitch asphaleiaui rocketbootstrap
 AsphaleiaFlipswitch_INSTALL_PATH = /Library/Switches
 
 include $(THEOS_MAKE_PATH)/bundle.mk

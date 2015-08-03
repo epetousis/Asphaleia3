@@ -210,6 +210,7 @@ static ASCommon *sharedCommonObj;
 
     if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+        [iconView setHighlighted:NO];
         handler(NO);
         return NO;
     }
@@ -234,7 +235,6 @@ static ASCommon *sharedCommonObj;
     } else if (!touchIDEnabled() && passcodeEnabled()) {
         [iconView setHighlighted:NO];
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-            [iconView setHighlighted:NO];
 
             if (authenticated){
                 [ASCommon sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
