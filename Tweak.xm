@@ -22,12 +22,9 @@
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
-PKGlyphView *fingerglyph;
-SBIconView *currentIconView;
 SBAppSwitcherIconController *iconController;
 NSTimer *currentTempUnlockTimer;
 NSTimer *currentTempGlobalDisableTimer;
-ASTouchWindow *anywhereTouchWindow;
 SBBannerContainerViewController *controller;
 CPDistributedMessagingCenter *centre;
 
@@ -42,91 +39,26 @@ void DeregisterForTouchIDNotifications(id observer) {
 	[[NSNotificationCenter defaultCenter] removeObserver:observer];
 }
 
+@interface ASCommon ()
+-(BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler;
+@end
+
 %hook SBIconController
 
--(id)init {
-	SBIconController *controller = %orig;
-	RegisterForTouchIDNotifications(controller, @selector(receiveTouchIDNotification:));
-	return controller;
-}
-
 -(void)iconTapped:(SBIconView *)iconView {
-	if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
-		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
-		%orig;
-		return;
-	}
-
-	if (fingerglyph && currentIconView) {
-		[iconView setHighlighted:NO];
-		if ([iconView isEqual:currentIconView]) {
-			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-				if (authenticated) {
-					[ASCommon sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
-					if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
-						[iconView.icon launchFromLocation:iconView.location context:nil];
-					} else {
-						[iconView.icon launchFromLocation:iconView.location];
-					}
-				}
-			}];
-		}
-		[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
-
-		return;
-	} else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:[iconView.icon displayNameForLocation:iconView.location]])) {
-		%orig;
-		return;
-	} else if (!touchIDEnabled() && passcodeEnabled()) {
-		[iconView setHighlighted:NO];
-		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
-			[iconView setHighlighted:NO];
-
-			if (authenticated){
-				[ASCommon sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
-				%orig;
+	[[ASCommon sharedInstance] authenticateAppWithIconView:iconView authenticatedHandler:^void(BOOL wasCancelled){
+		if (!wasCancelled) {
+			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
+				[iconView.icon launchFromLocation:iconView.location context:nil];
+			} else {
+				[iconView.icon launchFromLocation:iconView.location];
 			}
-		}];
-		return;
-	}
-
-	if (!anywhereTouchWindow) {
-		anywhereTouchWindow = [[ASTouchWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	}
-
-	currentIconView = iconView;
-
-	if (!fingerglyph) {
-		fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:1];
-		fingerglyph.secondaryColor = [UIColor grayColor];
-		fingerglyph.primaryColor = [UIColor redColor];
-	}
-
-	CGRect fingerframe = fingerglyph.frame;
-	fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-	fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-	fingerglyph.frame = fingerframe;
-	fingerglyph.center = CGPointMake(CGRectGetMidX([iconView _iconImageView].bounds),CGRectGetMidY([iconView _iconImageView].bounds));
-	[[iconView _iconImageView] addSubview:fingerglyph];
-
-	fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
-	[UIView animateWithDuration:0.3f animations:^{
-		fingerglyph.transform = CGAffineTransformMakeScale(1,1);
-	}];
-
-	[[ASTouchIDController sharedInstance] startMonitoring];
-
-	[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
-
-	[anywhereTouchWindow blockTouchesAllowingTouchInView:currentIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
-		if (blockedTouch) {
-			[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
 		}
 	}];
 }
 
 -(void)iconHandleLongPress:(SBIconView *)iconView {
-	if (self.isEditing || !shouldSecureAppArrangement() || [ASPreferencesHandler sharedInstance].asphaleiaDisabled) {
+	if (self.isEditing || !shouldSecureAppArrangement()) {
 		%orig;
 		return;
 	}
@@ -135,7 +67,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertAppArranging beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
@@ -143,54 +75,25 @@ void DeregisterForTouchIDNotifications(id observer) {
 
 %new
 -(void)asphaleia_resetAsphaleiaIconView {
-	if (fingerglyph && currentIconView) {
-		[currentIconView _updateLabel];
+	if ([ASCommon sharedInstance].fingerglyph && [ASCommon sharedInstance].currentHSIconView) {
+		[[ASCommon sharedInstance].currentHSIconView _updateLabel];
 
 		[UIView animateWithDuration:0.3f animations:^{
-			fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
+			[ASCommon sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-			[currentIconView setHighlighted:NO];
-			[[ASTouchIDController sharedInstance] stopMonitoring];
+			[[ASCommon sharedInstance].currentHSIconView setHighlighted:NO];
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
 
-			[fingerglyph removeFromSuperview];
-			fingerglyph.transform = CGAffineTransformMakeScale(1,1);
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
+			[[ASCommon sharedInstance].fingerglyph removeFromSuperview];
+			[ASCommon sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(1,1);
+			[[ASCommon sharedInstance].fingerglyph setState:0 animated:YES completionHandler:nil];
 
-			[currentIconView _updateLabel];
+			[[ASCommon sharedInstance].currentHSIconView _updateLabel];
 
-			currentIconView = nil;
-			[anywhereTouchWindow setHidden:YES];
+			[ASCommon sharedInstance].currentHSIconView = nil;
+			[[ASCommon sharedInstance].anywhereTouchWindow setHidden:YES];
 		});
-	}
-}
-
-%new
--(void)receiveTouchIDNotification:(NSNotification *)notification
-{
-	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
-		if (fingerglyph && currentIconView) {
-			[fingerglyph setState:1 animated:YES completionHandler:nil];
-			[currentIconView asphaleia_updateLabelWithText:@"Scanning..."];
-		}
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
-		if (fingerglyph)
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
-		if (fingerglyph && currentIconView) {
-			[ASCommon sharedInstance].appUserAuthorisedID = currentIconView.icon.applicationBundleID;
-			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
-				[currentIconView.icon launchFromLocation:currentIconView.location context:nil];
-			} else {
-				[currentIconView.icon launchFromLocation:currentIconView.location];
-			}
-			[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
-		}
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
-		if (fingerglyph && currentIconView) {
-			[fingerglyph setState:0 animated:YES completionHandler:nil];
-			[currentIconView asphaleia_updateLabelWithText:@"Scan finger..."];
-		}
 	}
 }
 
@@ -267,7 +170,7 @@ BOOL switcherAuthenticating;
 	}
 	if (!switcherAuthenticating) {
 		switcherAuthenticating = YES;
-		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSwitcher beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
 			switcherAuthenticating = NO;
 			if (!wasCancelled)
 				%orig;
@@ -367,7 +270,7 @@ static BOOL searchControllerAuthenticating;
 	%orig;
 	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
-		[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertSpotlight beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+		[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertSpotlight dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
 			searchControllerHasAuthenticated = YES;
@@ -402,7 +305,7 @@ static BOOL searchControllerAuthenticating;
 	}
 
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertPowerDown beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPowerDown dismissedHandler:^(BOOL wasCancelled) {
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled)
 		%orig;
@@ -427,7 +330,7 @@ static BOOL controlCentreHasAuthenticated;
 
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
@@ -445,7 +348,7 @@ static BOOL controlCentreHasAuthenticated;
 
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlCentre beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {

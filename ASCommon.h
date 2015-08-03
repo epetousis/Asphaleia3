@@ -2,6 +2,7 @@
 #import "Asphaleia.h"
 #import "PKGlyphView.h"
 #import "ASTouchIDController.h"
+#import "ASTouchWindow.h"
 
 @interface UIAlertView ()
 -(id)_alertController;
@@ -21,15 +22,17 @@ typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
 typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject <UIAlertViewDelegate> {
-	PKGlyphView *fingerglyph;
 	ASCommonAuthenticationHandler authHandler;
 	UIView *alertViewAccessory;
 	SBIconView *currentIconView;
 }
 @property UIAlertView *currentAuthAlert;
+@property SBIconView *currentHSIconView;
+@property PKGlyphView *fingerglyph;
 @property NSString *appUserAuthorisedID;
 @property BOOL catchAllIgnoreRequest;
 @property NSString *temporarilyUnlockedAppBundleID;
+@property ASTouchWindow *anywhereTouchWindow;
 +(instancetype)sharedInstance;
 -(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate;
 -(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate;
