@@ -67,17 +67,17 @@ static ASCommon *sharedCommonObj;
 
     if (touchIDEnabled()) {
         imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
-        if (!fingerglyph) {
-            fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-            fingerglyph.secondaryColor = [UIColor grayColor];
-            fingerglyph.primaryColor = [UIColor redColor];
-            CGRect fingerframe = fingerglyph.frame;
+        if (!_fingerglyph) {
+            _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+            _fingerglyph.secondaryColor = [UIColor grayColor];
+            _fingerglyph.primaryColor = [UIColor redColor];
+            CGRect fingerframe = _fingerglyph.frame;
             fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
             fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-            fingerglyph.frame = fingerframe;
-            fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+            _fingerglyph.frame = fingerframe;
+            _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
         }
-        [imgView addSubview:fingerglyph];
+        [imgView addSubview:_fingerglyph];
         alertViewAccessory = imgView;
     }
 
@@ -178,6 +178,11 @@ static ASCommon *sharedCommonObj;
 }
 
 -(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
+    if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled) {
+        handler(NO);
+        return NO;
+    }
+
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
     authHandler = [handler copy];
 
@@ -199,38 +204,141 @@ static ASCommon *sharedCommonObj;
     return YES;
 }
 
+-(BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler {
+    if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
+            return NO;
+
+    if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
+        [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+        handler(NO);
+        return NO;
+    }
+
+    if (_fingerglyph && _currentHSIconView) {
+        [iconView setHighlighted:NO];
+        if ([iconView isEqual:_currentHSIconView]) {
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+                if (authenticated) {
+                    [ASCommon sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
+                }
+                handler(!authenticated);
+            }];
+        }
+        [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+
+        return YES;
+    } else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:[iconView.icon displayNameForLocation:iconView.location]])) {
+        [iconView setHighlighted:NO];
+        handler(NO);
+        return NO;
+    } else if (!touchIDEnabled() && passcodeEnabled()) {
+        [iconView setHighlighted:NO];
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            [iconView setHighlighted:NO];
+
+            if (authenticated){
+                [ASCommon sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
+            }
+            handler(!authenticated);
+        }];
+        return YES;
+    }
+
+    if (!_anywhereTouchWindow) {
+        _anywhereTouchWindow = [[ASTouchWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    }
+
+    _currentHSIconView = iconView;
+
+    if (!_fingerglyph) {
+        _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+        _fingerglyph.secondaryColor = [UIColor grayColor];
+        _fingerglyph.primaryColor = [UIColor redColor];
+    }
+
+    CGRect fingerframe = _fingerglyph.frame;
+    fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+    fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+    _fingerglyph.frame = fingerframe;
+    _fingerglyph.center = CGPointMake(CGRectGetMidX([iconView _iconImageView].bounds),CGRectGetMidY([iconView _iconImageView].bounds));
+    [[iconView _iconImageView] addSubview:_fingerglyph];
+
+    _fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
+    [UIView animateWithDuration:0.3f animations:^{
+        _fingerglyph.transform = CGAffineTransformMakeScale(1,1);
+    }];
+
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
+
+    [_currentHSIconView asphaleia_updateLabelWithText:@"Scan finger..."];
+
+    [_anywhereTouchWindow blockTouchesAllowingTouchInView:_currentHSIconView touchBlockedHandler:^void(ASTouchWindow *touchWindow, BOOL blockedTouch){
+        if (blockedTouch) {
+            [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+            handler(YES);
+        }
+    }];
+    return YES;
+}
+
 -(void)receivedNotificationOfName:(NSString *)name
 {
-    if (!self.currentAuthAlert) {
-        return;
-    }
-    NSString *origTitle = self.currentAuthAlert.title;
-    if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
-        if ([origTitle containsString:@"\n\n\n"]) {
-            self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
-        } else {
-            self.currentAuthAlert.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
-        }
-        [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+    if (self.currentAuthAlert) {
+        NSString *origTitle = self.currentAuthAlert.title;
+        if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+            if ([origTitle containsString:@"\n\n\n"]) {
+                self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
+            } else {
+                self.currentAuthAlert.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
+            }
+            [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+                self.currentAuthAlert.title = origTitle;
+            } repeats:NO];
+            if (_fingerglyph)
+                [_fingerglyph setState:1 animated:YES completionHandler:nil];
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+            if (_fingerglyph)
+                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+            [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
+            CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
+            if (_fingerglyph)
+                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+            _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
+            authHandler(NO);
+            self.currentAuthAlert = nil;
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
             self.currentAuthAlert.title = origTitle;
-        } repeats:NO];
-        if (fingerglyph)
-            [fingerglyph setState:1 animated:YES completionHandler:nil];
-    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
-        if (fingerglyph)
-            [fingerglyph setState:0 animated:YES completionHandler:nil];
-    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
-        [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-        if (fingerglyph)
-            [fingerglyph setState:0 animated:YES completionHandler:nil];
-        _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
-        authHandler(NO);
-        self.currentAuthAlert = nil;
-    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
-        self.currentAuthAlert.title = origTitle;
-        if (fingerglyph)
-            [fingerglyph setState:0 animated:YES completionHandler:nil];
+            if (_fingerglyph)
+                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+        }
+    } else {
+        if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
+            return;
+        if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+            if (_fingerglyph && _currentHSIconView) {
+                [_fingerglyph setState:1 animated:YES completionHandler:nil];
+                [_currentHSIconView asphaleia_updateLabelWithText:@"Scanning..."];
+            }
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+            if (_fingerglyph)
+                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+            if (_fingerglyph && _currentHSIconView) {
+                [ASCommon sharedInstance].appUserAuthorisedID = _currentHSIconView.icon.applicationBundleID;
+                if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
+                    [_currentHSIconView.icon launchFromLocation:_currentHSIconView.location context:nil];
+                } else {
+                    [_currentHSIconView.icon launchFromLocation:_currentHSIconView.location];
+                }
+                [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+            }
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+            if (_fingerglyph && _currentHSIconView) {
+                [_fingerglyph setState:0 animated:YES completionHandler:nil];
+                [_currentHSIconView asphaleia_updateLabelWithText:@"Scan finger..."];
+            }
+        }
     }
 }
 
