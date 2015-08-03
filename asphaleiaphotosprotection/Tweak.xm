@@ -41,7 +41,7 @@ void increaseMessageCount() {
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
-	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos()) {
+	if (authenticated || !shouldSecurePhotos()) {
 		%orig;
 		return;
 	}
@@ -95,11 +95,14 @@ ALAssetsLibraryAccessFailureBlock block2;
 %hook ALAssetsLibrary
 
 + (int)authorizationStatus {
-	return 0;
+	if (shouldSecurePhotos())
+		return 0;
+
+	return %orig;
 }
 
 - (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id /* block */)arg2 failureBlock:(id /* block */)arg3 {
-	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos()) {
+	if (authenticated || !shouldSecurePhotos()) {
 		%orig;
 		return;
 	}
@@ -159,17 +162,17 @@ PHAuthBlock authBlock;
 
 + (int)authorizationStatus {
 	PHAuthorizationStatus status = %orig;
-	if (status != PHAuthorizationStatusAuthorized) {
+	if (status != PHAuthorizationStatusAuthorized && shouldSecurePhotos()) {
 		accessDenied = YES;
 		return status;
 	}
 	accessDenied = NO;
-	if (!authenticated)
+	if (!authenticated && shouldSecurePhotos())
 		return PHAuthorizationStatusDenied;
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
-	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos() || accessDenied || (alertView && alertView.tag != 4002)) {
+	if (authenticated || !shouldSecurePhotos() || accessDenied || (alertView && alertView.tag != 4002)) {
 		%orig;
 		return;
 	}
@@ -278,7 +281,7 @@ SEL origSelector;
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" userInfo:nil];
 
-	if (authenticated || (!touchIDEnabled() && !passcodeEnabled()) || !shouldSecurePhotos() || ([reply[@"active"] boolValue] && devicePasscodeSet())) {
+	if (authenticated || !shouldSecurePhotos() || ([reply[@"active"] boolValue] && devicePasscodeSet())) {
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}
