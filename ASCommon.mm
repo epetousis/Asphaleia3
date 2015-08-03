@@ -147,7 +147,7 @@ static ASCommon *sharedCommonObj;
     return alertView;
 }
 
--(void)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
     SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
@@ -161,17 +161,18 @@ static ASCommon *sharedCommonObj;
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         authHandler(NO);
-        return;
+        return NO;
     }
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
                 authHandler(!authenticated);
             }];
-        return;
+        return NO;
     }
 
     [alertView show];
+    return YES;
 }
 
 -(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
