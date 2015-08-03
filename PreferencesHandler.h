@@ -68,7 +68,7 @@ NSArray *getProtectedPanels(void);
 
 @interface ASPreferencesHandler : NSObject
 @property (nonatomic, retain) NSDictionary *prefs;
-@property BOOL asphaleiaDisabled;
+@property (readonly) BOOL asphaleiaDisabled;
 @property BOOL appSecurityDisabled;
 +(instancetype)sharedInstance;
 @end

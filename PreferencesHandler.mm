@@ -5,6 +5,10 @@
 #import <dlfcn.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 
+@interface ASPreferencesHandler ()
+@property (readwrite) BOOL asphaleiaDisabled;
+@end
+
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
 	if (!passcodeEnabled() && !touchIDEnabled()) {
