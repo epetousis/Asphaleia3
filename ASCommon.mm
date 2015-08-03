@@ -155,6 +155,10 @@ static ASCommon *sharedCommonObj;
     SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
     [iconView _setIcon:appIcon animated:YES];
 
+    if ((![getProtectedApps() containsObject:appIdentifier] && !shouldProtectAllApps()) || [_temporarilyUnlockedAppBundleID isEqual:appIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+        return NO;
+    }
+
     authHandler = [handler copy];
 
     UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
@@ -166,6 +170,8 @@ static ASCommon *sharedCommonObj;
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+                if (authenticated)
+                    _appUserAuthorisedID = appIdentifier;
                 authHandler(!authenticated);
             }];
         return NO;
@@ -221,6 +227,7 @@ static ASCommon *sharedCommonObj;
         [[ASTouchIDController sharedInstance] stopMonitoring];
         if (fingerglyph)
             [fingerglyph setState:0 animated:YES completionHandler:nil];
+        _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
         authHandler(NO);
         self.currentAuthAlert = nil;
     } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
@@ -313,6 +320,8 @@ static ASCommon *sharedCommonObj;
     self.currentAuthAlert = nil;
     if (buttonIndex == [alertView firstOtherButtonIndex]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            if (authenticated)
+                _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
             authHandler(!authenticated);
         }];
     } else if (buttonIndex == [alertView cancelButtonIndex]) {
