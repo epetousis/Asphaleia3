@@ -27,6 +27,9 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 	SBIconView *currentIconView;
 }
 @property UIAlertView *currentAuthAlert;
+@property NSString *appUserAuthorisedID;
+@property BOOL catchAllIgnoreRequest;
+@property NSString *temporarilyUnlockedAppBundleID;
 +(instancetype)sharedInstance;
 -(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate;
 -(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate;
