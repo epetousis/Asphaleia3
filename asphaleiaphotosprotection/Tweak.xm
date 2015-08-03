@@ -116,6 +116,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
 		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
 	} else {
+		alertView = nil;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
 	}
 	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
@@ -185,6 +186,7 @@ PHAuthBlock authBlock;
 		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
 		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
 	} else {
+		alertView = nil;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
 	}
 	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
@@ -293,6 +295,7 @@ SEL origSelector;
 		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
 		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
 	} else {
+		alertView = nil;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
 	}
 	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
