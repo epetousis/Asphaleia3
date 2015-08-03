@@ -14,8 +14,12 @@
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
 @interface ASCommon ()
-@property UIAlertView *currentAlertView;
+-(void)receivedNotificationOfName:(NSString *)name;
 @end
+
+void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+    [[ASCommon sharedInstance] receivedNotificationOfName:(__bridge NSString *)name];
+}
 
 @implementation ASCommon
 
@@ -36,10 +40,6 @@ static ASCommon *sharedCommonObj;
 }
 
 -(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate {
-    /*if (!touchIDEnabled()) {
-        return nil;
-    }*/
-
     NSString *title;
     NSString *message;
     if (customMessage)
@@ -85,10 +85,6 @@ static ASCommon *sharedCommonObj;
 }
 
 -(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate {
-    /*if (!touchIDEnabled()) {
-        return nil;
-    }*/
-
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
@@ -181,7 +177,7 @@ static ASCommon *sharedCommonObj;
     return YES;
 }
 
--(void)showAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
     authHandler = [handler copy];
 
@@ -189,26 +185,27 @@ static ASCommon *sharedCommonObj;
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
         authHandler(NO);
-        return;
+        return NO;
     }
 
     if (!touchIDEnabled()) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
                 authHandler(!authenticated);
             }];
-        return;
+        return NO;
     }
 
     [alertView show];
+    return YES;
 }
 
--(void)receiveTouchIDNotification:(NSNotification *)notification
+-(void)receivedNotificationOfName:(NSString *)name
 {
     if (!self.currentAuthAlert) {
         return;
     }
     NSString *origTitle = self.currentAuthAlert.title;
-    if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+    if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
         if ([origTitle containsString:@"\n\n\n"]) {
             self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
         } else {
@@ -219,18 +216,18 @@ static ASCommon *sharedCommonObj;
         } repeats:NO];
         if (fingerglyph)
             [fingerglyph setState:1 animated:YES completionHandler:nil];
-    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
         if (fingerglyph)
             [fingerglyph setState:0 animated:YES completionHandler:nil];
-    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
         [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
-        [[ASTouchIDController sharedInstance] stopMonitoring];
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
         if (fingerglyph)
             [fingerglyph setState:0 animated:YES completionHandler:nil];
         _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
         authHandler(NO);
         self.currentAuthAlert = nil;
-    } else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+    } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
         self.currentAuthAlert.title = origTitle;
         if (fingerglyph)
             [fingerglyph setState:0 animated:YES completionHandler:nil];
@@ -238,10 +235,10 @@ static ASCommon *sharedCommonObj;
 }
 
 -(void)registerForTouchIDNotifications {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.fingerup" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.authsuccess" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveTouchIDNotification:) name:@"com.a3tweaks.asphaleia8.authfailed" object:nil];
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.fingerdown");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.fingerup");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.authsuccess");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.authfailed");
 }
 
 -(void)deregisterForTouchIDNotifications {
@@ -316,7 +313,7 @@ static ASCommon *sharedCommonObj;
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
     SBIconView *iconView = currentIconView;
     currentIconView = nil;
-    [[ASTouchIDController sharedInstance] stopMonitoring];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
     self.currentAuthAlert = nil;
     if (buttonIndex == [alertView firstOtherButtonIndex]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
@@ -338,12 +335,7 @@ static ASCommon *sharedCommonObj;
     self.currentAuthAlert = alertView;
 
     if (touchIDEnabled())
-        [[ASTouchIDController sharedInstance] startMonitoring];
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
 }
-
-/*- (void)didPresentAlertView:(UIAlertView *)alertView {
-    if (touchIDEnabled())
-        [[ASTouchIDController sharedInstance] startMonitoring];
-}*/
 
 @end
