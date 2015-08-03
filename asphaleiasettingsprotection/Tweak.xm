@@ -52,6 +52,7 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
 		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
 	} else {
+		alertView = nil;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
 	}
 	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
