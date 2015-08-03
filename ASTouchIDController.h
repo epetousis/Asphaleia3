@@ -9,7 +9,7 @@ https://github.com/Sassoty/BioTesting */
 
 typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor, unsigned event);
 
-#define asphaleiaLogMsg(str) HBLogInfo(@"[Asphaleia] %@",str)
+#define asphaleiaLogMsg(str) NSLog(@"[Asphaleia] %@",str)
 
 @interface SBUIBiometricEventMonitor : NSObject
 - (void)addObserver:(id)arg1;

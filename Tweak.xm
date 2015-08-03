@@ -18,7 +18,7 @@
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
 
-#define asphaleiaLog() HBLogInfo(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
+#define asphaleiaLog() NSLog(@"[Asphaleia] Method called: %@",NSStringFromSelector(_cmd))
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
@@ -346,11 +346,8 @@ UIWindow *blurredWindow;
 	
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && !catchAllIgnoreRequest) {
-		SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:frontmostApp];
-		SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-		[iconView _setIcon:appIcon animated:YES];
 
-		[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:NO dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
+		[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[frontmostApp bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
 			if (blurredWindow) {
 				blurredWindow.hidden = YES;
 				blurredWindow = nil;
@@ -513,11 +510,7 @@ static BOOL openURLHasAuthenticated;
 			return;
 	}
 
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[application bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				if (blurredWindow && [[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
 					blurredWindow.hidden = YES;
@@ -696,12 +689,7 @@ BOOL currentBannerAuthenticated;
 		return;
 	}
 
-	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[bulletin sectionID]];
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:@"Scan fingerprint to show notification." beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[bulletin sectionID] customMessage:@"Scan fingerprint to show notification." dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
@@ -739,7 +727,7 @@ BOOL currentBannerAuthenticated;
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:application.bundleIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
@@ -782,12 +770,8 @@ BOOL currentBannerAuthenticated;
 		return;
 	}
 
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:app];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[app bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 			if (!wasCancelled) {
 				catchAllIgnoreRequest = YES;
@@ -823,17 +807,12 @@ BOOL currentBannerAuthenticated;
 - (void)activateApplicationWithDisplayIdentifier:(NSString *)displayIdentifier fromCell:(id)arg2 {
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 
-	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:displayIdentifier];
-	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
-	[iconView _setIcon:appIcon animated:YES];
-
 	if ((![getProtectedApps() containsObject:displayIdentifier] && !shouldProtectAllApps()) || [temporarilyUnlockedAppBundleID isEqual:displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
 		%orig;
 		return;
 	}
 
-	[[ASCommon sharedInstance] showAppAuthenticationAlertWithIconView:iconView customMessage:nil beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:displayIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 	appUserAuthorisedID = displayIdentifier;
 	if (!wasCancelled)
 		%orig;

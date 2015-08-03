@@ -147,8 +147,14 @@ static ASCommon *sharedCommonObj;
     return alertView;
 }
 
--(void)showAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage beginMesaMonitoringBeforeShowing:(BOOL)shouldBeginMonitoringOnWillPresent dismissedHandler:(ASCommonAuthenticationHandler)handler {
+-(void)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+
+    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
+    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
+    [iconView _setIcon:appIcon animated:YES];
+
     authHandler = [handler copy];
 
     UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
