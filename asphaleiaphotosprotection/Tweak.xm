@@ -45,22 +45,9 @@ void increaseMessageCount() {
 		%orig;
 		return;
 	}
-	if (alertView)
+	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
-	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	alertView.tag = 4000; // UIImagePickerController tag
-	if (alertView && touchIDEnabled()) {
-		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
-		origTitle = alertView.title;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
-		addObserver(authSuccess, "com.a3tweaks.asphaleia8.authsuccess");
-		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
-		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
-	} else {
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-	}
-	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
-	authHandler = ^(BOOL wasCancelled){
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
 		if (!wasCancelled) {
 			%orig;
 		} else {
@@ -71,12 +58,10 @@ void increaseMessageCount() {
 				increaseMessageCount();
 			}
 		}
-	};
-	if (alertView)
-		[alertView show];
+	}];
 }
 
-%new
+/*%new
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
     CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, NULL, NULL);
@@ -86,7 +71,7 @@ void increaseMessageCount() {
     } else if (buttonIndex == 0) {
         authHandler(YES);
     }
-}
+}*/
 
 %end
 
@@ -106,26 +91,12 @@ ALAssetsLibraryAccessFailureBlock block2;
 		%orig;
 		return;
 	}
-	if (alertView)
+	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
 
-	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	alertView.tag = 4001; // ALAssetsLibrary tag
-	if (alertView && touchIDEnabled()) {
-		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
-		origTitle = alertView.title;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
-		addObserver(authSuccess, "com.a3tweaks.asphaleia8.authsuccess");
-		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
-		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
-	} else {
-		alertView = nil;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-	}
-	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
 	block1 = [arg2 copy];
 	block2 = [arg3 copy];
-	authHandler = ^(BOOL wasCancelled){
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
 		if (!wasCancelled) {
 			authenticated = YES;
 			%orig(arg1,block1,block2);
@@ -135,21 +106,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 				increaseMessageCount();
 			}
 		}
-	};
-	if (alertView)
-		[alertView show];
-}
-
-%new
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-    CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, NULL, NULL);
-    alertView = nil;
-    if (buttonIndex == 1) {
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-    } else if (buttonIndex == 0) {
-        authHandler(YES);
-    }
+	}];
 }
 
 %end
@@ -176,49 +133,21 @@ PHAuthBlock authBlock;
 		%orig;
 		return;
 	}
-	if (alertView)
+	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
 
-	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	alertView.tag = 4002; // PHPhotoLibrary tag
-	if (alertView && touchIDEnabled()) {
-		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
-		origTitle = alertView.title;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
-		addObserver(authSuccess, "com.a3tweaks.asphaleia8.authsuccess");
-		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
-		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
-	} else {
-		alertView = nil;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-	}
-	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
 	authBlock = [arg1 copy];
-	authHandler = ^(BOOL wasCancelled){
-		if (!wasCancelled) {
-			%orig(authBlock);
-			authenticated = YES;
-			if (shouldShowPhotosProtectMsg()) {
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-				[alert show];
-				increaseMessageCount();
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+			if (!wasCancelled) {
+				%orig(authBlock);
+				authenticated = YES;
+				if (shouldShowPhotosProtectMsg()) {
+					UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+					[alert show];
+					increaseMessageCount();
+				}
 			}
-		}
-	};
-	if (alertView)
-		[alertView show];
-}
-
-%new
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-    CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, NULL, NULL);
-    alertView = nil;
-    if (buttonIndex == 1) {
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-    } else if (buttonIndex == 0) {
-        authHandler(YES);
-    }
+		}];
 }
 
 %end
@@ -288,39 +217,12 @@ SEL origSelector;
 	if (alertView)
 		return;
 
-	alertView = [[ASCommon sharedInstance] returnAuthenticationAlertOfType:ASAuthenticationAlertPhotos delegate:(id<UIAlertViewDelegate>)self];
-	alertView.tag = 4003; // CAMImageWell tag
-	if (alertView && touchIDEnabled()) {
-		[[ASCommon sharedInstance] addSubview:[[ASCommon sharedInstance] valueForKey:@"alertViewAccessory"] toAlertView:alertView];
-		origTitle = alertView.title;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
-		addObserver(authSuccess, "com.a3tweaks.asphaleia8.authsuccess");
-		addObserver(fingerScanFailed, "com.a3tweaks.asphaleia8.authfailed");
-		addObserver(fingerDown, "com.a3tweaks.asphaleia8.fingerdown");
-	} else {
-		alertView = nil;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-	}
-	addObserver(authSuccess, "com.a3tweaks.asphaleia8.passcodeauthsuccess");
-	authHandler = ^(BOOL wasCancelled){
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
 		if (!wasCancelled) {
 			authenticated = YES;
 			[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		}
-	};
-	if (alertView)
-		[alertView show];
-}
-%new
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-    CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, NULL, NULL);
-    alertView = nil;
-    if (buttonIndex == 1) {
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-    } else if (buttonIndex == 0) {
-        authHandler(YES);
-    }
+	}];
 }
 
 %end

@@ -4,13 +4,13 @@ TARGET = iphone:clang:latest
 include $(THEOS)/makefiles/common.mk
 
 LIBRARY_NAME = libasphaleiaui
-libasphaleiaui_FILES = ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASTouchIDController.mm ASPasscodeHandler.mm ASTouchWindow.m
+libasphaleiaui_FILES = ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASPasscodeHandler.mm ASTouchWindow.m
 libasphaleiaui_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage LocalAuthentication
 libasphaleiaui_INSTALL_PATH = /usr/lib
 libasphaleiaui_CFLAGS = -fobjc-arc
 
 TWEAK_NAME = Asphaleia
-Asphaleia_FILES = Tweak.xm ASXPCHandler.mm
+Asphaleia_FILES = Tweak.xm ASXPCHandler.mm ASTouchIDController.mm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
 Asphaleia_PRIVATE_FRAMEWORKS = AppSupport
 Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)
