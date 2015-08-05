@@ -174,7 +174,7 @@ BOOL switcherAuthenticating;
 			switcherAuthenticating = NO;
 			if (!wasCancelled)
 				%orig;
-			}];
+		}];
 	}
 }
 

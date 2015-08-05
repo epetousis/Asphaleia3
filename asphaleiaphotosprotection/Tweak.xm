@@ -12,6 +12,7 @@
 
 UIAlertView *alertView;
 BOOL authenticated;
+BOOL authenticating;
 ASCommonAuthenticationHandler authHandler;
 NSString *origTitle;
 void fingerDown(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -41,13 +42,15 @@ void increaseMessageCount() {
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
-	if (authenticated || !shouldSecurePhotos()) {
+	if (authenticated || !shouldSecurePhotos() || authenticating) {
 		%orig;
 		return;
 	}
 	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
+	authenticating = YES;
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+		authenticating = NO;
 		if (!wasCancelled) {
 			%orig;
 		} else {
@@ -60,18 +63,6 @@ void increaseMessageCount() {
 		}
 	}];
 }
-
-/*%new
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-    CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge void *)self, NULL, NULL);
-    alertView = nil;
-    if (buttonIndex == 1) {
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.showpasscodeview"), NULL, NULL, YES);
-    } else if (buttonIndex == 0) {
-        authHandler(YES);
-    }
-}*/
 
 %end
 
@@ -87,16 +78,18 @@ ALAssetsLibraryAccessFailureBlock block2;
 }
 
 - (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id /* block */)arg2 failureBlock:(id /* block */)arg3 {
-	if (authenticated || !shouldSecurePhotos()) {
+	if (authenticated || !shouldSecurePhotos() || authenticating) {
 		%orig;
 		return;
 	}
 	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
+	authenticating = YES;
 
 	block1 = [arg2 copy];
 	block2 = [arg3 copy];
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+		authenticating = NO;
 		if (!wasCancelled) {
 			authenticated = YES;
 			%orig(arg1,block1,block2);
@@ -129,15 +122,17 @@ PHAuthBlock authBlock;
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
-	if (authenticated || !shouldSecurePhotos() || accessDenied || (alertView && alertView.tag != 4002)) {
+	if (authenticated || !shouldSecurePhotos() || accessDenied || authenticating) {
 		%orig;
 		return;
 	}
 	if ([ASCommon sharedInstance].currentAuthAlert)
 		return;
+	authenticating = YES;
 
 	authBlock = [arg1 copy];
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+			authenticating = NO;
 			if (!wasCancelled) {
 				%orig(authBlock);
 				authenticated = YES;
@@ -210,14 +205,16 @@ SEL origSelector;
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" userInfo:nil];
 
-	if (authenticated || !shouldSecurePhotos() || ([reply[@"active"] boolValue] && devicePasscodeSet())) {
+	if (authenticated || !shouldSecurePhotos() || ([reply[@"active"] boolValue] && devicePasscodeSet()) || authenticating) {
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}
 	if (alertView)
 		return;
+	authenticating = YES;
 
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+		authenticating = NO;
 		if (!wasCancelled) {
 			authenticated = YES;
 			[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
