@@ -53,7 +53,7 @@ static ASCommon *sharedCommonObj;
         title = titleWithSpacingForIcon(iconView.icon.displayName);
     }
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
+    __block UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                    message:message
                    delegate:delegate
          cancelButtonTitle:@"Cancel"
@@ -66,19 +66,21 @@ static ASCommon *sharedCommonObj;
     imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
 
     if (touchIDEnabled()) {
-        imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
-        if (!_fingerglyph) {
-            _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-            _fingerglyph.secondaryColor = [UIColor grayColor];
-            _fingerglyph.primaryColor = [UIColor redColor];
-            CGRect fingerframe = _fingerglyph.frame;
-            fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-            fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-            _fingerglyph.frame = fingerframe;
-            _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
-        }
-        [imgView addSubview:_fingerglyph];
-        alertViewAccessory = imgView;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
+            if (!_fingerglyph) {
+                _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+                _fingerglyph.secondaryColor = [UIColor grayColor];
+                _fingerglyph.primaryColor = [UIColor redColor];
+                CGRect fingerframe = _fingerglyph.frame;
+                fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+                fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+                _fingerglyph.frame = fingerframe;
+                _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+            }
+            [imgView addSubview:_fingerglyph];
+            [self addSubview:imgView toAlertView:alertView];
+        });
     }
 
     return alertView;
@@ -134,11 +136,12 @@ static ASCommon *sharedCommonObj;
                    delegate:delegate
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
-
-    __block UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-    imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
-    alertViewAccessory = imgView;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+        imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+        imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
+        [self addSubview:imgView toAlertView:alertView];
+    });
 
     return alertView;
 }
@@ -173,7 +176,9 @@ static ASCommon *sharedCommonObj;
         return NO;
     }
 
-    [alertView show];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [alertView show];
+    });
     return YES;
 }
 
@@ -200,7 +205,9 @@ static ASCommon *sharedCommonObj;
         return NO;
     }
 
-    [alertView show];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [alertView show];
+    });
     return YES;
 }
 
@@ -435,8 +442,6 @@ static ASCommon *sharedCommonObj;
 }
 
 - (void)willPresentAlertView:(UIAlertView *)alertView {
-    [self addSubview:alertViewAccessory toAlertView:alertView];
-
     if (self.currentAuthAlert)
         [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
 

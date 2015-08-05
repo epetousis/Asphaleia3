@@ -185,6 +185,11 @@
 - (void)_finishSlideDownWithCompletion:(id)completion;
 @end
 
+@interface UIAlertController ()
+@property (nonatomic,retain) UIViewController * contentViewController;
+@property UIView *_foregroundView;
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;
