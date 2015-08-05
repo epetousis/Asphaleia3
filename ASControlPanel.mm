@@ -36,7 +36,7 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
         return;
     }
 
-    [[ASCommon sharedInstance] showAuthenticationAlertOfType:ASAuthenticationAlertControlPanel beginMesaMonitoringBeforeShowing:YES dismissedHandler:^(BOOL wasCancelled) {
+    [[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlPanel dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
             NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Items" : @"Disable My Secured Items";
             NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
