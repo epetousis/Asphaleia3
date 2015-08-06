@@ -1,3 +1,6 @@
+ARCHS = armv7 armv7s arm64
+TARGET = iphone:clang:latest
+
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = AsphaleiaFlipswitch
