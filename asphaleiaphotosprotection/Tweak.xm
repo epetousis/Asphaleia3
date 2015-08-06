@@ -72,13 +72,13 @@ ALAssetsLibraryAccessFailureBlock block2;
 %hook ALAssetsLibrary
 
 + (int)authorizationStatus {
-	if (shouldSecurePhotos())
+	if (!authenticated && shouldSecurePhotos())
 		return 0;
 
 	return %orig;
 }
 
-- (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id /* block */)arg2 failureBlock:(id /* block */)arg3 {
+- (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id)arg2 failureBlock:(id)arg3 {
 	if (authenticated || !shouldSecurePhotos() || authenticating) {
 		%orig;
 		return;
@@ -150,8 +150,15 @@ PHAuthBlock authBlock;
 
 %hook PHFetchResult
 
+-(NSUInteger)count {
+	if (authenticated || !shouldSecurePhotos())
+		return %orig;
+
+	return 0;
+}
+
 - (id)objectAtIndexedSubscript:(unsigned int)arg1 {
-	if (authenticated)
+	if (authenticated || !shouldSecurePhotos())
 		return %orig;
 
 	return nil;
