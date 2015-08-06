@@ -31,6 +31,8 @@
 			<string>com.a3tweaks.asphaleia8</string>
 			<key>key</key>
 			<string>simplePasscode</string>
+			<key>id</key>
+			<string>passcodeSwitchCell</string>
 			<key>label</key>
 			<string>Passcode</string>
 			<key>PostNotification</key>
