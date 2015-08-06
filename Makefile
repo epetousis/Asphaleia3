@@ -5,7 +5,7 @@ include $(THEOS)/makefiles/common.mk
 
 LIBRARY_NAME = libasphaleiaui
 libasphaleiaui_FILES = ASCommon.mm UIAlertView+Blocks.m UIImage+ImageEffects.m NSTimer+Blocks.m ASActivatorListener.m ASControlPanel.mm PreferencesHandler.mm ASPasscodeHandler.mm ASTouchWindow.m
-libasphaleiaui_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage LocalAuthentication
+libasphaleiaui_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage LocalAuthentication Security
 libasphaleiaui_INSTALL_PATH = /usr/lib
 libasphaleiaui_CFLAGS = -fobjc-arc
 

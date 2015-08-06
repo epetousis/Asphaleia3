@@ -9,6 +9,7 @@
 #import <dlfcn.h>
 #import <RocketBootstrap/RocketBootstrap.h>
 #import <AppSupport/CPDistributedMessagingCenter.h>
+#import "../Asphaleia.h"
 
 UIAlertView *alertView;
 BOOL authenticated;
@@ -158,39 +159,6 @@ PHAuthBlock authBlock;
 
 %end
 
-BOOL devicePasscodeSet() {
-	// From http://pastebin.com/T9YwEjnL
-	NSData* secret = [@"Device has passcode set?" dataUsingEncoding:NSUTF8StringEncoding];
-	NSDictionary *attributes = @{
-	    (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
-	    (__bridge id)kSecAttrService: @"LocalDeviceServices",
-	    (__bridge id)kSecAttrAccount: @"NoAccount",
-	    (__bridge id)kSecValueData: secret,
-	    (__bridge id)kSecAttrAccessible: (__bridge id)kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-	};
-
-	OSStatus status = SecItemAdd((__bridge CFDictionaryRef)attributes, NULL);
-	if (status == errSecSuccess) {
-	    NSDictionary *query = @{
-	        (__bridge id)kSecClass:  (__bridge id)kSecClassGenericPassword,
-	        (__bridge id)kSecAttrService: @"LocalDeviceServices",
-	        (__bridge id)kSecAttrAccount: @"NoAccount"
-	    };
-	
-	    status = SecItemDelete((__bridge CFDictionaryRef)query);
-	
-	    return true;
-	}
-
-	if (status == errSecDecode) {
-	    return false;
-	}
-
-	return false;
-}
-
-@interface CAMImageWell : UIButton
-@end
 %hook CAMImageWell
 id origTarget;
 SEL origSelector;

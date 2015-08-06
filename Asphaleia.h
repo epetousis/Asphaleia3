@@ -190,6 +190,9 @@
 @property UIView *_foregroundView;
 @end
 
+@interface CAMImageWell : UIButton
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;

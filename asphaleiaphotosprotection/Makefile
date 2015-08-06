@@ -5,7 +5,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = AsphaleiaPhotosProtection
 AsphaleiaPhotosProtection_FILES = Tweak.xm
-AsphaleiaPhotosProtection_FRAMEWORKS = UIKit Security
+AsphaleiaPhotosProtection_FRAMEWORKS = UIKit
 AsphaleiaPhotosProtection_PRIVATE_FRAMEWORKS = AppSupport
 AsphaleiaPhotosProtection_CFLAGS = -fobjc-arc
 AsphaleiaPhotosProtection_LDFLAGS = -L"../.theos/obj/debug"
