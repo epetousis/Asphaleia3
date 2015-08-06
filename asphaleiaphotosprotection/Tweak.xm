@@ -147,6 +147,17 @@ PHAuthBlock authBlock;
 
 %end
 
+%hook PHFetchResult
+
+- (id)objectAtIndexedSubscript:(unsigned int)arg1 {
+	if (authenticated)
+		return %orig;
+
+	return nil;
+}
+
+%end
+
 BOOL devicePasscodeSet() {
 	// From http://pastebin.com/T9YwEjnL
 	NSData* secret = [@"Device has passcode set?" dataUsingEncoding:NSUTF8StringEncoding];
