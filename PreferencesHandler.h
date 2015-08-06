@@ -3,6 +3,8 @@
 #import <SystemConfiguration/CaptiveNetwork.h>
 
 #define kPrefsChangedNotification "com.a3tweaks.asphaleia/ReloadPrefs"
+#define kDisableAsphaleiaNotification "com.a3tweaks.asphaleia/DisableAsphaleia"
+#define kEnableAsphaleiaNotification "com.a3tweaks.asphaleia/EnableAsphaleia"
 #define addObserver(c, n) CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (c), CFSTR(n), NULL, CFNotificationSuspensionBehaviorCoalesce)
 #define loadPreferences() preferencesChangedCallback(NULL, NULL, NULL, NULL, NULL)
 

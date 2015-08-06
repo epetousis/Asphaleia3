@@ -229,7 +229,6 @@ SEL origSelector;
 		return;
 	if ([UIApplication sharedApplication] || NSClassFromString(@"PHPhotoLibrary") != nil || NSClassFromString(@"ALAssetsLibrary") != nil || NSClassFromString(@"UIImagePickerController") != nil) {
 		loadPreferences();
-		addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 		%init;
 	}
 }
