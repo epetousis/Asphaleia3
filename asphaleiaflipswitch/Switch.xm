@@ -7,7 +7,7 @@
 - (void)setObject:(id)value forKey:(NSString *)key inDomain:(NSString *)domain;
 @end
 
-static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
+//static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
 
 @interface AsphaleiaFlipswitchSwitch : NSObject <FSSwitchDataSource> {
 	BOOL state;
@@ -20,7 +20,6 @@ static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
 	AsphaleiaFlipswitchSwitch *flipswitch = [super init];
 	if (flipswitch) {
 		loadPreferences();
-		addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	}
 	return flipswitch;
 }
@@ -30,25 +29,18 @@ static NSString *nsNotificationString = @"com.a3tweaks.asphaleia/ReloadPrefs";
 }
 
 - (FSSwitchState)stateForSwitchIdentifier:(NSString *)switchIdentifier {
-	return (passcodeEnabled() || touchIDEnabled()) ? FSSwitchStateOn : FSSwitchStateOff;
+	return (![ASPreferencesHandler sharedInstance].asphaleiaDisabled) ? FSSwitchStateOn : FSSwitchStateOff;
 }
 
 - (void)applyState:(FSSwitchState)newState forSwitchIdentifier:(NSString *)switchIdentifier {
-	NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
 	switch (newState) {
 	case FSSwitchStateIndeterminate:
 		break;
 	case FSSwitchStateOn:
-        [tempPrefs setObject:[NSNumber numberWithBool:YES] forKey:kPasscodeEnabledKey];
-        [tempPrefs setObject:[NSNumber numberWithBool:YES] forKey:kTouchIDEnabledKey];
-        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)nsNotificationString, NULL, NULL, YES);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR(kEnableAsphaleiaNotification), NULL, NULL, YES);
 		break;
 	case FSSwitchStateOff:
-        [tempPrefs setObject:[NSNumber numberWithBool:NO] forKey:kPasscodeEnabledKey];
-        [tempPrefs setObject:[NSNumber numberWithBool:NO] forKey:kTouchIDEnabledKey];
-        [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)nsNotificationString, NULL, NULL, YES);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR(kDisableAsphaleiaNotification), NULL, NULL, YES);
 		break;
 	}
 	return;

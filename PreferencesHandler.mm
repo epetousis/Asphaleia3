@@ -9,7 +9,23 @@
 @property (readwrite) BOOL asphaleiaDisabled;
 @end
 
+void asphaleiaToggleCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	if ([(__bridge NSString *)name isEqualToString:@kEnableAsphaleiaNotification]) {
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = NO;
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled = NO;
+	} else if ([(__bridge NSString *)name isEqualToString:@kDisableAsphaleiaNotification]) {
+		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;
+		[ASPreferencesHandler sharedInstance].appSecurityDisabled = YES;
+	}
+}
+
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	static dispatch_once_t token = 0;
+	dispatch_once(&token, ^{
+		addObserver(preferencesChangedCallback,kPrefsChangedNotification);
+		addObserver(asphaleiaToggleCallback,kDisableAsphaleiaNotification);
+		addObserver(asphaleiaToggleCallback,kEnableAsphaleiaNotification);
+	});
 	[ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithContentsOfFile:kPreferencesFilePath];
 	if (!passcodeEnabled() && !touchIDEnabled()) {
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = YES;

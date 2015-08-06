@@ -35,5 +35,4 @@
 
 %ctor {
 	loadPreferences();
-	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 }

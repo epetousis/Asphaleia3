@@ -723,7 +723,6 @@ BOOL currentBannerAuthenticated;
 %end
 
 %ctor {
-	addObserver(preferencesChangedCallback,kPrefsChangedNotification);
 	loadPreferences();
 	[[ASControlPanel sharedInstance] load];
 	[[ASActivatorListener sharedInstance] loadWithEventHandler:^void(LAEvent *event, BOOL abortEventCalled){
