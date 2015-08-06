@@ -51,11 +51,14 @@
     }
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
-    if (![settingsPanelNames containsObject:[[(PSTableCell *)cell specifier] identifier]])
+
+    if ([[(PSTableCell *)cell specifier] identifier] && ![settingsPanelNames containsObject:[[(PSTableCell *)cell specifier] identifier]])
         [settingsPanelNames insertObject:[[(PSTableCell *)cell specifier] identifier] atIndex:[self getRowIndexFromAllRows:indexPath]];
+
     [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
     switchview.tag = [self getRowIndexFromAllRows:indexPath];
     [switchview setOn:[securedSettings[settingsPanelNames[[self getRowIndexFromAllRows:indexPath]]] boolValue] animated:NO];
+    
     cell.detailTextLabel.text = nil;
     cell.accessoryView = switchview;
     return cell;
