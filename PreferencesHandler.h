@@ -41,6 +41,7 @@ static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/
 void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 BOOL shouldRequireAuthorisationOnWifi(void);
 BOOL isTouchIDDevice(void);
+BOOL devicePasscodeSet(void);
 BOOL passcodeEnabled(void);
 BOOL touchIDEnabled(void);
 NSString *getPasscode(void);
