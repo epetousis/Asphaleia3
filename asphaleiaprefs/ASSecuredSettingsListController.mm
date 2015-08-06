@@ -43,6 +43,10 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [[[self navigationController] rootListController] tableView:[[[self navigationController] rootListController] table] cellForRowAtIndexPath:indexPath];
+    if (!cell) { // Invalid indexPath.
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"settingsCell"];
+        return cell;
+    }
     if ([cell.accessoryView isKindOfClass:[UISwitch class]]) {
         cell.userInteractionEnabled = NO;
         cell.textLabel.enabled = NO;
@@ -58,7 +62,7 @@
     [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
     switchview.tag = [self getRowIndexFromAllRows:indexPath];
     [switchview setOn:[securedSettings[settingsPanelNames[[self getRowIndexFromAllRows:indexPath]]] boolValue] animated:NO];
-    
+
     cell.detailTextLabel.text = nil;
     cell.accessoryView = switchview;
     return cell;

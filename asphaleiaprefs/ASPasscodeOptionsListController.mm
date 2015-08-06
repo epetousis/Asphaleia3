@@ -75,6 +75,24 @@
     [defaults writeToFile:PreferencesPath atomically:YES];
     CFStringRef toPost = (CFStringRef)specifier.properties[@"PostNotification"];
     if(toPost) CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
+
+    if ([specifier.properties[@"key"] isEqualToString:@"simplePasscode"] && ![value boolValue] && isTouchIDDevice()) {
+        PSSpecifier *touchIDSpecifier;
+        for (PSSpecifier *forSpecifier in [[self specifiers] copy]) {
+            if ([[forSpecifier identifier] isEqualToString:@"touchIDSwitchCell"])
+                touchIDSpecifier = forSpecifier;
+        }
+        [self setPreferenceValue:[NSNumber numberWithBool:NO] specifier:touchIDSpecifier];
+        [[self table] reloadData];
+    } else if ([specifier.properties[@"key"] isEqualToString:@"touchID"] && [value boolValue] && isTouchIDDevice()) {
+        PSSpecifier *passcodeSpecifier;
+        for (PSSpecifier *forSpecifier in [[self specifiers] copy]) {
+            if ([[forSpecifier identifier] isEqualToString:@"passcodeSwitchCell"])
+                passcodeSpecifier = forSpecifier;
+        }
+        [self setPreferenceValue:[NSNumber numberWithBool:YES] specifier:passcodeSpecifier];
+        [[self table] reloadData];
+    }
 }
 
 @end
