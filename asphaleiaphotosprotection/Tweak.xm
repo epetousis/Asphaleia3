@@ -80,7 +80,8 @@ ALAssetsLibraryAccessFailureBlock block2;
 
 - (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id)arg2 failureBlock:(id)arg3 {
 	if (authenticated || !shouldSecurePhotos() || authenticating) {
-		%orig;
+		if (!authenticating)
+			%orig;
 		return;
 	}
 	if ([ASCommon sharedInstance].currentAuthAlert)
@@ -124,7 +125,8 @@ PHAuthBlock authBlock;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
 	if (authenticated || !shouldSecurePhotos() || accessDenied || authenticating) {
-		%orig;
+		if (!authenticating)
+			%orig;
 		return;
 	}
 	if ([ASCommon sharedInstance].currentAuthAlert)
