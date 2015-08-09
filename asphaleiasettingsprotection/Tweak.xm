@@ -22,7 +22,7 @@
 		%orig;
 		return;
 	}
-	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertSettingsPanel dismissedHandler:^(BOOL wasCancelled){
 		if (!wasCancelled) {
 			%orig;
 		} else {
