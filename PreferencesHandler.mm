@@ -254,6 +254,19 @@ NSArray *getProtectedPanels(void) {
 	return [NSArray arrayWithArray:protectedPanels];
 }
 
+NSArray *getProtectedSwitches(void) {
+	NSDictionary *switches = [[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredSwitchesKey];
+	if (!switches || !shouldRequireAuthorisationOnWifi() || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [ASPreferencesHandler sharedInstance].asphaleiaDisabled)
+		return [NSArray array];
+
+	NSMutableArray *protectedSwitches = [NSMutableArray array];
+	for (NSString *fswitch in switches) {
+		if ([[switches objectForKey:fswitch] boolValue])
+			[protectedSwitches addObject:fswitch];
+	}
+	return [NSArray arrayWithArray:protectedSwitches];
+}
+
 @implementation ASPreferencesHandler
 
 +(instancetype)sharedInstance {
