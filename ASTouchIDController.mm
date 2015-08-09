@@ -106,6 +106,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
     {
 		id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
 		id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
+		id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
 		if (event)
         {
 			activatorListenerNames = [activator assignedListenerNamesForEvent:event];
@@ -120,6 +121,14 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			if (activatorListenerNamesSpringBoard)
 				for (NSString *listenerName in activatorListenerNamesSpringBoard)
 					[activator removeListenerAssignment:listenerName fromEvent:eventSpringBoard];
+		}
+
+		if (eventLockscreen)
+        {
+			activatorListenerNamesLS = [activator assignedListenerNamesForEvent:eventLockscreen];
+			if (activatorListenerNamesLS)
+				for (NSString *listenerName in activatorListenerNamesLS)
+					[activator removeListenerAssignment:listenerName fromEvent:eventLockscreen];
 		}
 	}
 
@@ -174,6 +183,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
 			id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
 			id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
+			id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
 			if (event)
 				for (NSString *listenerName in activatorListenerNames) 
 					[activator addListenerAssignment:listenerName toEvent:event];
@@ -181,6 +191,10 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			if (eventSpringBoard)
 				for (NSString *listenerName in activatorListenerNamesSpringBoard) 
 					[activator addListenerAssignment:listenerName toEvent:eventSpringBoard];
+
+			if (eventLockscreen)
+				for (NSString *listenerName in activatorListenerNamesLS) 
+					[activator addListenerAssignment:listenerName toEvent:eventLockscreen];
         });
     }
 

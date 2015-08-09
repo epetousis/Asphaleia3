@@ -32,6 +32,7 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 	BOOL previousMatchingSetting;
 	NSArray *activatorListenerNames;
 	NSArray *activatorListenerNamesSpringBoard;
+	NSArray *activatorListenerNamesLS;
 }
 @property (nonatomic, strong) BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;
