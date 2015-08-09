@@ -26,7 +26,7 @@
     [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
     switchview.tag = indexPath.row;
     cell.textLabel.text = switchNames[[[[FSSwitchPanel sharedPanel] sortedSwitchIdentifiers] objectAtIndex:indexPath.row]];
-    [switchview setOn:[securedSwitches[switchNames[[[[FSSwitchPanel sharedPanel] sortedSwitchIdentifiers] objectAtIndex:indexPath.row]]] boolValue] animated:NO];
+    [switchview setOn:[securedSwitches[[[[FSSwitchPanel sharedPanel] sortedSwitchIdentifiers] objectAtIndex:indexPath.row]] boolValue] animated:NO];
     cell.accessoryView = switchview;
     return cell;
 }
