@@ -124,6 +124,10 @@ static ASCommon *sharedCommonObj;
             title = @"Settings Panel";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             break;
+        case ASAuthenticationAlertFlipswitch:
+            title = @"Flipswitch";
+            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            break;
         default:
             title = @"Asphaleia";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];

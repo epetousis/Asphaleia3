@@ -121,7 +121,7 @@ static UIImage *defaultImage;
     UITableViewCell *cell;
     NSString *key;
     if (indexPath.section == 0) {
-        UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"globalAppSecurityCell"];
+        UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ASGlobalAppSecurityCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         UISwitch *switchview = [[UISwitch alloc] initWithFrame:CGRectZero];
         [switchview addTarget:self action:@selector(updateSwitchAtIndexPath:) forControlEvents:UIControlEventValueChanged];
@@ -131,7 +131,7 @@ static UIImage *defaultImage;
         cell.accessoryView = switchview;
         return cell;
     } else if (indexPath.section == 1) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"systemAppCell"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ASSystemAppCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.indentationWidth = 10.0f;
         cell.indentationLevel = 0;
@@ -143,7 +143,7 @@ static UIImage *defaultImage;
         cell.accessoryView = switchview;
         key = systemAppsSortedKeys[indexPath.row];
     } else {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"appStoreAppCell"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ASAppStoreAppCell"];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.indentationWidth = 10.0f;
         cell.indentationLevel = 0;

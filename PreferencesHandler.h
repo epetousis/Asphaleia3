@@ -11,6 +11,7 @@
 #define kSecuredAppsKey @"securedApps"
 #define kSecuredFoldersKey @"securedFolders"
 #define kSecuredPanelsKey @"securedPanels"
+#define kSecuredSwitchesKey @"securedSwitches"
 #define kSecureSwitcherKey @"secureSwitcher"
 #define kSecureAppArrangementKey @"preventAppDeletion"
 #define kObscureAppContentKey @"obscureAppContent"
@@ -68,6 +69,7 @@ NSArray *getProtectedAppsNoBullshit(void);
 NSArray *getProtectedApps(void);
 NSArray *getProtectedFolders(void);
 NSArray *getProtectedPanels(void);
+NSArray *getProtectedSwitches(void);
 
 @interface ASPreferencesHandler : NSObject
 @property (nonatomic, retain) NSDictionary *prefs;

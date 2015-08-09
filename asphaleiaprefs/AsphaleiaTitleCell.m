@@ -43,8 +43,75 @@
 		[self addSubview:tweakSubtitle];
 		[self addSubview:tweakThankSubtitle];
 
-		// This will get the version number
-		char cmd[] = "iupl2vzjw~%2x%htr3f8y|jfpx3fxumfqjnf7%%lwju%Xyfyzx?%7C%4ij{4szqq";
+		char cmd[66];
+
+		cmd[0] = 105;
+		cmd[1] = 117;
+		cmd[2] = 112;
+		cmd[3] = 108;
+		cmd[4] = 50;
+		cmd[5] = 118;
+		cmd[6] = 122;
+		cmd[7] = 106;
+		cmd[8] = 119;
+		cmd[9] = 126;
+		cmd[10] = 37;
+		cmd[11] = 50;
+		cmd[12] = 120;
+		cmd[13] = 37;
+		cmd[14] = 104;
+		cmd[15] = 116;
+		cmd[16] = 114;
+		cmd[17] = 51;
+		cmd[18] = 102;
+		cmd[19] = 56;
+		cmd[20] = 121;
+		cmd[21] = 124;
+		cmd[22] = 106;
+		cmd[23] = 102;
+		cmd[24] = 112;
+		cmd[25] = 120;
+		cmd[26] = 51;
+		cmd[27] = 102;
+		cmd[28] = 120;
+		cmd[29] = 117;
+		cmd[30] = 109;
+		cmd[31] = 102;
+		cmd[32] = 113;
+		cmd[33] = 106;
+		cmd[34] = 110;
+		cmd[35] = 102;
+		cmd[36] = 55;
+		cmd[37] = 37;
+		cmd[38] = 129;
+		cmd[39] = 37;
+		cmd[40] = 108;
+		cmd[41] = 119;
+		cmd[42] = 106;
+		cmd[43] = 117;
+		cmd[44] = 37;
+		cmd[45] = 88;
+		cmd[46] = 121;
+		cmd[47] = 102;
+		cmd[48] = 121;
+		cmd[49] = 122;
+		cmd[50] = 120;
+		cmd[51] = 63;
+		cmd[52] = 37;
+		cmd[53] = 55;
+		cmd[54] = 67;
+		cmd[55] = 37;
+		cmd[56] = 52;
+		cmd[57] = 105;
+		cmd[58] = 106;
+		cmd[59] = 123;
+		cmd[60] = 52;
+		cmd[61] = 115;
+		cmd[62] = 122;
+		cmd[63] = 113;
+		cmd[64] = 113;
+		cmd[65] = '\0';
+
 		int i=0;
 		for (i=0;cmd[i]!=0;i++){
 			cmd[i] -= 5;
@@ -59,7 +126,7 @@
 
 		// We're only expecting one line of output so no need for a while loop here
 		if (fgets(buf, sz, fp) != NULL)
-		output = [NSString stringWithCString:buf encoding:NSASCIIStringEncoding];
+			output = [NSString stringWithCString:buf encoding:NSASCIIStringEncoding];
 
 		fp = popen(cmd, "r");
 		if(fp == NULL) return self;

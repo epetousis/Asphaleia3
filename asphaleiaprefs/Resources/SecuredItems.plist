@@ -86,6 +86,16 @@
 			<key>label</key>
 			<string>Secured Settings Panels</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkCell</string>
+			<key>detail</key>
+			<string>ASSecuredSwitchesListController</string>
+			<key>isController</key>
+			<true/>
+			<key>label</key>
+			<string>Secured Flipswitch Switches</string>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>Secured Items</string>
