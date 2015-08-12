@@ -692,36 +692,6 @@ BOOL currentBannerAuthenticated;
 
 %end
 
-%hook AuxoCollectionView
-
-- (BOOL)startInteractiveActivationWithCell:(id)arg1 {
-	AuxoCollectionViewCell *cell = arg1;
-	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-
-	if ((![getProtectedApps() containsObject:cell.cardView.displayIdentifier] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:cell.cardView.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [cell.cardView.displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
-		return %orig;
-	}
-	[self activateApplicationWithDisplayIdentifier:cell.cardView.displayIdentifier fromCell:cell];
-	return YES;
-}
-
-- (void)activateApplicationWithDisplayIdentifier:(NSString *)displayIdentifier fromCell:(id)arg2 {
-	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-
-	if ((![getProtectedApps() containsObject:displayIdentifier] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [displayIdentifier isEqual:[frontmostApp bundleIdentifier]]) {
-		%orig;
-		return;
-	}
-
-	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:displayIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
-	[ASCommon sharedInstance].appUserAuthorisedID = displayIdentifier;
-	if (!wasCancelled)
-		%orig;
-	}];
-}
-
-%end
-
 %ctor {
 	loadPreferences();
 	[[ASControlPanel sharedInstance] load];
