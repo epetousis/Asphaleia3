@@ -226,6 +226,13 @@ static ASCommon *sharedCommonObj;
         return NO;
     }
 
+    NSString *displayName;
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
+        displayName = [iconView.icon displayNameForLocation:iconView.location];
+    } else {
+        displayName = [iconView.icon displayName];
+    }
+
     if (_fingerglyph && _currentHSIconView) {
         [iconView setHighlighted:NO];
         if ([iconView isEqual:_currentHSIconView]) {
@@ -239,7 +246,7 @@ static ASCommon *sharedCommonObj;
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
         return YES;
-    } else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:[iconView.icon displayNameForLocation:iconView.location]])) {
+    } else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:displayName])) {
         [iconView setHighlighted:NO];
         handler(NO);
         return NO;
