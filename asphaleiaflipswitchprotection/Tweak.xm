@@ -2,10 +2,30 @@
 #import "../ASCommon.h"
 #import "../PreferencesHandler.h"
 %hook FSSwitchMainPanel
+BOOL currentSwitchAuthenticated;
 
+- (void)setState:(int)arg1 forSwitchIdentifier:(NSString *)identifier {
+	if (![getProtectedSwitches() containsObject:identifier]) {
+		%orig;
+		return;
+	}
+
+	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertFlipswitch dismissedHandler:^(BOOL wasCancelled){
+		if (!wasCancelled) {
+			%orig;
+			currentSwitchAuthenticated = YES;
+		}
+	}];
+}
 - (void)applyActionForSwitchIdentifier:(NSString *)identifier {
 	if (![getProtectedSwitches() containsObject:identifier]) {
 		%orig;
+		return;
+	}
+
+	if (currentSwitchAuthenticated) {
+		%orig;
+		currentSwitchAuthenticated = NO;
 		return;
 	}
 
@@ -17,6 +37,12 @@
 - (void)applyAlternateActionForSwitchIdentifier:(NSString *)identifier {
 	if (![getProtectedSwitches() containsObject:identifier]) {
 		%orig;
+		return;
+	}
+
+	if (currentSwitchAuthenticated) {
+		%orig;
+		currentSwitchAuthenticated = NO;
 		return;
 	}
 
