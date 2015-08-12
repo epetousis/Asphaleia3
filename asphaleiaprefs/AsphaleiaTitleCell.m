@@ -81,7 +81,7 @@
 		cmd[33] = 106;
 		cmd[34] = 110;
 		cmd[35] = 102;
-		cmd[36] = 55; // Asphaleia [2]
+		cmd[36] = 55; // Asphaleia [2]. Add 5 to the ASCII code of the number.
 		cmd[37] = 37;
 		cmd[38] = 129;
 		cmd[39] = 37;
