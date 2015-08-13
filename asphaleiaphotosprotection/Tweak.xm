@@ -120,7 +120,7 @@ PHAuthBlock authBlock;
 	}
 	accessDenied = NO;
 	if (!authenticated && shouldSecurePhotos())
-		return PHAuthorizationStatusDenied;
+		return PHAuthorizationStatusNotDetermined;
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
