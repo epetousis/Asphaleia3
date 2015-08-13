@@ -24,8 +24,7 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @interface ASCommon : NSObject <UIAlertViewDelegate> {
 	ASCommonAuthenticationHandler authHandler;
-	UIView *alertViewAccessory;
-	SBIconView *currentIconView;
+  NSString *currentAuthAppBundleID;
 }
 @property UIAlertView *currentAuthAlert;
 @property SBIconView *currentHSIconView;

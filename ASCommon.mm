@@ -59,7 +59,7 @@ static ASCommon *sharedCommonObj;
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
 
-    currentIconView = iconView;
+    currentAuthAppBundleID = iconView.icon.applicationBundleID;
     UIImage *iconImage = [iconView.icon getIconImage:2];
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
@@ -167,7 +167,6 @@ static ASCommon *sharedCommonObj;
     UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
-        authHandler(NO);
         return NO;
     }
 
@@ -177,7 +176,7 @@ static ASCommon *sharedCommonObj;
                     _appUserAuthorisedID = appIdentifier;
                 authHandler(!authenticated);
             }];
-        return NO;
+        return YES;
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -188,7 +187,6 @@ static ASCommon *sharedCommonObj;
 
 -(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
     if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled) {
-        handler(NO);
         return NO;
     }
 
@@ -198,7 +196,6 @@ static ASCommon *sharedCommonObj;
     UIAlertView *alertView = [self returnAuthenticationAlertOfType:alertType delegate:self];
 
     if (!touchIDEnabled() && !passcodeEnabled()) {
-        authHandler(NO);
         return NO;
     }
 
@@ -206,7 +203,7 @@ static ASCommon *sharedCommonObj;
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
                 authHandler(!authenticated);
             }];
-        return NO;
+        return YES;
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -222,7 +219,6 @@ static ASCommon *sharedCommonObj;
     if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
         [iconView setHighlighted:NO];
-        handler(NO);
         return NO;
     }
 
@@ -232,6 +228,7 @@ static ASCommon *sharedCommonObj;
     } else {
         displayName = [iconView.icon displayName];
     }
+    currentAuthAppBundleID = iconView.icon.applicationBundleID;
 
     if (_fingerglyph && _currentHSIconView) {
         [iconView setHighlighted:NO];
@@ -248,7 +245,6 @@ static ASCommon *sharedCommonObj;
         return YES;
     } else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:displayName])) {
         [iconView setHighlighted:NO];
-        handler(NO);
         return NO;
     } else if (!touchIDEnabled() && passcodeEnabled()) {
         [iconView setHighlighted:NO];
@@ -322,15 +318,16 @@ static ASCommon *sharedCommonObj;
             CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
-            _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
+            _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(NO);
             self.currentAuthAlert = nil;
+            currentAuthAppBundleID = nil;
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
             self.currentAuthAlert.title = origTitle;
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
         }
-    } else {
+    } else if (self.currentHSIconView) {
         if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
             return;
         if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
@@ -343,13 +340,14 @@ static ASCommon *sharedCommonObj;
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
             if (_fingerglyph && _currentHSIconView) {
-                [ASCommon sharedInstance].appUserAuthorisedID = _currentHSIconView.icon.applicationBundleID;
+                [ASCommon sharedInstance].appUserAuthorisedID = currentAuthAppBundleID;
                 if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
                     [_currentHSIconView.icon launchFromLocation:_currentHSIconView.location context:nil];
                 } else {
                     [_currentHSIconView.icon launchFromLocation:_currentHSIconView.location];
                 }
                 [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+                currentAuthAppBundleID = nil;
             }
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
             if (_fingerglyph && _currentHSIconView) {
@@ -437,14 +435,16 @@ static ASCommon *sharedCommonObj;
 
 // UIAlertView delegate methods
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
-    SBIconView *iconView = currentIconView;
-    currentIconView = nil;
+    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:currentAuthAppBundleID];
+    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
+    [iconView _setIcon:appIcon animated:YES];
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
     self.currentAuthAlert = nil;
     if (buttonIndex == [alertView firstOtherButtonIndex]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
-                _appUserAuthorisedID = currentIconView.icon.applicationBundleID;
+                _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(!authenticated);
         }];
     } else if (buttonIndex == [alertView cancelButtonIndex]) {

@@ -2,6 +2,7 @@
 #import "Asphaleia.h"
 #import <objc/runtime.h>
 #import "PreferencesHandler.h"
+#import "ASCommon.h"
 
 @interface ASPreferencesHandler ()
 @property (readwrite) BOOL asphaleiaDisabled;
@@ -24,6 +25,8 @@ static ASXPCHandler *sharedHandlerObj;
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = [userInfo[@"asphaleiaDisabled"] boolValue];
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/ReadAsphaleiaState"]) {
 		return @{ @"asphaleiaDisabled" : [NSNumber numberWithBool:[ASPreferencesHandler sharedInstance].asphaleiaDisabled] };
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/SetUserAuthorisedApp"]) {
+		[ASCommon sharedInstance].appUserAuthorisedID = userInfo[@"appIdentifier"];
 	}
 	return nil;
 }

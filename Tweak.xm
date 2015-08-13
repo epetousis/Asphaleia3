@@ -46,7 +46,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
-	[[ASCommon sharedInstance] authenticateAppWithIconView:iconView authenticatedHandler:^void(BOOL wasCancelled){
+	BOOL isProtected = [[ASCommon sharedInstance] authenticateAppWithIconView:iconView authenticatedHandler:^void(BOOL wasCancelled){
 		if (!wasCancelled) {
 			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
 				[iconView.icon launchFromLocation:iconView.location context:nil];
@@ -55,6 +55,8 @@ void DeregisterForTouchIDNotifications(id observer) {
 			}
 		}
 	}];
+	if (!isProtected)
+		%orig;
 }
 
 -(void)iconHandleLongPress:(SBIconView *)iconView {
@@ -124,13 +126,13 @@ void DeregisterForTouchIDNotifications(id observer) {
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled)
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier])
 		%orig;
 }
 
 - (void)_layoutContainer {
 	%orig;
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier]) {
 		return;
 	}
 
@@ -601,6 +603,7 @@ BOOL currentBannerAuthenticated;
 %hook SBWorkspace
 
 -(void)setCurrentTransaction:(id)transaction {
+	asphaleiaLog();
 	if (![transaction isKindOfClass:[%c(SBAppToAppWorkspaceTransaction) class]]) {
 		%orig;
 		return;
