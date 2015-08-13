@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "PKGlyphView.h"
 #import "ASTouchIDController.h"
+#import "ASAuthenticationController.h"
 #import "ASCommon.h"
 #import "PreferencesHandler.h"
 #import "substrate.h"
@@ -39,14 +40,10 @@ void DeregisterForTouchIDNotifications(id observer) {
 	[[NSNotificationCenter defaultCenter] removeObserver:observer];
 }
 
-@interface ASCommon ()
--(BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler;
-@end
-
 %hook SBIconController
 
 -(void)iconTapped:(SBIconView *)iconView {
-	BOOL isProtected = [[ASCommon sharedInstance] authenticateAppWithIconView:iconView authenticatedHandler:^void(BOOL wasCancelled){
+	BOOL isProtected = [[ASAuthenticationController sharedInstance] authenticateAppWithIconView:iconView authenticatedHandler:^void(BOOL wasCancelled){
 		if (!wasCancelled) {
 			if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
 				[iconView.icon launchFromLocation:iconView.location context:nil];
@@ -69,7 +66,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 	[iconView cancelLongPressTimer];
 	[iconView setTouchDownInIcon:NO];
 	
-	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertAppArranging dismissedHandler:^(BOOL wasCancelled) {
 		if (!wasCancelled)
 			[self setIsEditing:YES];
 		}];
@@ -77,24 +74,24 @@ void DeregisterForTouchIDNotifications(id observer) {
 
 %new
 -(void)asphaleia_resetAsphaleiaIconView {
-	if ([ASCommon sharedInstance].fingerglyph && [ASCommon sharedInstance].currentHSIconView) {
-		[[ASCommon sharedInstance].currentHSIconView _updateLabel];
+	if ([ASAuthenticationController sharedInstance].fingerglyph && [ASAuthenticationController sharedInstance].currentHSIconView) {
+		[[ASAuthenticationController sharedInstance].currentHSIconView _updateLabel];
 
 		[UIView animateWithDuration:0.3f animations:^{
-			[ASCommon sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
+			[ASAuthenticationController sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(0.01,0.01);
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-			[[ASCommon sharedInstance].currentHSIconView setHighlighted:NO];
+			[[ASAuthenticationController sharedInstance].currentHSIconView setHighlighted:NO];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
 
-			[[ASCommon sharedInstance].fingerglyph removeFromSuperview];
-			[ASCommon sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(1,1);
-			[[ASCommon sharedInstance].fingerglyph setState:0 animated:YES completionHandler:nil];
+			[[ASAuthenticationController sharedInstance].fingerglyph removeFromSuperview];
+			[ASAuthenticationController sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(1,1);
+			[[ASAuthenticationController sharedInstance].fingerglyph setState:0 animated:YES completionHandler:nil];
 
-			[[ASCommon sharedInstance].currentHSIconView _updateLabel];
+			[[ASAuthenticationController sharedInstance].currentHSIconView _updateLabel];
 
-			[ASCommon sharedInstance].currentHSIconView = nil;
-			[[ASCommon sharedInstance].anywhereTouchWindow setHidden:YES];
+			[ASAuthenticationController sharedInstance].currentHSIconView = nil;
+			[[ASAuthenticationController sharedInstance].anywhereTouchWindow setHidden:YES];
 		});
 	}
 }
@@ -126,13 +123,13 @@ void DeregisterForTouchIDNotifications(id observer) {
 %hook SBAppSwitcherSnapshotView
 
 -(void)_layoutStatusBar {
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier])
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier])
 		%orig;
 }
 
 - (void)_layoutContainer {
 	%orig;
-	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier]) {
+	if ((![getProtectedApps() containsObject:self.displayItem.displayIdentifier] && !shouldProtectAllApps()) || !shouldObscureAppContent() || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:self.displayItem.displayIdentifier]) {
 		return;
 	}
 
@@ -172,7 +169,7 @@ BOOL switcherAuthenticating;
 	}
 	if (!switcherAuthenticating) {
 		switcherAuthenticating = YES;
-		[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
+		[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertSwitcher dismissedHandler:^(BOOL wasCancelled) {
 			switcherAuthenticating = NO;
 			if (!wasCancelled)
 				%orig;
@@ -196,7 +193,7 @@ UIWindow *blurredWindow;
 	[ASXPCHandler sharedInstance].slideUpControllerActive = NO;
 	[[ASTouchIDController sharedInstance] stopMonitoring];
 	[[%c(SBIconController) sharedInstance] asphaleia_resetAsphaleiaIconView];
-	[[ASCommon sharedInstance] dismissAnyAuthenticationAlerts];
+	[[ASAuthenticationController sharedInstance] dismissAnyAuthenticationAlerts];
 	[[ASPasscodeHandler sharedInstance] dismissPasscodeView];
 	%orig;
 	if (shouldResetAppExitTimerOnLock() && currentTempUnlockTimer) {
@@ -216,7 +213,7 @@ UIWindow *blurredWindow;
 	}
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]]) {
 		blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 		blurredWindow.backgroundColor = [UIColor clearColor];
 
@@ -247,9 +244,9 @@ UIWindow *blurredWindow;
 	%orig;
 	
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && ![ASCommon sharedInstance].catchAllIgnoreRequest) {
+	if (([getProtectedApps() containsObject:[frontmostApp bundleIdentifier]] || shouldProtectAllApps()) && !shouldUnsecurelyUnlockIntoApp() && frontmostApp && ![[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[frontmostApp bundleIdentifier]] && ![ASAuthenticationController sharedInstance].catchAllIgnoreRequest) {
 
-		[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[frontmostApp bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
+		[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[frontmostApp bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
 			if (blurredWindow) {
 				blurredWindow.hidden = YES;
 				blurredWindow = nil;
@@ -272,7 +269,7 @@ static BOOL searchControllerAuthenticating;
 	%orig;
 	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && shouldSecureSpotlight()) {
 		[self cancelButtonPressed];
-		[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertSpotlight dismissedHandler:^(BOOL wasCancelled) {
+		[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertSpotlight dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
 			searchControllerHasAuthenticated = YES;
@@ -307,7 +304,7 @@ static BOOL searchControllerAuthenticating;
 	}
 
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPowerDown dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertPowerDown dismissedHandler:^(BOOL wasCancelled) {
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled)
 		%orig;
@@ -332,7 +329,7 @@ static BOOL controlCentreHasAuthenticated;
 
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
@@ -350,7 +347,7 @@ static BOOL controlCentreHasAuthenticated;
 
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
 	controlCentreAuthenticating = NO;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 	if (!wasCancelled) {
@@ -381,9 +378,9 @@ static BOOL controlCentreHasAuthenticated;
 	if (appExitUnlockTimeInterval() <= 0)
 		return;
 
-	[ASCommon sharedInstance].temporarilyUnlockedAppBundleID = [self bundleIdentifier];
+	[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID = [self bundleIdentifier];
 	currentTempUnlockTimer = [NSTimer scheduledTimerWithTimeInterval:appExitUnlockTimeInterval() block:^{
-		[ASCommon sharedInstance].temporarilyUnlockedAppBundleID = nil;
+		[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID = nil;
 		currentTempUnlockTimer = nil;
 	} repeats:NO];
 }
@@ -400,19 +397,19 @@ static BOOL openURLHasAuthenticated;
 
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
 	asphaleiaLog();
-	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated || [[ASCommon sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]]) {
+	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || openURLHasAuthenticated || [[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]]) {
 		%orig;
 		return;
 	}
 
-	[ASCommon sharedInstance].catchAllIgnoreRequest = YES;
+	[ASAuthenticationController sharedInstance].catchAllIgnoreRequest = YES;
 	if ([[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
 		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 		if (shouldUnsecurelyUnlockIntoApp() && [getProtectedApps() containsObject:[frontmostApp bundleIdentifier]])
 			return;
 	}
 
-	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[application bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[application bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				if (blurredWindow && [[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
 					blurredWindow.hidden = YES;
@@ -443,7 +440,7 @@ BOOL currentBannerAuthenticated;
 
 	currentBannerAuthenticated = NO;
 
-	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || !shouldObscureNotifications())
+	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || !shouldObscureNotifications())
 		return;
 
 	UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
@@ -500,7 +497,7 @@ BOOL currentBannerAuthenticated;
 }
 
 -(void)_handleBannerTapGesture:(id)gesture {
-	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications()) {
+	if ((![getProtectedApps() containsObject:[[self _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[self _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications()) {
 		%orig;
 	} else {
 		[[ASTouchIDController sharedInstance] stopMonitoring];
@@ -508,7 +505,7 @@ BOOL currentBannerAuthenticated;
 			if (authenticated) {
 				if (notificationBlurView) {
 					currentBannerAuthenticated = YES;
-					[ASCommon sharedInstance].appUserAuthorisedID = [[self _bulletin] sectionID];
+					[ASAuthenticationController sharedInstance].appUserAuthorisedID = [[self _bulletin] sectionID];
 					[UIView animateWithDuration:0.3f animations:^{
 						[notificationBlurView setAlpha:0.0f];
 					} completion:^(BOOL finished){
@@ -527,7 +524,7 @@ BOOL currentBannerAuthenticated;
 -(void)viewDidDisappear:(BOOL)animated {
 	%orig;
 	currentBannerAuthenticated = NO;
-	[ASCommon sharedInstance].appUserAuthorisedID = nil;
+	[ASAuthenticationController sharedInstance].appUserAuthorisedID = nil;
 
 	if (![[%c(SBBannerController) sharedInstance] isShowingBanner]) {
 		[[ASTouchIDController sharedInstance] stopMonitoring];
@@ -555,7 +552,7 @@ BOOL currentBannerAuthenticated;
 	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
 		if (bannerFingerGlyph && notificationBlurView) {
 			currentBannerAuthenticated = YES;
-			[ASCommon sharedInstance].appUserAuthorisedID = [[self _bulletin] sectionID];
+			[ASAuthenticationController sharedInstance].appUserAuthorisedID = [[self _bulletin] sectionID];
 			[[ASTouchIDController sharedInstance] stopMonitoring];
 			[UIView animateWithDuration:0.3f animations:^{
 				[notificationBlurView setAlpha:0.0f];
@@ -575,7 +572,7 @@ BOOL currentBannerAuthenticated;
 %hook SBBannerController
 
 - (BOOL)gestureRecognizerShouldBegin:(id)gestureRecognizer {
-	if ((![getProtectedApps() containsObject:[[controller _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[controller _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications())
+	if ((![getProtectedApps() containsObject:[[controller _bulletin] sectionID]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[[controller _bulletin] sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications())
 		return %orig;
 	else
 		return NO;
@@ -586,12 +583,12 @@ BOOL currentBannerAuthenticated;
 %hook SBBulletinModalController
 
 -(void)observer:(id)observer addBulletin:(BBBulletin *)bulletin forFeed:(unsigned)feed {
-	if ((![getProtectedApps() containsObject:[bulletin sectionID]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[bulletin sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications()) {
+	if ((![getProtectedApps() containsObject:[bulletin sectionID]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[bulletin sectionID]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || currentBannerAuthenticated || !shouldObscureNotifications()) {
 		%orig;
 		return;
 	}
 
-	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[bulletin sectionID] customMessage:@"Scan fingerprint to show notification." dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[bulletin sectionID] customMessage:@"Scan fingerprint to show notification." dismissedHandler:^(BOOL wasCancelled) {
 			if (!wasCancelled) {
 				%orig;
 			}
@@ -611,27 +608,27 @@ BOOL currentBannerAuthenticated;
 
 	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
 	if ((![getProtectedApps() containsObject:[application bundleIdentifier]] && !shouldProtectAllApps()) ||
-		[[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] ||
+		[[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[application bundleIdentifier]] ||
 		[ASPreferencesHandler sharedInstance].asphaleiaDisabled ||
 		[ASPreferencesHandler sharedInstance].appSecurityDisabled ||
-		[[ASCommon sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]] ||
-		[ASCommon sharedInstance].catchAllIgnoreRequest ||
+		[[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]] ||
+		[ASAuthenticationController sharedInstance].catchAllIgnoreRequest ||
 		![application bundleIdentifier]) {
 
-		[ASCommon sharedInstance].appUserAuthorisedID = nil;
-		[ASCommon sharedInstance].catchAllIgnoreRequest = NO;
+		[ASAuthenticationController sharedInstance].appUserAuthorisedID = nil;
+		[ASAuthenticationController sharedInstance].catchAllIgnoreRequest = NO;
 		%orig;
 		return;
 	}
 
-	[ASCommon sharedInstance].appUserAuthorisedID = nil;
+	[ASAuthenticationController sharedInstance].appUserAuthorisedID = nil;
 
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
 	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
 	[iconView _setIcon:appIcon animated:YES];
 
-	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:application.bundleIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
-			[ASCommon sharedInstance].appUserAuthorisedID = nil;
+	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:application.bundleIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
+			[ASAuthenticationController sharedInstance].appUserAuthorisedID = nil;
 			if (!wasCancelled) {
 				%orig;
 			}
@@ -669,16 +666,16 @@ BOOL currentBannerAuthenticated;
 }
 
 - (void)_activateApp:(id)app withAppInfo:(id)appInfo andURL:(id)url animated:(BOOL)animated {
-	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		%orig;
 		return;
 	}
 
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASCommon sharedInstance] authenticateAppWithDisplayIdentifier:[app bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
+	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[app bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
 			if (!wasCancelled) {
-				[ASCommon sharedInstance].catchAllIgnoreRequest = YES;
+				[ASAuthenticationController sharedInstance].catchAllIgnoreRequest = YES;
 				%orig;
 			} else {
 				[self _finishSlideDownWithCompletion:nil];
@@ -688,7 +685,7 @@ BOOL currentBannerAuthenticated;
 
 - (void)_handleAppLaunchedUnderLockScreenWithResult:(int)result {
 	SBApplication *app = MSHookIvar<SBApplication *>(self, "_targetApp");
-	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [[ASCommon sharedInstance].temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+	if ((![getProtectedApps() containsObject:[app bundleIdentifier]] && !shouldProtectAllApps()) || [[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:[app bundleIdentifier]] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
 		%orig;
 	}
 }
@@ -732,5 +729,6 @@ BOOL currentBannerAuthenticated;
 	centre = [CPDistributedMessagingCenter centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	[centre runServerOnCurrentThread];
-	[centre registerForMessageName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" target:[ASXPCHandler sharedInstance] selector:@selector(handleMessageNamed:withUserInfo:)];
+	for (NSString *notification in xpcNotifications)
+		[centre registerForMessageName:notification target:[ASXPCHandler sharedInstance] selector:@selector(handleMessageNamed:withUserInfo:)];
 }

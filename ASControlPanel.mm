@@ -1,5 +1,5 @@
 #import "ASControlPanel.h"
-#import "ASCommon.h"
+#import "ASAuthenticationController.h"
 #import "UIAlertView+Blocks.h"
 #import "Asphaleia.h"
 #import "PreferencesHandler.h"
@@ -36,7 +36,7 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
         return;
     }
 
-    [[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertControlPanel dismissedHandler:^(BOOL wasCancelled) {
+    [[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlPanel dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
             NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Items" : @"Disable My Secured Items";
             NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
@@ -103,7 +103,7 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,32);
 
-    [[ASCommon sharedInstance] addSubview:imgView toAlertView:alertView];
+    [[ASAuthenticationController sharedInstance] addSubview:imgView toAlertView:alertView];
 }
  
 -(void)activator:(LAActivator *)activator abortEvent:(LAEvent *)event {
