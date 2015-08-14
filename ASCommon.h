@@ -1,8 +1,4 @@
 #import <UIKit/UIKit.h>
-#import "Asphaleia.h"
-#import "PKGlyphView.h"
-#import "ASTouchIDController.h"
-#import "ASTouchWindow.h"
 
 typedef NS_ENUM(NSInteger, ASAuthenticationAlertType) {
   ASAuthenticationAlertAppArranging,

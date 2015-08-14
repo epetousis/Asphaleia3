@@ -11,7 +11,7 @@
 
 @interface ASAuthenticationController : NSObject <UIAlertViewDelegate> {
 	ASCommonAuthenticationHandler authHandler;
-  NSString *currentAuthAppBundleID;
+	NSString *currentAuthAppBundleID;
 }
 @property UIAlertView *currentAuthAlert;
 @property SBIconView *currentHSIconView;

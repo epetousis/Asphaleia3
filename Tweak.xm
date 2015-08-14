@@ -5,7 +5,6 @@
 #import "ASCommon.h"
 #import "PreferencesHandler.h"
 #import "substrate.h"
-#import "UIImage+ImageEffects.h"
 #import <AudioToolbox/AudioServices.h>
 #import "ASActivatorListener.h"
 #import "ASControlPanel.h"
@@ -695,37 +694,7 @@ BOOL currentBannerAuthenticated;
 %ctor {
 	loadPreferences();
 	[[ASControlPanel sharedInstance] load];
-	[[ASActivatorListener sharedInstance] loadWithEventHandler:^void(LAEvent *event, BOOL abortEventCalled){
-		SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-		NSString *bundleID = frontmostApp.bundleIdentifier;
-
-		if (!bundleID || !shouldUseDynamicSelection())
-			return;
-
-		NSNumber *appSecureValue = [NSNumber numberWithBool:![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]];
-		if (abortEventCalled)
-			appSecureValue = [NSNumber numberWithBool:NO];
-
-		[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
-		[[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-
-		NSString *title = nil;
-		NSString *description = nil;
-		if (![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]) {
-			title = @"Disabled authentication";
-			description = [NSString stringWithFormat:@"Disabled authentication for %@", frontmostApp.displayName];
-		} else {
-			title = @"Enabled authentication";
-			description = [NSString stringWithFormat:@"Enabled authentication for %@", frontmostApp.displayName];
-		}
-
-		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-				   message:description
-				  delegate:nil
-		 cancelButtonTitle:@"Okay"
-		 otherButtonTitles:nil];
-		[alertView show];
-	}];
+	[[ASActivatorListener sharedInstance] load];
 	centre = [CPDistributedMessagingCenter centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	[centre runServerOnCurrentThread];

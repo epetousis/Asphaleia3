@@ -1,6 +1,5 @@
 #import "ASCommon.h"
 #include <sys/sysctl.h>
-#import "UIAlertView+Blocks.h"
 #import <objc/runtime.h>
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"

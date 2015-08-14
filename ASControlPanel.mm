@@ -1,6 +1,5 @@
 #import "ASControlPanel.h"
 #import "ASAuthenticationController.h"
-#import "UIAlertView+Blocks.h"
 #import "Asphaleia.h"
 #import "PreferencesHandler.h"
 #import <objc/runtime.h>
