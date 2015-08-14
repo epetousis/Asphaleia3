@@ -584,23 +584,6 @@ BOOL currentBannerAuthenticated;
 
 %end
 
-%hook SBBulletinModalController
-
--(void)observer:(id)observer addBulletin:(BBBulletin *)bulletin forFeed:(unsigned)feed {
-	if (![[ASPreferences sharedInstance] requiresSecurityForApp:[[controller _bulletin] sectionID]] || currentBannerAuthenticated || ![[ASPreferences sharedInstance] obscureNotifications]) {
-		%orig;
-		return;
-	}
-
-	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[bulletin sectionID] customMessage:@"Scan fingerprint to show notification." dismissedHandler:^(BOOL wasCancelled) {
-			if (!wasCancelled) {
-				%orig;
-			}
-		}];
-}
-
-%end
-
 %hook SBWorkspace
 
 -(void)setCurrentTransaction:(id)transaction {
