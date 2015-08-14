@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import "ASPasscodeHandler.h"
 #import "ASAuthenticationController.h"
 #import <RocketBootstrap/RocketBootstrap.h>
@@ -49,8 +49,6 @@ static ASCommon *sharedCommonObj;
 
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
-    [centre registerForMessageName:@"com.a3tweaks.asphaleia2.xpc/AlertAuthenticated" target:self selector:@selector(handleMessageNamed:withUserInfo:)];
-
     NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/AuthenticateApp" userInfo:@{ @"appIdentifier" : appIdentifier, @"customMessage" : customMessage }];
     return [reply[@"isProtected"] boolValue];
 }
@@ -62,8 +60,6 @@ static ASCommon *sharedCommonObj;
     authHandler = [handler copy];
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
-    [centre registerForMessageName:@"com.a3tweaks.asphaleia2.xpc/AlertAuthenticated" target:self selector:@selector(handleMessageNamed:withUserInfo:)];
-
     NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/AuthenticateFunction" userInfo:@{ @"alertType" : [NSNumber numberWithInt:alertType] }];
     return [reply[@"isProtected"] boolValue];
 }

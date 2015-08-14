@@ -1,6 +1,6 @@
 #import "../ASCommon.h"
 #import "../ASPasscodeHandler.h"
-#import "../PreferencesHandler.h"
+#import "../ASPreferences.h"
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 #import <AssetsLibrary/AssetsLibrary.h>
@@ -32,18 +32,11 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 	alertView = nil;
 	authHandler(NO);
 }
-void increaseMessageCount() {
-	NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
-	[tempPrefs setObject:[NSNumber numberWithInt:[tempPrefs[kPhotosMessageCount] intValue]+1] forKey:kPhotosMessageCount];
-	[ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-	[[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR(kPrefsChangedNotification), NULL, NULL, YES);
-}
 
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
-	if (authenticated || !shouldSecurePhotos() || authenticating) {
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || authenticating) {
 		%orig;
 		return;
 	}
@@ -56,10 +49,10 @@ void increaseMessageCount() {
 			%orig;
 		} else {
 			[self dismissViewControllerAnimated:YES completion:nil];
-			if (shouldShowPhotosProtectMsg()) {
+			if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
 				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 				[alert show];
-				increaseMessageCount();
+				[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 			}
 		}
 	}];
@@ -72,14 +65,14 @@ ALAssetsLibraryAccessFailureBlock block2;
 %hook ALAssetsLibrary
 
 + (int)authorizationStatus {
-	if (!authenticated && shouldSecurePhotos())
+	if (!authenticated && [[ASPreferences sharedInstance] securePhotos])
 		return 0;
 
 	return %orig;
 }
 
 - (void)enumerateGroupsWithTypes:(unsigned int)arg1 usingBlock:(id)arg2 failureBlock:(id)arg3 {
-	if (authenticated || !shouldSecurePhotos() || authenticating) {
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || authenticating) {
 		if (!authenticating)
 			%orig;
 		return;
@@ -95,10 +88,10 @@ ALAssetsLibraryAccessFailureBlock block2;
 		if (!wasCancelled) {
 			authenticated = YES;
 			%orig(arg1,block1,block2);
-			if (shouldShowPhotosProtectMsg()) {
+			if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
 				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 				[alert show];
-				increaseMessageCount();
+				[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 			}
 		}
 	}];
@@ -114,17 +107,17 @@ PHAuthBlock authBlock;
 
 + (int)authorizationStatus {
 	PHAuthorizationStatus status = %orig;
-	if (status != PHAuthorizationStatusAuthorized && shouldSecurePhotos()) {
+	if (status != PHAuthorizationStatusAuthorized && [[ASPreferences sharedInstance] securePhotos]) {
 		accessDenied = YES;
 		return status;
 	}
 	accessDenied = NO;
-	if (!authenticated && shouldSecurePhotos())
+	if (!authenticated && [[ASPreferences sharedInstance] securePhotos])
 		return PHAuthorizationStatusNotDetermined;
 	return status;
 }
 + (void)requestAuthorization:(void (^)(PHAuthorizationStatus status))arg1 {
-	if (authenticated || !shouldSecurePhotos() || accessDenied || authenticating) {
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || accessDenied || authenticating) {
 		if (!authenticating)
 			%orig;
 		return;
@@ -139,10 +132,10 @@ PHAuthBlock authBlock;
 			if (!wasCancelled) {
 				%orig(authBlock);
 				authenticated = YES;
-				if (shouldShowPhotosProtectMsg()) {
+				if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
 					UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 					[alert show];
-					increaseMessageCount();
+					[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 				}
 			}
 		}];
@@ -153,14 +146,14 @@ PHAuthBlock authBlock;
 %hook PHFetchResult
 
 -(NSUInteger)count {
-	if (authenticated || !shouldSecurePhotos())
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos])
 		return %orig;
 
 	return 0;
 }
 
 - (id)objectAtIndexedSubscript:(unsigned int)arg1 {
-	if (authenticated || !shouldSecurePhotos())
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos])
 		return %orig;
 
 	return nil;
@@ -193,7 +186,7 @@ SEL origSelector;
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" userInfo:nil];
 
-	if (authenticated || !shouldSecurePhotos() || ([reply[@"active"] boolValue] && devicePasscodeSet()) || authenticating) {
+	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || ([reply[@"active"] boolValue] && [ASPreferences devicePasscodeSet]) || authenticating) {
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}

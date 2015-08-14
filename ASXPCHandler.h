@@ -5,7 +5,8 @@
 	@"com.a3tweaks.asphaleia2.xpc/SetUserAuthorisedApp",\
 	@"com.a3tweaks.asphaleia2.xpc/AuthenticateApp",\
 	@"com.a3tweaks.asphaleia2.xpc/AuthenticateFunction",\
-	@"com.a3tweaks.asphaleia2.xpc/GetCurrentAuthAlert"]
+	@"com.a3tweaks.asphaleia2.xpc/GetCurrentAuthAlert",\
+	@"com.a3tweaks.asphaleia2.xpc/GetCurrentTempUnlockedApp"]
 @interface ASXPCHandler : NSObject
 @property BOOL slideUpControllerActive;
 +(instancetype)sharedInstance;

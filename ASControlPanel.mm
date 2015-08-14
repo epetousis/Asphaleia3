@@ -1,7 +1,7 @@
 #import "ASControlPanel.h"
 #import "ASAuthenticationController.h"
 #import "Asphaleia.h"
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
@@ -12,6 +12,11 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 
 @interface ASControlPanel ()
 @property UIAlertView *alertView;
+@end
+
+@interface ASPreferences ()
+@property (readwrite) BOOL asphaleiaDisabled;
+@property (readwrite) BOOL itemSecurityDisabled;
 @end
 
 @implementation ASControlPanel
@@ -30,18 +35,18 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 -(void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event {
     SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
     NSString *bundleID = [frontmostApp bundleIdentifier];
-    if ((bundleID && !shouldAllowControlPanelInApps()) || !shouldEnableControlPanel()) {
+    if ((bundleID && ![[ASPreferences sharedInstance] allowControlPanelInApps]) || ![[ASPreferences sharedInstance] enableControlPanel]) {
         [event setHandled:YES];
         return;
     }
 
     [[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlPanel dismissedHandler:^(BOOL wasCancelled) {
         if (!wasCancelled) {
-            NSString *mySecuredAppsTitle = [ASPreferencesHandler sharedInstance].appSecurityDisabled ? @"Enable My Secured Items" : @"Disable My Secured Items";
-            NSString *enableGlobalAppsTitle = !shouldProtectAllApps() ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
+            NSString *mySecuredAppsTitle = [ASPreferences sharedInstance].itemSecurityDisabled ? @"Enable My Secured Items" : @"Disable My Secured Items";
+            NSString *enableGlobalAppsTitle = ![[ASPreferences sharedInstance] protectAllApps] ? @"Enable Global App Security" : @"Disable Global App Security"; // Enable/Disable
             NSString *addRemoveFromSecureAppsTitle = nil;
             if (bundleID) {
-                addRemoveFromSecureAppsTitle = [getProtectedAppsNoBullshit() containsObject:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
+                addRemoveFromSecureAppsTitle = [[ASPreferences sharedInstance] securityEnabledForApp:bundleID] ? @"Remove from your Secured Apps" : @"Add to your Secured Apps";
             }
             NSMutableArray *buttonTitleArray = [NSMutableArray arrayWithObjects:mySecuredAppsTitle, enableGlobalAppsTitle, nil];
             if (addRemoveFromSecureAppsTitle)
@@ -65,32 +70,27 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
     SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
     NSString *bundleID = [frontmostApp bundleIdentifier];
-    NSMutableDictionary *tempPrefs = [NSMutableDictionary dictionaryWithDictionary:[ASPreferencesHandler sharedInstance].prefs];
     switch (buttonIndex) {
         case 1:
-            [ASPreferencesHandler sharedInstance].appSecurityDisabled = ![ASPreferencesHandler sharedInstance].appSecurityDisabled;
-            if ([ASPreferencesHandler sharedInstance].appSecurityDisabled && shouldProtectAllApps()) {
-                [tempPrefs setObject:[NSNumber numberWithBool:NO] forKey:kProtectAllAppsKey];
-                [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-                [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            [ASPreferences sharedInstance].itemSecurityDisabled = ![ASPreferences sharedInstance].itemSecurityDisabled;
+            if ([ASPreferences sharedInstance].itemSecurityDisabled && [[ASPreferences sharedInstance] protectAllApps]) {
+                [[ASPreferences sharedInstance] setObject:[NSNumber numberWithBool:NO] forKey:kProtectAllAppsKey];
             }
             break;
         case 2:
-            [tempPrefs setObject:[NSNumber numberWithBool:!shouldProtectAllApps()] forKey:kProtectAllAppsKey];
-            [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-            [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            [[ASPreferences sharedInstance] setObject:[NSNumber numberWithBool:![[ASPreferences sharedInstance] protectAllApps]] forKey:kProtectAllAppsKey];
 
-            if ([ASPreferencesHandler sharedInstance].appSecurityDisabled && shouldProtectAllApps()) {
-                [ASPreferencesHandler sharedInstance].appSecurityDisabled = NO;
+            if ([ASPreferences sharedInstance].itemSecurityDisabled && [[ASPreferences sharedInstance] protectAllApps]) {
+                [ASPreferences sharedInstance].itemSecurityDisabled = NO;
             }
             break;
         case 3:
-            if (![tempPrefs objectForKey:kSecuredAppsKey])
-                [tempPrefs setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
+            if (![[ASPreferences sharedInstance] objectForKey:kSecuredAppsKey])
+                [[ASPreferences sharedInstance] setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
 
-            [[tempPrefs objectForKey:kSecuredAppsKey] setObject:[NSNumber numberWithBool:![getProtectedApps() containsObject:bundleID]] forKey:frontmostApp.bundleIdentifier];
-            [ASPreferencesHandler sharedInstance].prefs = [NSDictionary dictionaryWithDictionary:tempPrefs];
-            [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+            NSMutableDictionary *dict = [[ASPreferences sharedInstance] objectForKey:kSecuredAppsKey];
+            [dict setObject:[NSNumber numberWithBool:![[ASPreferences sharedInstance] securityEnabledForApp:bundleID]] forKey:frontmostApp.bundleIdentifier];
+            [[ASPreferences sharedInstance] setObject:dict forKey:kSecuredAppsKey];
             break;
     }
 }

@@ -1,5 +1,5 @@
 #import "ASActivatorListener.h"
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import "Asphaleia.h"
 #import <objc/runtime.h>
 #import <dlfcn.h>
@@ -23,17 +23,18 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
     NSString *bundleID = frontmostApp.bundleIdentifier;
 
-    if (!bundleID || !shouldUseDynamicSelection())
+    if (!bundleID || ![[ASPreferences sharedInstance] enableDynamicSelection])
         return;
 
-    NSNumber *appSecureValue = [NSNumber numberWithBool:![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]];
+    BOOL appSecureValue = [[ASPreferences sharedInstance] securityEnabledForApp:bundleID];
 
-    [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] setObject:appSecureValue forKey:frontmostApp.bundleIdentifier];
-    [[ASPreferencesHandler sharedInstance].prefs writeToFile:kPreferencesFilePath atomically:YES];
+    NSMutableDictionary *dict = [[ASPreferences sharedInstance] objectForKey:kSecuredAppsKey];
+    [dict setObject:[NSNumber numberWithBool:appSecureValue] forKey:frontmostApp.bundleIdentifier];
+    [[ASPreferences sharedInstance] setObject:dict forKey:kSecuredAppsKey];
 
     NSString *title = nil;
     NSString *description = nil;
-    if (![[[[ASPreferencesHandler sharedInstance].prefs objectForKey:kSecuredAppsKey] objectForKey:bundleID] boolValue]) {
+    if (!appSecureValue) {
         title = @"Disabled authentication";
         description = [NSString stringWithFormat:@"Disabled authentication for %@", frontmostApp.displayName];
     } else {

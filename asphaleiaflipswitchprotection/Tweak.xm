@@ -1,11 +1,11 @@
 #import <Flipswitch/Flipswitch.h>
 #import "../ASCommon.h"
-#import "../PreferencesHandler.h"
+#import "../ASPreferences.h"
 %hook FSSwitchMainPanel
 BOOL currentSwitchAuthenticated;
 
 - (void)setState:(int)arg1 forSwitchIdentifier:(NSString *)identifier {
-	if (![getProtectedSwitches() containsObject:identifier]) {
+	if (![[ASPreferences sharedInstance] requiresSecurityForSwitch:identifier]) {
 		%orig;
 		return;
 	}
@@ -18,7 +18,7 @@ BOOL currentSwitchAuthenticated;
 	}];
 }
 - (void)applyActionForSwitchIdentifier:(NSString *)identifier {
-	if (![getProtectedSwitches() containsObject:identifier]) {
+	if (![[ASPreferences sharedInstance] requiresSecurityForSwitch:identifier]) {
 		%orig;
 		return;
 	}
@@ -35,7 +35,7 @@ BOOL currentSwitchAuthenticated;
 	}];
 }
 - (void)applyAlternateActionForSwitchIdentifier:(NSString *)identifier {
-	if (![getProtectedSwitches() containsObject:identifier]) {
+	if (![[ASPreferences sharedInstance] requiresSecurityForSwitch:identifier]) {
 		%orig;
 		return;
 	}
