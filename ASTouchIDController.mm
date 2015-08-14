@@ -17,6 +17,7 @@ https://github.com/Sassoty/BioTesting */
 
 @interface ASTouchIDController ()
 @property (readwrite) BOOL isMonitoring;
+@property (readwrite) id lastMatchedFingerprint;
 @end
 
 @interface SBScreenFlash
@@ -68,13 +69,13 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.fingerheld" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.fingerheld"), NULL, NULL, YES);
 			break;
-		case TouchIDMatched:
+		/*case TouchIDMatched:
 			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authsuccess"), NULL, NULL, YES);
 			[self stopMonitoring];
 			_shouldBlockLockscreenMonitor = NO;
-			break;
+			break;*/
 		case TouchIDNotMatched:
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
@@ -90,6 +91,15 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 	}
+}
+
+-(void)matchResult:(id)result withDetails:(id)details {
+	asphaleiaLogMsg(@"Finger matched");
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:result];
+	self.lastMatchedFingerprint = result;
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authsuccess"), NULL, NULL, YES);
+	[self stopMonitoring];
+	_shouldBlockLockscreenMonitor = NO;
 }
 
 -(void)startMonitoring {

@@ -640,6 +640,15 @@ BOOL currentBannerAuthenticated;
 		%orig;
 }
 
+-(void)matchResult:(id)result withDetails:(id)details {
+	%orig;
+	NSHashTable *currentObservers = [MSHookIvar<NSHashTable*>(self, "_observers") copy];
+	for (id observer in currentObservers) {
+		if ([observer respondsToSelector:@selector(matchResult:withDetails:)])
+			[observer matchResult:result withDetails:details];
+	}
+}
+
 %end
 
 %hook SBLockScreenSlideUpToAppController

@@ -193,6 +193,10 @@
 @interface CAMImageWell : UIButton
 @end
 
+@protocol SBUIBiometricEventObserver
+-(void)matchResult:(id)result withDetails:(id)details;
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;
