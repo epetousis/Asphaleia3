@@ -1,13 +1,14 @@
 #import "ASXPCHandler.h"
 #import "Asphaleia.h"
 #import <objc/runtime.h>
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import "ASAuthenticationController.h"
 #import <RocketBootstrap/RocketBootstrap.h>
 #import <AppSupport/CPDistributedMessagingCenter.h>
 
-@interface ASPreferencesHandler ()
+@interface ASPreferences ()
 @property (readwrite) BOOL asphaleiaDisabled;
+@property (readwrite) BOOL itemSecurityDisabled;
 @end
 
 @implementation ASXPCHandler
@@ -24,9 +25,12 @@ static ASXPCHandler *sharedHandlerObj;
 	if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive"]) {
 		return @{ @"active" : [NSNumber numberWithBool:_slideUpControllerActive] };
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/SetAsphaleiaState"]) {
-		[ASPreferencesHandler sharedInstance].asphaleiaDisabled = [userInfo[@"asphaleiaDisabled"] boolValue];
+		if (userInfo[@"asphaleiaDisabled"])
+			[ASPreferences sharedInstance].asphaleiaDisabled = [userInfo[@"asphaleiaDisabled"] boolValue];
+		if (userInfo[@"itemSecurityDisabled"])
+			[ASPreferences sharedInstance].itemSecurityDisabled = [userInfo[@"itemSecurityDisabled"] boolValue];
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/ReadAsphaleiaState"]) {
-		return @{ @"asphaleiaDisabled" : [NSNumber numberWithBool:[ASPreferencesHandler sharedInstance].asphaleiaDisabled] };
+		return @{ @"asphaleiaDisabled" : [NSNumber numberWithBool:[ASPreferences sharedInstance].asphaleiaDisabled], @"itemSecurityDisabled" : [NSNumber numberWithBool:[ASPreferences sharedInstance].itemSecurityDisabled] };
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/SetUserAuthorisedApp"]) {
 		[ASAuthenticationController sharedInstance].appUserAuthorisedID = userInfo[@"appIdentifier"];
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/AuthenticateApp"]) {
@@ -50,6 +54,11 @@ static ASXPCHandler *sharedHandlerObj;
 			return @{ @"currentAuthAlert" : [ASAuthenticationController sharedInstance].currentAuthAlert };
 		else
 			return @{ @"currentAuthAlert" : [NSNull null] };
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/GetCurrentTempUnlockedApp"]) {
+		if ([ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID)
+			return @{ @"bundleIdentifier" : [ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID };
+		else
+			return @{ @"bundleIdentifier" : [NSNull null] };
 	}
 	return nil;
 }

@@ -1,6 +1,6 @@
 #import "ASPasscodeHandler.h"
 #import "ASCommon.h"
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import "SBUIPasscodeEntryField.h"
 #import "SBUIPasscodeLockNumberPad.h"
 #import <AudioToolbox/AudioServices.h>
@@ -13,7 +13,7 @@
 @end
 
 void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+	[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
         if (authenticated) {
         	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.passcodeauthsuccess"), NULL, NULL, YES);
         } else {

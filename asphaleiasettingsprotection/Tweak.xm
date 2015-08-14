@@ -4,7 +4,7 @@
 #import "../ASCommon.h"
 #import <UIKit/UIKit.h>
 #import "../ASPasscodeHandler.h"
-#import "../PreferencesHandler.h"
+#import "../ASPreferences.h"
 #import "../NSTimer+Blocks.h"
 @interface PSSpecifier ()
 @property (assign,nonatomic) SEL controllerLoadAction;
@@ -18,7 +18,7 @@
 %hook PrefsListController
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (![getProtectedPanels() containsObject:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]]) {
+	if (![[ASPreferences sharedInstance] requiresSecurityForPanel:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]]) {
 		%orig;
 		return;
 	}

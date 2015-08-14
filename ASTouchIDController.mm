@@ -8,7 +8,7 @@ https://github.com/Sassoty/BioTesting */
 #import <libactivator/libactivator.h>
 #import <dlfcn.h>
 #import <AudioToolbox/AudioServices.h>
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import <substrate.h>
 #import <notify.h>
 
@@ -49,7 +49,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
-	if (!self.isMonitoring || !isTouchIDDevice())
+	if (!self.isMonitoring || ![ASPreferences isTouchIDDevice])
 		return;
 
 	switch(event) {
@@ -79,14 +79,14 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authfailed"), NULL, NULL, YES);
-			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
+			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint])
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 		case 10: // For the new iPhone
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authfailed" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authfailed"), NULL, NULL, YES);
-			if ([[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] ? [[[ASPreferencesHandler sharedInstance].prefs objectForKey:kVibrateOnFailKey] boolValue] : NO)
+			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint])
 				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 			break;
 	}
@@ -94,7 +94,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 -(void)startMonitoring {
 	// If already monitoring, don't start again
-	if(self.isMonitoring || starting || !isTouchIDDevice()) {
+	if(self.isMonitoring || starting || ![ASPreferences isTouchIDDevice]) {
 		return;
 	}
 	starting = YES;
@@ -161,7 +161,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 }
 
 -(void)stopMonitoring {
-	if(!self.isMonitoring || stopping || !isTouchIDDevice()) {
+	if(!self.isMonitoring || stopping || ![ASPreferences isTouchIDDevice]) {
 		return;
 	}
 	stopping = YES;

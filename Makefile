@@ -4,7 +4,7 @@ TARGET = iphone:clang:latest
 include $(THEOS)/makefiles/common.mk
 
 LIBRARY_NAME = libasphaleiaui
-libasphaleiaui_FILES = ASCommon.mm NSTimer+Blocks.m PreferencesHandler.mm
+libasphaleiaui_FILES = ASCommon.mm NSTimer+Blocks.m ASPreferences.mm
 libasphaleiaui_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage LocalAuthentication Security
 libasphaleiaui_INSTALL_PATH = /usr/lib
 libasphaleiaui_LDFLAGS = -lrocketbootstrap

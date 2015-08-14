@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 #import <AudioToolbox/AudioServices.h>
 #import "NSTimer+Blocks.h"
-#import "PreferencesHandler.h"
+#import "ASPreferences.h"
 #import "ASPasscodeHandler.h"
 
 #define kBundlePath @"/Library/Application Support/Asphaleia/AsphaleiaAssets.bundle"
@@ -64,7 +64,7 @@ static ASAuthenticationController *sharedCommonObj;
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
     imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
 
-    if (touchIDEnabled()) {
+    if ([[ASPreferences sharedInstance] touchIDEnabled]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
             if (!_fingerglyph) {
@@ -157,7 +157,7 @@ static ASAuthenticationController *sharedCommonObj;
     SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
     [iconView _setIcon:appIcon animated:YES];
 
-    if ((![getProtectedApps() containsObject:appIdentifier] && !shouldProtectAllApps()) || [_temporarilyUnlockedAppBundleID isEqual:appIdentifier] || [ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled) {
+    if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
         return NO;
     }
 
@@ -165,12 +165,12 @@ static ASAuthenticationController *sharedCommonObj;
 
     UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
 
-    if (!touchIDEnabled() && !passcodeEnabled()) {
+    if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
         return NO;
     }
 
-    if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+    if (![[ASPreferences sharedInstance] touchIDEnabled]) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
                 if (authenticated)
                     _appUserAuthorisedID = appIdentifier;
                 authHandler(!authenticated);
@@ -185,7 +185,7 @@ static ASAuthenticationController *sharedCommonObj;
 }
 
 -(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled) {
+    if ([ASPreferences sharedInstance].asphaleiaDisabled) {
         return NO;
     }
 
@@ -194,12 +194,12 @@ static ASAuthenticationController *sharedCommonObj;
 
     UIAlertView *alertView = [self returnAuthenticationAlertOfType:alertType delegate:self];
 
-    if (!touchIDEnabled() && !passcodeEnabled()) {
+    if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
         return NO;
     }
 
-    if (!touchIDEnabled()) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:nil eventBlock:^void(BOOL authenticated){
+    if (![[ASPreferences sharedInstance] touchIDEnabled]) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
                 authHandler(!authenticated);
             }];
         return YES;
@@ -215,7 +215,7 @@ static ASAuthenticationController *sharedCommonObj;
     if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
             return NO;
 
-    if ([ASPreferencesHandler sharedInstance].asphaleiaDisabled || [ASPreferencesHandler sharedInstance].appSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
+    if ([ASPreferences sharedInstance].asphaleiaDisabled || [ASPreferences sharedInstance].itemSecurityDisabled || [[iconView icon] isDownloadingIcon]) {
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
         [iconView setHighlighted:NO];
         return NO;
@@ -232,7 +232,7 @@ static ASAuthenticationController *sharedCommonObj;
     if (_fingerglyph && _currentHSIconView) {
         [iconView setHighlighted:NO];
         if ([iconView isEqual:_currentHSIconView]) {
-            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+            [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
                 if (authenticated) {
                     [ASAuthenticationController sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
                 }
@@ -242,12 +242,12 @@ static ASAuthenticationController *sharedCommonObj;
         [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
         return YES;
-    } else if (([iconView.icon isApplicationIcon] && ![getProtectedApps() containsObject:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([[ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID isEqual:iconView.icon.applicationBundleID] && !shouldProtectAllApps()) || ([iconView.icon isFolderIcon] && ![getProtectedFolders() containsObject:displayName])) {
+    } else if (([iconView.icon isApplicationIcon] && ![[ASPreferences sharedInstance] requiresSecurityForApp:iconView.icon.applicationBundleID]) || ([iconView.icon isFolderIcon] && ![[ASPreferences sharedInstance] requiresSecurityForFolder:displayName])) {
         [iconView setHighlighted:NO];
         return NO;
-    } else if (!touchIDEnabled() && passcodeEnabled()) {
+    } else if (![[ASPreferences sharedInstance] touchIDEnabled] && [[ASPreferences sharedInstance] passcodeEnabled]) {
         [iconView setHighlighted:NO];
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
 
             if (authenticated){
                 [ASAuthenticationController sharedInstance].appUserAuthorisedID = iconView.icon.applicationBundleID;
@@ -423,7 +423,7 @@ static ASAuthenticationController *sharedCommonObj;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
     self.currentAuthAlert = nil;
     if (buttonIndex == [alertView firstOtherButtonIndex]) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:getPasscode() iconView:iconView eventBlock:^void(BOOL authenticated){
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(!authenticated);
@@ -439,7 +439,7 @@ static ASAuthenticationController *sharedCommonObj;
 
     self.currentAuthAlert = alertView;
 
-    if (touchIDEnabled())
+    if ([[ASPreferences sharedInstance] touchIDEnabled])
         CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
 }
 
