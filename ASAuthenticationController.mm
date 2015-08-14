@@ -13,11 +13,14 @@
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
 @interface ASAuthenticationController ()
--(void)receivedNotificationOfName:(NSString *)name;
+-(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint;
 @end
 
 void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-    [[ASAuthenticationController sharedInstance] receivedNotificationOfName:(__bridge NSString *)name];
+    id fingerprint = nil;
+    if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"])
+        id fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
+    [[ASAuthenticationController sharedInstance] receivedNotificationOfName:(__bridge NSString *)name fingerprint:fingerprint];
 }
 
 @implementation ASAuthenticationController
@@ -294,7 +297,7 @@ static ASAuthenticationController *sharedCommonObj;
     return YES;
 }
 
--(void)receivedNotificationOfName:(NSString *)name
+-(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint
 {
     if (self.currentAuthAlert) {
         NSString *origTitle = self.currentAuthAlert.title;
