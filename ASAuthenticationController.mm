@@ -19,7 +19,7 @@
 void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     id fingerprint = nil;
     if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"])
-        id fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
+        fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
     [[ASAuthenticationController sharedInstance] receivedNotificationOfName:(__bridge NSString *)name fingerprint:fingerprint];
 }
 
