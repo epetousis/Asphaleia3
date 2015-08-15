@@ -33,6 +33,7 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 	authHandler(NO);
 }
 
+%group UIImagePickerController
 %hook UIImagePickerController
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -59,9 +60,11 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 }
 
 %end
+%end
 
 ALAssetsLibraryGroupsEnumerationResultsBlock block1;
 ALAssetsLibraryAccessFailureBlock block2;
+%group ALAssetsLibrary
 %hook ALAssetsLibrary
 
 + (int)authorizationStatus {
@@ -98,11 +101,12 @@ ALAssetsLibraryAccessFailureBlock block2;
 }
 
 %end
+%end
 
 BOOL accessDenied;
 typedef void (^PHAuthBlock)(PHAuthorizationStatus status);
 PHAuthBlock authBlock;
-
+%group PHPhotoLibrary
 %hook PHPhotoLibrary
 
 + (int)authorizationStatus {
@@ -142,6 +146,7 @@ PHAuthBlock authBlock;
 }
 
 %end
+%end
 
 %hook PHFetchResult
 
@@ -161,6 +166,7 @@ PHAuthBlock authBlock;
 
 %end
 
+%group CAMImageWell
 %hook CAMImageWell
 id origTarget;
 SEL origSelector;
@@ -204,12 +210,32 @@ SEL origSelector;
 }
 
 %end
+%end
 
 %ctor {
 	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"])
 		return;
-	if ([UIApplication sharedApplication] || NSClassFromString(@"PHPhotoLibrary") != nil || NSClassFromString(@"ALAssetsLibrary") != nil || NSClassFromString(@"UIImagePickerController") != nil) {
-		loadPreferences();
-		%init;
+	if ([UIApplication sharedApplication]) {
+		BOOL loaded;
+		if (NSClassFromString(@"PHPhotoLibrary") != nil) {
+			loaded = YES;
+			%init(PHPhotoLibrary);
+		}
+		if (NSClassFromString(@"ALAssetsLibrary") != nil) {
+			loaded = YES;
+			%init(ALAssetsLibrary);
+		}
+		if (NSClassFromString(@"UIImagePickerController") != nil) {
+			loaded = YES;
+			%init(UIImagePickerController);
+		}
+		if (NSClassFromString(@"CAMImageWell") != nil) {
+			loaded = YES;
+			%init (CAMImageWell);
+		}
+		if (loaded) {
+			loadPreferences();
+			%init;
+		}
 	}
 }
