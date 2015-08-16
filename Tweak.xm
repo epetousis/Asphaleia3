@@ -547,7 +547,7 @@ BOOL currentBannerAuthenticated;
 %new
 -(void)receiveTouchIDNotification:(NSNotification *)notification
 {
-	if ([notification object]) {
+	if ([[notification object] isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
 		if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[[notification object] name]]) {
 			if (bannerFingerGlyph)
 				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];

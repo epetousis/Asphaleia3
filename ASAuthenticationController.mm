@@ -318,7 +318,7 @@ static ASAuthenticationController *sharedCommonObj;
 -(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint
 {
     if (self.currentAuthAlert) {
-        if (fingerprint) {
+        if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
             BOOL correctFingerUsed;
             switch (self.currentAuthAlert.tag) {
                 case ASAuthenticationItem:
@@ -367,7 +367,7 @@ static ASAuthenticationController *sharedCommonObj;
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
         }
     } else if (self.currentHSIconView) {
-        if (fingerprint) {
+        if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
             if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]])
                 name = @"com.a3tweaks.asphaleia8.authfailed";
         }
