@@ -6,7 +6,7 @@ include $(THEOS)/makefiles/common.mk
 BUNDLE_NAME = AsphaleiaPrefs
 AsphaleiaPrefs_FILES = ASRootListController.mm AsphaleiaTitleCell.m ASCreatorsListController.mm ASPasscodeOptionsListController.mm ASAdvancedOptionsListController.mm ASControlPanelListController.mm ASAdvancedSecurityListController.mm ASSecuredItemsListController.mm ASSecuredFoldersListController.mm ASSecuredAppsListController.mm ASSecuredSettingsListController.mm ASSecuredSwitchesListController.mm asphaleiaTVC.m modalPinVC.mm TouchIDInfo.mm
 AsphaleiaPrefs_INSTALL_PATH = /Library/PreferenceBundles
-AsphaleiaPrefs_FRAMEWORKS = UIKit CoreGraphics AudioToolbox QuartzCore Twitter MessageUI SystemConfiguration
+AsphaleiaPrefs_FRAMEWORKS = UIKit CoreGraphics AudioToolbox QuartzCore Twitter MessageUI SystemConfiguration LocalAuthentication
 AsphaleiaPrefs_PRIVATE_FRAMEWORKS = Preferences
 AsphaleiaPrefs_LDFLAGS = -lapplist -lmobilegestalt -lflipswitch
 
