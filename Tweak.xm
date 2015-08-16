@@ -547,6 +547,15 @@ BOOL currentBannerAuthenticated;
 %new
 -(void)receiveTouchIDNotification:(NSNotification *)notification
 {
+	if ([notification object]) {
+		if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[[notification object] name]]) {
+			if (bannerFingerGlyph)
+				[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
+			if ([[ASPreferences sharedInstance] vibrateOnIncorrectFingerprint])
+				AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+			return;
+		}
+	}
 	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
 		if (bannerFingerGlyph)
 			[bannerFingerGlyph setState:1 animated:YES completionHandler:nil];

@@ -306,6 +306,58 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 	return [[switches objectForKey:flipswitch] boolValue];
 }
 
+-(BOOL)fingerprintProtectsSecureItems:(NSString *)fingerprint {
+	NSDictionary *fingerprintSettings = [self objectForKey:kFingerprintSettingsKey];
+	if (!fingerprintSettings)
+		return YES;
+
+	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kSecuredItemsFingerprintsKey];
+	BOOL usesFingerprintProtection;
+	for (NSString *fingerprint in fingerprintDict) {
+		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
+			usesFingerprintProtection = YES;
+	}
+	if (!usesFingerprintProtection)
+		return YES;
+
+	return [[fingerprintDict objectForKey:fingerprint] boolValue];
+}
+
+-(BOOL)fingerprintProtectsSecurityMods:(NSString *)fingerprint {
+	NSDictionary *fingerprintSettings = [self objectForKey:kFingerprintSettingsKey];
+	if (!fingerprintSettings)
+		return YES;
+
+	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kSecurityModFingerprintsKey];
+	BOOL usesFingerprintProtection;
+	for (NSString *fingerprint in fingerprintDict) {
+		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
+			usesFingerprintProtection = YES;
+	}
+	if (!usesFingerprintProtection)
+		return YES;
+
+	return [[fingerprintDict objectForKey:fingerprint] boolValue];
+}
+
+-(BOOL)fingerprintProtectsAdvancedSecurity:(NSString *)fingerprint {
+	NSDictionary *fingerprintSettings = [self objectForKey:kFingerprintSettingsKey];
+	if (!fingerprintSettings)
+		return YES;
+
+	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kAdvancedSecurityFingerprintsKey];
+	BOOL usesFingerprintProtection;
+	for (NSString *fingerprint in fingerprintDict) {
+		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
+			usesFingerprintProtection = YES;
+	}
+	if (!usesFingerprintProtection)
+		return YES;
+
+	return [[fingerprintDict objectForKey:fingerprint] boolValue];
+}
+
+// Custom setters/getters
 -(BOOL)asphaleiaDisabled {
 	if (objc_getClass("SpringBoard"))
 		return _asphaleiaDisabled;

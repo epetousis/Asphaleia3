@@ -34,6 +34,10 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 #define kTouchIDEnabledKey @"touchID"
 #define kSecurePhotosKey @"securePhotos"
 #define kPhotosMessageCount @"photosMsgDisplayCount"
+#define kSecuredItemsFingerprintsKey @"securedItemsFingerprints"
+#define kSecurityModFingerprintsKey @"securityModifiersFingerprints"
+#define kAdvancedSecurityFingerprintsKey @"advancedSecurityFingerprints"
+#define kFingerprintSettingsKey @"fingerprintSettings"
 
 @interface ASPreferences : NSObject {
 	NSDictionary *_prefs;
@@ -74,4 +78,8 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 -(BOOL)requiresSecurityForFolder:(NSString *)folder;
 -(BOOL)requiresSecurityForPanel:(NSString *)panel;
 -(BOOL)requiresSecurityForSwitch:(NSString *)flipswitch;
+
+-(BOOL)fingerprintProtectsSecureItems:(NSString *)fingerprint;
+-(BOOL)fingerprintProtectsSecurityMods:(NSString *)fingerprint;
+-(BOOL)fingerprintProtectsAdvancedSecurity:(NSString *)fingerprint;
 @end

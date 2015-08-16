@@ -99,7 +99,6 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 		[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia8.authsuccess" object:result];
 		self.lastMatchedFingerprint = result;
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.authsuccess"), NULL, NULL, YES);
-		[self stopMonitoring];
 		_shouldBlockLockscreenMonitor = NO;
 	}
 }
