@@ -193,7 +193,6 @@ SEL origSelector;
 %end
 %end
 
-typedef void (^InitialisingBlock)();
 %ctor {
 	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"])
 		return;
