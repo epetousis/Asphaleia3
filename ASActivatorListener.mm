@@ -29,12 +29,12 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     BOOL appSecureValue = [[ASPreferences sharedInstance] securityEnabledForApp:bundleID];
 
     NSMutableDictionary *dict = [[ASPreferences sharedInstance] objectForKey:kSecuredAppsKey];
-    [dict setObject:[NSNumber numberWithBool:appSecureValue] forKey:frontmostApp.bundleIdentifier];
+    [dict setObject:[NSNumber numberWithBool:!appSecureValue] forKey:frontmostApp.bundleIdentifier];
     [[ASPreferences sharedInstance] setObject:dict forKey:kSecuredAppsKey];
 
     NSString *title = nil;
     NSString *description = nil;
-    if (!appSecureValue) {
+    if (appSecureValue) {
         title = @"Disabled authentication";
         description = [NSString stringWithFormat:@"Disabled authentication for %@", frontmostApp.displayName];
     } else {
