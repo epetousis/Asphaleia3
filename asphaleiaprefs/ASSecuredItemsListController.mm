@@ -14,8 +14,8 @@
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
     Class la = objc_getClass("LAActivator");
     if (!la) {
-		[_specifiers[0] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
-		[_specifiers[1] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
+		[(PSSpecifier *)_specifiers[0] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
+		[(PSSpecifier *)_specifiers[1] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
 		[_specifiers removeObjectAtIndex:2];
 	}
 	return _specifiers;
