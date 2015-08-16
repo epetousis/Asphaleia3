@@ -22,6 +22,13 @@ static UITextField *wifiTextField;
     for (id subview in [cell.contentView subviews]) {
         if ([subview isKindOfClass:[UITextField class]]) {
             wifiTextField = subview;
+            wifiTextField.delegate = self;
+        }
+    }
+    if (!isTouchIDDevice()) {
+        for (PSSpecifier *specifier in [_specifiers copy]) {
+            if ([[specifier identifier] isEqualToString:@"fingerprintCell"] || [[specifier identifier] isEqualToString:@"fingerprintGroupCell"])
+                [_specifiers removeObject:specifier];
         }
     }
     return cell;
