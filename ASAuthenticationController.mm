@@ -60,6 +60,7 @@ static ASAuthenticationController *sharedCommonObj;
                    delegate:delegate
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+    alertView.tag = ASAuthenticationItem;
 
     currentAuthAppBundleID = iconView.icon.applicationBundleID;
     UIImage *iconImage = [iconView.icon getIconImage:2];
@@ -93,46 +94,62 @@ static ASAuthenticationController *sharedCommonObj;
 
     NSString *title;
     UIImage *iconImage;
+    int tag;
     switch (alertType) {
         case ASAuthenticationAlertAppArranging:
             title = @"Arrange Apps";
             iconImage = [UIImage imageNamed:@"IconEditMode.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertSwitcher:
             title = @"Multitasking";
             iconImage = [UIImage imageNamed:@"IconMultitasking.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertSpotlight:
             title = @"Spotlight";
             iconImage = [UIImage imageNamed:@"IconSpotlight.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertPowerDown:
             title = @"Slide to Power Off";
             iconImage = [UIImage imageNamed:@"IconPowerOff.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertControlCentre:
             title = @"Control Center";
             iconImage = [UIImage imageNamed:@"IconControlCenter.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertControlPanel:
             title = @"Asphaleia Control Panel";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationSecurityMod;
+            break;
+        case ASAuthenticationAlertDynamicSelection:
+            title = @"Dynamic Selection";
+            iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationSecurityMod;
             break;
         case ASAuthenticationAlertPhotos:
             title = @"Photo Library";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
         case ASAuthenticationAlertSettingsPanel:
             title = @"Settings Panel";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationItem;
             break;
         case ASAuthenticationAlertFlipswitch:
             title = @"Flipswitch";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationItem;
             break;
         default:
             title = @"Asphaleia";
             iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
+            tag = ASAuthenticationFunction;
             break;
     }
     title = titleWithSpacingForSmallIcon(title);
@@ -142,6 +159,7 @@ static ASAuthenticationController *sharedCommonObj;
                    delegate:delegate
          cancelButtonTitle:@"Cancel"
          otherButtonTitles:@"Passcode",nil];
+    alertView.tag = tag;
     dispatch_async(dispatch_get_main_queue(), ^{
         UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
         imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
@@ -300,6 +318,25 @@ static ASAuthenticationController *sharedCommonObj;
 -(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint
 {
     if (self.currentAuthAlert) {
+        if (fingerprint) {
+            BOOL correctFingerUsed;
+            switch (self.currentAuthAlert.tag) {
+                case ASAuthenticationItem:
+                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
+                    break;
+                case ASAuthenticationFunction:
+                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsAdvancedSecurity:[fingerprint name]];
+                    break;
+                case ASAuthenticationSecurityMod:
+                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecurityMods:[fingerprint name]];
+                    break;
+                default:
+                    correctFingerUsed = YES;
+                    break;
+            }
+            if (!correctFingerUsed)
+                name = @"com.a3tweaks.asphaleia8.authfailed";
+        }
         NSString *origTitle = self.currentAuthAlert.title;
         if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
             if ([origTitle containsString:@"\n\n\n"]) {
@@ -330,6 +367,10 @@ static ASAuthenticationController *sharedCommonObj;
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
         }
     } else if (self.currentHSIconView) {
+        if (fingerprint) {
+            if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]])
+                name = @"com.a3tweaks.asphaleia8.authfailed";
+        }
         if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
             return;
         if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
