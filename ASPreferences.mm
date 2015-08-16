@@ -312,7 +312,7 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 		return YES;
 
 	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kSecuredItemsFingerprintsKey];
-	BOOL usesFingerprintProtection;
+	BOOL usesFingerprintProtection = NO;
 	for (NSString *fingerprint in fingerprintDict) {
 		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
 			usesFingerprintProtection = YES;
@@ -329,7 +329,7 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 		return YES;
 
 	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kSecurityModFingerprintsKey];
-	BOOL usesFingerprintProtection;
+	BOOL usesFingerprintProtection = NO;
 	for (NSString *fingerprint in fingerprintDict) {
 		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
 			usesFingerprintProtection = YES;
@@ -346,7 +346,7 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 		return YES;
 
 	NSDictionary *fingerprintDict = [fingerprintSettings objectForKey:kAdvancedSecurityFingerprintsKey];
-	BOOL usesFingerprintProtection;
+	BOOL usesFingerprintProtection = NO;
 	for (NSString *fingerprint in fingerprintDict) {
 		if ([[fingerprintDict objectForKey:fingerprint] boolValue])
 			usesFingerprintProtection = YES;
