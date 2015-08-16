@@ -11,27 +11,8 @@
 #import <AppSupport/CPDistributedMessagingCenter.h>
 #import "../Asphaleia.h"
 
-UIAlertView *alertView;
 BOOL authenticated;
 BOOL authenticating;
-ASCommonAuthenticationHandler authHandler;
-NSString *origTitle;
-void fingerDown(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-    alertView.title = @"\n\nScanning finger...";
-    [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-        alertView.title = origTitle;
-    } repeats:NO];
-}
-void fingerScanFailed(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	alertView.title = origTitle;
-}
-void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
-	CFNotificationCenterRemoveObserver(CFNotificationCenterGetDarwinNotifyCenter(), observer, NULL, NULL);
-	[alertView dismissWithClickedButtonIndex:-1 animated:YES];
-	alertView = nil;
-	authHandler(NO);
-}
 
 %group UIImagePickerController
 %hook UIImagePickerController
@@ -62,9 +43,9 @@ void authSuccess(CFNotificationCenterRef center, void *observer, CFStringRef nam
 %end
 %end
 
+%group ALAssetsLibrary
 ALAssetsLibraryGroupsEnumerationResultsBlock block1;
 ALAssetsLibraryAccessFailureBlock block2;
-%group ALAssetsLibrary
 %hook ALAssetsLibrary
 
 + (int)authorizationStatus {
@@ -103,10 +84,10 @@ ALAssetsLibraryAccessFailureBlock block2;
 %end
 %end
 
+%group PHPhotoLibrary
 BOOL accessDenied;
 typedef void (^PHAuthBlock)(PHAuthorizationStatus status);
 PHAuthBlock authBlock;
-%group PHPhotoLibrary
 %hook PHPhotoLibrary
 
 + (int)authorizationStatus {
@@ -146,7 +127,6 @@ PHAuthBlock authBlock;
 }
 
 %end
-%end
 
 %hook PHFetchResult
 
@@ -164,6 +144,7 @@ PHAuthBlock authBlock;
 	return nil;
 }
 
+%end
 %end
 
 %group CAMImageWell
@@ -196,7 +177,7 @@ SEL origSelector;
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}
-	if (alertView)
+	if ([[ASCommon sharedInstance] currentAuthAlert])
 		return;
 	authenticating = YES;
 
@@ -212,30 +193,29 @@ SEL origSelector;
 %end
 %end
 
+typedef void (^InitialisingBlock)();
 %ctor {
 	if ([[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.mobileslideshow"])
 		return;
-	if ([UIApplication sharedApplication]) {
-		BOOL loaded;
-		if (NSClassFromString(@"PHPhotoLibrary") != nil) {
-			loaded = YES;
-			%init(PHPhotoLibrary);
-		}
-		if (NSClassFromString(@"ALAssetsLibrary") != nil) {
-			loaded = YES;
-			%init(ALAssetsLibrary);
-		}
-		if (NSClassFromString(@"UIImagePickerController") != nil) {
-			loaded = YES;
-			%init(UIImagePickerController);
-		}
-		if (NSClassFromString(@"CAMImageWell") != nil) {
-			loaded = YES;
-			%init (CAMImageWell);
-		}
-		if (loaded) {
-			loadPreferences();
-			%init;
-		}
+	BOOL loaded;
+	if (NSClassFromString(@"PHPhotoLibrary") != nil) {
+		loaded = YES;
+		%init(PHPhotoLibrary);
+	}
+	if (NSClassFromString(@"ALAssetsLibrary") != nil) {
+		loaded = YES;
+		%init(ALAssetsLibrary);
+	}
+	if (NSClassFromString(@"UIImagePickerController") != nil) {
+		loaded = YES;
+		%init(UIImagePickerController);
+	}
+	if (NSClassFromString(@"CAMImageWell") != nil) {
+		loaded = YES;
+		%init(CAMImageWell);
+	}
+	if (loaded) {
+		loadPreferences();
+		%init;
 	}
 }
