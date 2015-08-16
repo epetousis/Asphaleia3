@@ -28,6 +28,26 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
+			<string>Black out notifications for secured apps.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.a3tweaks.asphaleia8</string>
+			<key>key</key>
+			<string>obscureBanners</string>
+			<key>label</key>
+			<string>Obscure Notifications</string>
+			<key>PostNotification</key>
+			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
 			<string>Do not require re-authorisation of a secured app if it is already open upon unlocking.</string>
 		</dict>
 		<dict>
@@ -147,22 +167,20 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>footerText</key>
-			<string>Black out notifications for secured apps.</string>
+			<key>id</key>
+			<string>fingerprintGroupCell</string>
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>default</key>
+			<string>PSLinkCell</string>
+			<key>id</key>
+			<string>fingerprintCell</string>
+			<key>detail</key>
+			<string>ASFingerprintsListController</string>
+			<key>isController</key>
 			<true/>
-			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
-			<key>key</key>
-			<string>obscureBanners</string>
 			<key>label</key>
-			<string>Obscure Notifications</string>
-			<key>PostNotification</key>
-			<string>com.a3tweaks.asphaleia/ReloadPrefs</string>
+			<string>Fingerprints</string>
 		</dict>
 	</array>
 	<key>title</key>
