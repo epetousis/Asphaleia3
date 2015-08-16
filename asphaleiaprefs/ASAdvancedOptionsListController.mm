@@ -23,6 +23,7 @@ static UITextField *wifiTextField;
         if ([subview isKindOfClass:[UITextField class]]) {
             wifiTextField = subview;
             wifiTextField.delegate = self;
+            [wifiTextField setReturnKeyType:UIReturnKeyDone];
         }
     }
     if (!isTouchIDDevice()) {

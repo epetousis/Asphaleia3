@@ -16,8 +16,8 @@
     dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
     Class la = objc_getClass("LAActivator");
     if (!la) {
-        [_specifiers[10] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
-        [_specifiers[11] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
+        [(PSSpecifier *)_specifiers[10] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
+        [(PSSpecifier *)_specifiers[11] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
     }
     if (!isTouchIDDevice()) {
         for (PSSpecifier *specifier in [_specifiers copy]) {
