@@ -31,5 +31,4 @@ SUBPROJECTS += asphaleiaprefs
 SUBPROJECTS += asphaleiaphotosprotection
 SUBPROJECTS += asphaleiaflipswitch
 SUBPROJECTS += asphaleiasettingsprotection
-SUBPROJECTS += asphaleiaflipswitchprotection
 include $(THEOS_MAKE_PATH)/aggregate.mk
