@@ -17,6 +17,7 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 - (void)_startMatching;
 - (void)_setMatchingEnabled:(BOOL)arg1;
 - (BOOL)isMatchingEnabled;
+-(BOOL)hasEnrolledIdentities;
 @end
 
 #define TouchIDFingerDown  1

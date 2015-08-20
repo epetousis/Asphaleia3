@@ -72,31 +72,13 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 }
 
 +(BOOL)isTouchIDDevice {
-	try {
-		LAContext *context = [[LAContext alloc] init];
-
-		if (![context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:nil]) {
-			return NO;
-		}
-		return YES;
-	} catch (NSException *exception) {
-		NSLog(@"[Asphaleia] An error occurred checking for Touch ID. Trying alternative method...");
-
-		int sysctlbyname(const char *, void *, size_t *, void *, size_t);
-
-		size_t size;
-		sysctlbyname("hw.machine", NULL, &size, NULL, 0);
-
-		char *answer = (char *)malloc(size);
-		sysctlbyname("hw.machine", answer, &size, NULL, 0);
-
-		NSString *results = [NSString stringWithCString:answer encoding: NSUTF8StringEncoding];
-
-		free(answer);
-
-		NSArray *touchIDModels = @[ @"iPhone6,1", @"iPhone6,2", @"iPhone7,1", @"iPhone7,2", @"iPad5,3", @"iPad5,4", @"iPad4,7", @"iPad4,8", @"iPad4,9" ];
-
-		return [touchIDModels containsObject:results];
+	if (objc_getClass("SBUIBiometricEventMonitor")) {
+		return [[objc_getClass("SBUIBiometricEventMonitor") sharedInstance] hasEnrolledIdentities];
+	} else {
+		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+		rocketbootstrap_distributedmessagingcenter_apply(centre);
+		NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/IsTouchIDDevice" userInfo:nil];
+		return [reply[@"isTouchIDDevice"] boolValue];
 	}
 }
 
