@@ -1,11 +1,9 @@
 #import "TouchIDInfo.h"
-#import <LocalAuthentication/LocalAuthentication.h>
+#import <objc/runtime.h>
+#import <RocketBootstrap/RocketBootstrap.h>
+#import <AppSupport/CPDistributedMessagingCenter.h>
+#import "../ASPreferences.h"
 
 BOOL isTouchIDDevice(void) {
-	LAContext *context = [[LAContext alloc] init];
-
-    if (![context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:nil]) {
-        return NO;
-    }
-    return YES;
+	return [ASPreferences isTouchIDDevice];
 }

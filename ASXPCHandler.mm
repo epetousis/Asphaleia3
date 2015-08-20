@@ -59,6 +59,8 @@ static ASXPCHandler *sharedHandlerObj;
 			return @{ @"bundleIdentifier" : [ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID };
 		else
 			return @{ @"bundleIdentifier" : [NSNull null] };
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/IsTouchIDDevice"]) {
+		return @{ @"isTouchIDDevice" : [NSNumber numberWithBool:[ASPreferences isTouchIDDevice]] };
 	}
 	return nil;
 }

@@ -13,6 +13,12 @@ static UITextField *wifiTextField;
 	if(_specifiers == nil) {
         _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions-AdvancedOptions" target:self] retain];
     }
+    if (!isTouchIDDevice()) {
+        for (PSSpecifier *specifier in [_specifiers copy]) {
+            if ([[specifier identifier] isEqualToString:@"fingerprintCell"] || [[specifier identifier] isEqualToString:@"fingerprintGroupCell"])
+                [_specifiers removeObject:specifier];
+        }
+    }
     return _specifiers;
 }
 
@@ -24,12 +30,6 @@ static UITextField *wifiTextField;
             wifiTextField = subview;
             wifiTextField.delegate = self;
             [wifiTextField setReturnKeyType:UIReturnKeyDone];
-        }
-    }
-    if (!isTouchIDDevice()) {
-        for (PSSpecifier *specifier in [_specifiers copy]) {
-            if ([[specifier identifier] isEqualToString:@"fingerprintCell"] || [[specifier identifier] isEqualToString:@"fingerprintGroupCell"])
-                [_specifiers removeObject:specifier];
         }
     }
     return cell;

@@ -8,7 +8,7 @@ AsphaleiaPrefs_FILES = ASRootListController.mm AsphaleiaTitleCell.m ASCreatorsLi
 AsphaleiaPrefs_INSTALL_PATH = /Library/PreferenceBundles
 AsphaleiaPrefs_FRAMEWORKS = UIKit CoreGraphics AudioToolbox QuartzCore Twitter MessageUI SystemConfiguration LocalAuthentication
 AsphaleiaPrefs_PRIVATE_FRAMEWORKS = Preferences
-AsphaleiaPrefs_LDFLAGS = -lapplist -lmobilegestalt -lflipswitch
+AsphaleiaPrefs_LDFLAGS = -L"../.theos/obj/debug" -lapplist -lmobilegestalt -lflipswitch -lrocketbootstrap -lasphaleiaui
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
