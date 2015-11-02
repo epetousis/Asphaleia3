@@ -636,8 +636,8 @@ BOOL currentBannerAuthenticated;
 
 - (void)_setMatchingEnabled:(BOOL)arg1 {
 	BOOL deviceLocked = MSHookIvar<BOOL>(self, "_deviceLocked");
-	BOOL screenOff = MSHookIvar<BOOL>(self, "_screenIsOff");
-	if (!arg1 && !deviceLocked && !screenOff)
+	BOOL screenOn = MSHookIvar<BOOL>(self, "_screenIsOn");
+	if (!arg1 && !deviceLocked && screenOn)
 		return;
 	else
 		%orig;
