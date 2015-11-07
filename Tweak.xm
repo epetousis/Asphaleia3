@@ -140,7 +140,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 	SBAppSwitcherSnapshotView *snapshot = self;
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:@10 forKey:@"inputRadius"];
-	UIImageView *snapshotImageView = MSHookIvar<UIImageView *>(snapshot,"_snapshotImageView");
+	UIView *snapshotImageView = MSHookIvar<UIView *>(snapshot,"_containerView");
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 
 	NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
@@ -186,6 +186,11 @@ BOOL switcherAuthenticating;
 		return YES;
 	else
 		return %orig;
+}
+
+-(BOOL)clickedMenuButton {
+	if (![[ASAuthenticationController sharedInstance] currentAuthAlert])
+		%orig;
 }
 
 %end
@@ -250,7 +255,7 @@ UIWindow *blurredWindow;
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 	if ([[ASPreferences sharedInstance] requiresSecurityForApp:[frontmostApp bundleIdentifier]] && ![[ASPreferences sharedInstance] unlockToAppUnsecurely] && frontmostApp && ![ASAuthenticationController sharedInstance].catchAllIgnoreRequest) {
 
-		[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[frontmostApp bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) { // If you want to set beginMesaMonitoringBeforeShowing to yes, implement the home button click disabling code
+		[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:[frontmostApp bundleIdentifier] customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
 			if (blurredWindow) {
 				blurredWindow.hidden = YES;
 				blurredWindow = nil;
