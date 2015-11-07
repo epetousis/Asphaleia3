@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "Asphaleia.h"
-#import "PKGlyphView.h"
+#import <PassKit/PKGlyphView.h>
 #import "ASTouchIDController.h"
 #import "ASTouchWindow.h"
 #import "ASCommon.h"

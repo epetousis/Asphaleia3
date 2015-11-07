@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#import "PKGlyphView.h"
+#import <PassKit/PKGlyphView.h>
 #import "ASTouchIDController.h"
 #import "ASAuthenticationController.h"
 #import "ASCommon.h"

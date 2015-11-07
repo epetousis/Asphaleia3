@@ -1,6 +1,6 @@
 #import <libactivator/libactivator.h>
 #import <UIKit/UIKit.h>
-#import "SBUIPasscodeLockViewSimple4DigitKeypad.h"
+#import <SpringboardUI/SBUIPasscodeLockViewSimple4DigitKeypad.h>
 #import "Asphaleia.h"
 
 typedef void (^ASPasscodeHandlerEventBlock) (BOOL authenticated);
