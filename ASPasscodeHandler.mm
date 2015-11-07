@@ -1,8 +1,8 @@
 #import "ASPasscodeHandler.h"
 #import "ASCommon.h"
 #import "ASPreferences.h"
-#import "SBUIPasscodeEntryField.h"
-#import "SBUIPasscodeLockNumberPad.h"
+#import <SpringboardUI/SBUIPasscodeEntryField.h>
+#import <SpringboardUI/SBUIPasscodeLockNumberPad.h>
 #import <AudioToolbox/AudioServices.h>
 #import "Asphaleia.h"
 
