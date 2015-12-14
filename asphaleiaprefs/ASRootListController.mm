@@ -23,7 +23,7 @@
 	[(UINavigationItem*)self.navigationItem titleView].alpha = 0.0f;
 	[(UINavigationItem*)self.navigationItem setRightBarButtonItem:nextBarButton animated:NO];
 	[(UINavigationItem*)self.navigationItem setLeftBarButtonItem:nil];
-	[(UINavigationItem*)self.navigationItem setBackBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Asphaleia 2"
+	[(UINavigationItem*)self.navigationItem setBackBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Asphaleia"
 			   style:UIBarButtonItemStylePlain
 			   target:nil
 			   action:nil]];
@@ -39,7 +39,7 @@
 		
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You don't seem to be able to tweet right now." delegate:nil cancelButtonTitle:@"Okay." otherButtonTitles:nil];
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You don't seem to be able to tweet right now." delegate:nil cancelButtonTitle:@"Okay." otherButtonTitles:nil];
 		[alert show];
 	}
 }
@@ -115,7 +115,7 @@
 	{
 		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
 		mailViewController.mailComposeDelegate = (id<MFMailComposeViewControllerDelegate>)self;
-		[mailViewController setSubject:@"Asphaleia 2 Support"];
+		[mailViewController setSubject:@"Asphaleia 3 Support"];
 		[mailViewController setToRecipients:[NSArray arrayWithObject:@"asphaleia@a3tweaks.com"]];
 		size_t size;
 		sysctlbyname("hw.machine", NULL, &size, NULL, 0);

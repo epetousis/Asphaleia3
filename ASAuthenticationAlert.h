@@ -1,11 +1,14 @@
 #import <SpringBoardUI/SBAlertItem.h>
 #import "ASAlert.h"
 
-@interface ASAuthenticationAlert : ASAlert
+@interface ASAuthenticationAlert : SBAlertItem
+@property (nonatomic) NSString *title;
+@property (nonatomic) NSString *message;
+@property (nonatomic, weak) id<ASAlertDelegate> delegate;
+@property(nonatomic) NSInteger tag;
 @property (nonatomic) UIView *icon;
 @property BOOL useSmallIcon;
-@property(nonatomic) NSInteger tag;
--(id)initWithTitle:(NSString *)title description:(NSString *)description icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAlertDelegate>)delegate;
+-(id)initWithTitle:(NSString *)title message:(NSString *)message icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAlertDelegate>)delegate;
 -(id)alertController;
 -(void)show;
 

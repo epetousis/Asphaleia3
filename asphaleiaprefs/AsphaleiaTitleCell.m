@@ -18,7 +18,7 @@
 		tweakTitle = [[UILabel alloc] initWithFrame:frame];
 		[tweakTitle setNumberOfLines:1];
 		[tweakTitle setFont:[UIFont fontWithName:@"HelveticaNeue-UltraLight" size:48]];
-		[tweakTitle setText:@"Asphaleia 2"];
+		[tweakTitle setText:@"Asphaleia 3"];
 		[tweakTitle setBackgroundColor:[UIColor clearColor]];
 		[tweakTitle setTextColor:[UIColor blackColor]];
 		[tweakTitle setTextAlignment:NSTextAlignmentCenter];
@@ -137,10 +137,10 @@
 		pclose(fp);
 		if ([output length] != 28 && [output length] != 58) {
 			[tweakThankSubtitle setText:@"Please don't pirate."];
-			NSLog(@"This copy of Asphaleia 2 has been pirated. :(");
+			NSLog(@"This copy of Asphaleia has been pirated. :(");
 		}
 		else {
-			NSLog(@"This copy of Asphaleia 2 is legitimate.");
+			NSLog(@"This copy of Asphaleia is legitimate.");
 		}
 	}
 

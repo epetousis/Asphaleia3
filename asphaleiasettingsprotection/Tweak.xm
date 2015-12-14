@@ -3,11 +3,9 @@
 #import <Preferences/PSTableCell.h>
 #import "../ASCommon.h"
 #import <UIKit/UIKit.h>
-#import "../ASPasscodeHandler.h"
 #import "../ASPreferences.h"
 #import "../NSTimer+Blocks.h"
 @interface PSSpecifier ()
-@property (assign,nonatomic) SEL controllerLoadAction;
 @property (assign,nonatomic) Class detailControllerClass;
 @end
 @interface PrefsListController : PSListController

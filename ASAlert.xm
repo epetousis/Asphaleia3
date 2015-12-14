@@ -13,10 +13,11 @@
 
 %subclass ASAlert : SBAlertItem
 
--(id)initWithTitle:(NSString *)title description:(NSString *)description delegate:(id<ASAlertDelegate>)delegate {
+%new
+-(id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id<ASAlertDelegate>)delegate {
 	if ((self = [self init])) {
 		self.title = title;
-		self.description = description;
+		self.message = message;
 		self.delegate = delegate;
 		self.buttons = [[NSMutableArray alloc] init];
 	}
@@ -26,7 +27,7 @@
 - (void)configure:(BOOL)configure requirePasscodeForActions:(BOOL)requirePasscode {
 	%orig;
 	self.alertSheet.title = self.title;
-	self.alertSheet.message = self.description;
+	self.alertSheet.message = self.message;
 
 	for (NSString *button in self.buttons)
 		[self.alertSheet addButtonWithTitle:button];
@@ -43,15 +44,12 @@
 - (void)alertView:(id)arg1 clickedButtonAtIndex:(int)arg2 {
 	if (self.delegate)
 		[self.delegate alertView:arg1 clickedButtonAtIndex:arg2];
+
+	[self dismiss];
 }
 
 - (BOOL)shouldShowInLockScreen {
 	return NO;
-}
-
-%new
--(void)setAboveTitleSubview:(UIView *)view {
-	self.aboveTitleSubview = view;
 }
 
 %new
@@ -99,6 +97,61 @@
 	if ([buttonTitle isKindOfClass:[NSString class]]) {
 		[self.buttons removeObject:buttonTitle];
 	}
+}
+
+// Properties
+%new
+-(void)setTitle:(NSString *)title {
+	objc_setAssociatedObject(self, @selector(title), title, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(NSString *)title {
+	return objc_getAssociatedObject(self, @selector(title));
+}
+
+%new
+-(void)setMessage:(NSString *)message {
+	objc_setAssociatedObject(self, @selector(message), message, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(NSString *)message {
+	return objc_getAssociatedObject(self, @selector(message));
+}
+
+%new
+-(void)setDelegate:(id<ASAlertDelegate>)delegate {
+	objc_setAssociatedObject(self, @selector(delegate), delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(id<ASAlertDelegate>)delegate {
+	return objc_getAssociatedObject(self, @selector(delegate));
+}
+
+%new
+-(void)setButtons:(NSMutableArray *)buttons {
+	objc_setAssociatedObject(self, @selector(buttons), buttons, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(NSMutableArray *)buttons {
+	return objc_getAssociatedObject(self, @selector(buttons));
+}
+
+%new
+-(void)setTag:(NSInteger)tag {
+	objc_setAssociatedObject(self, @selector(tag), [NSNumber numberWithInt:tag], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(NSInteger)tag {
+	return [objc_getAssociatedObject(self, @selector(tag)) intValue];
+}
+
+%new
+-(void)setAboveTitleSubview:(UIView *)aboveTitleSubview {
+	objc_setAssociatedObject(self, @selector(aboveTitleSubview), aboveTitleSubview, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(UIView *)aboveTitleSubview {
+	return objc_getAssociatedObject(self, @selector(aboveTitleSubview));
 }
 
 %end

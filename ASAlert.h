@@ -10,10 +10,10 @@
 
 @interface ASAlert : SBAlertItem
 @property (nonatomic) NSString *title;
-@property (nonatomic) NSString *description;
+@property (nonatomic) NSString *message;
 @property (nonatomic, weak) id<ASAlertDelegate> delegate;
 @property(nonatomic) NSInteger tag;
--(id)initWithTitle:(NSString *)title description:(NSString *)description delegate:(id<ASAlertDelegate>)delegate;
+-(id)initWithTitle:(NSString *)title message:(NSString *)message delegate:(id<ASAlertDelegate>)delegate;
 -(id)alertController;
 -(void)addButtonWithTitle:(NSString *)buttonTitle;
 -(void)removeButtonWithTitle:(NSString *)buttonTitle;
