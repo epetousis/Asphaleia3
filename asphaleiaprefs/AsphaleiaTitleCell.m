@@ -21,7 +21,7 @@
 
 		[tweakTitle setTextColor:[UIColor blackColor]];
 		NSMutableAttributedString *titleAttributedText = [[NSMutableAttributedString alloc] initWithString:@"Asphaleia 3"];
-		[titleAttributedText addAttribute:NSForegroundColorAttributeName value:[UIColor lightBlueColor] range:NSMakeRange(10,1)];
+		[titleAttributedText addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(10,1)];
 		[tweakTitle setAttributedText:titleAttributedText];
 		[tweakTitle setBackgroundColor:[UIColor clearColor]];
 		[tweakTitle setTextAlignment:NSTextAlignmentCenter];
