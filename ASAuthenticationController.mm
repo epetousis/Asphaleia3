@@ -273,28 +273,7 @@ static ASAuthenticationController *sharedCommonObj;
 
 -(void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint
 {
-    if (self.currentAuthAlert) {
-        if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
-            // why did I put the fingerprint code here?
-            BOOL correctFingerUsed;
-            switch (self.currentAuthAlert.tag) {
-                case ASAuthenticationItem:
-                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
-                    break;
-                case ASAuthenticationFunction:
-                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsAdvancedSecurity:[fingerprint name]];
-                    break;
-                case ASAuthenticationSecurityMod:
-                    correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecurityMods:[fingerprint name]];
-                    break;
-                default:
-                    correctFingerUsed = YES;
-                    break;
-            }
-            if (!correctFingerUsed)
-                name = @"com.a3tweaks.asphaleia.authfailed";
-        }
-    } else if (self.currentHSIconView) {
+    if (self.currentHSIconView) {
         if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
             if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]])
                 name = @"com.a3tweaks.asphaleia.authfailed";
@@ -365,13 +344,34 @@ static ASAuthenticationController *sharedCommonObj;
 }
 
 // ASAuthenticationAlert delegate methods
-- (void)authAlertViewDismissed:(ASAuthenticationAlert *)alertView authorised:(BOOL)authorised {
-    [self.currentAuthAlert dismiss];
+- (void)authAlertView:(ASAuthenticationAlert *)alertView dismissed:(BOOL)dismissed authorised:(BOOL)authorised fingerprint:(BiometricKitIdentity *)fingerprint {
+    BOOL correctFingerUsed = NO;
+    if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+        switch (self.currentAuthAlert.tag) {
+            case ASAuthenticationItem:
+                correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
+                break;
+            case ASAuthenticationFunction:
+                correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsAdvancedSecurity:[fingerprint name]];
+                break;
+            case ASAuthenticationSecurityMod:
+                correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecurityMods:[fingerprint name]];
+                break;
+            default:
+                correctFingerUsed = YES;
+                break;
+        }
+    }
+
+    if (!correctFingerUsed)
+        return;
+    else if (correctFingerUsed && !dismissed)
+        [self.currentAuthAlert dismiss];
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
     if (authorised)
         _appUserAuthorisedID = currentAuthAppBundleID;
 
-    authHandler(!authorised);
+    authHandler(!(authorised && correctFingerUsed));
     self.currentAuthAlert = nil;
     currentAuthAppBundleID = nil;
 }

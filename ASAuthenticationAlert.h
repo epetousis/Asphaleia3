@@ -1,9 +1,10 @@
 #import <SpringBoardUI/SBAlertItem.h>
+#import "Asphaleia.h"
 
 @class ASAuthenticationAlert;
 
 @protocol ASAuthenticationAlertDelegate <NSObject>
-- (void)authAlertViewDismissed:(ASAuthenticationAlert *)alertView authorised:(BOOL)authorised;
+- (void)authAlertView:(ASAuthenticationAlert *)alertView dismissed:(BOOL)dismissed authorised:(BOOL)authorised fingerprint:(BiometricKitIdentity *)fingerprint;
 @optional
 - (void)willPresentAlertView:(ASAuthenticationAlert *)alertView;
 @end
