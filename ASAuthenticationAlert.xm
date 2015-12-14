@@ -51,6 +51,7 @@
 
 		if ([[ASPreferences sharedInstance] touchIDEnabled]) {
 			dispatch_async(dispatch_get_main_queue(), ^{
+				[[ASAuthenticationController sharedInstance] initialiseGlyphIfRequired];
 				imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
 				CGRect fingerframe = [[ASAuthenticationController sharedInstance] fingerglyph].frame;
 				fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
@@ -263,6 +264,7 @@
 }
 
 // Other
+%new
 -(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
 	UIGraphicsBeginImageContextWithOptions(origImage.size, NO, origImage.scale);
 	CGContextRef imgContext = UIGraphicsGetCurrentContext();

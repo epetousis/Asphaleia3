@@ -209,6 +209,10 @@
 @property(readonly, retain, nonatomic) SBSceneLayoutWorkspaceTransaction *layoutTransaction;
 @end
 
+@interface SBUIPasscodeLockViewSimpleFixedDigitKeypad : NSObject
+- (id)initWithLightStyle:(BOOL)arg1 numberOfDigits:(unsigned int)arg2;
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;

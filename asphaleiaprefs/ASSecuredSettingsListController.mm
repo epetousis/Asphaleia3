@@ -103,4 +103,8 @@
     return nil;
 }
 
+- (CGFloat)_tableView:(id)arg1 heightForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
+    return 0.0f;
+}
+
 @end

@@ -53,7 +53,7 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
                 [buttonTitleArray addObject:addRemoveFromSecureAppsTitle];
 
             self.alertView = [[objc_getClass("ASAlert") alloc] initWithTitle:titleWithSpacingForSmallIcon(@"Asphaleia Control Panel")
-                                description:nil
+                                message:nil
                                 delegate:self];
             for (NSString *buttonTitle in buttonTitleArray)
                 [self.alertView addButtonWithTitle:buttonTitle];

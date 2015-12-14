@@ -317,10 +317,6 @@ static UIImage *defaultImage;
     } 
 }
 
-- (double)_tableView:(id)arg1 heightForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
-    return 0.f;
-}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 3;
 }
@@ -349,6 +345,10 @@ static UIImage *defaultImage;
 
 - (id)_tableView:(id)arg1 viewForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
     return nil;
+}
+
+- (CGFloat)_tableView:(id)arg1 heightForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
+    return 0.0f;
 }
 
 @end

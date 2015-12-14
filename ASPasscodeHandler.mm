@@ -48,10 +48,9 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 	self.passcodeWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.passcodeWindow.windowLevel = UIWindowLevelAlert;
 	[self.passcodeWindow _setSecure:YES];
-	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimple4DigitKeypad") alloc] init];
+	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimpleFixedDigitKeypad") alloc] initWithLightStyle:NO numberOfDigits:4];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];
-	[self.passcodeView updateStatusText:@"Enter Passcode" subtitle:nil animated:NO];
 
 	UIVisualEffect *effect;
 	effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
@@ -76,6 +75,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
     [self.passcodeWindow addSubview:self.passcodeView];
     [self.passcodeWindow setAlpha:0.f];
     [self.passcodeWindow makeKeyAndVisible];
+	[self.passcodeView updateStatusText:@"Enter Passcode" subtitle:nil animated:NO];
     [UIView animateWithDuration:.15f delay:0.0
                     options:UIViewAnimationOptionCurveEaseIn
                  animations:^{[self.passcodeWindow setAlpha:1.f];}
