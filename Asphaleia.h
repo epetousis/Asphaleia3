@@ -213,6 +213,10 @@
 - (id)initWithLightStyle:(BOOL)arg1 numberOfDigits:(unsigned int)arg2;
 @end
 
+@interface BiometricKitIdentity : NSObject
+-(NSString *)name;
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;

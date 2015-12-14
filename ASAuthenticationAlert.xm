@@ -90,17 +90,16 @@
 	[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
 	if (self.delegate) {
 		if (arg2 == 0) {
-			[self.delegate authAlertViewDismissed:arg1 authorised:NO];
+			[self.delegate authAlertView:arg1 dismissed:YES authorised:NO fingerprint:nil];
 		} else if (arg2 == 1) {
 			SBIconView *icon = [self.icon isKindOfClass:objc_getClass("SBIconView")] ? (SBIconView *)self.icon : nil;
-    		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
-    		    if (authenticated)
-    		        [self.delegate authAlertViewDismissed:arg1 authorised:YES];
-    		}];
+			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
+				if (authenticated)
+					[self.delegate authAlertView:arg1 dismissed:YES authorised:YES fingerprint:nil];
+			}];
 		}
 	}
 
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[self dismiss];
 }
 
@@ -143,38 +142,19 @@
 	if ([[ASPreferences sharedInstance] touchIDEnabled])
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
 
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.fingerdown" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.fingerup" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.authsuccess" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.authfailed" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:@"com.a3tweaks.asphaleia.fingerdown" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:@"com.a3tweaks.asphaleia.fingerup" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:@"com.a3tweaks.asphaleia.authsuccess" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:) name:@"com.a3tweaks.asphaleia.authfailed" object:nil];
 
 	if (objc_getClass("SBAlertItemsController"))
 		[[%c(SBAlertItemsController) sharedInstance] activateAlertItem:self];
 }
 
 %new
--(void)receivedNotification:(NSNotification *)notification fingerprint:(id)fingerprint
+-(void)receivedNotification:(NSNotification *)notification
 {
 	NSString *name = [notification name];
-	if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
-		BOOL correctFingerUsed;
-		switch (self.alertSheet.tag) {
-			case ASAuthenticationItem:
-				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
-				break;
-			case ASAuthenticationFunction:
-				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsAdvancedSecurity:[fingerprint name]];
-				break;
-			case ASAuthenticationSecurityMod:
-				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecurityMods:[fingerprint name]];
-				break;
-			default:
-				correctFingerUsed = YES;
-				break;
-		}
-		if (!correctFingerUsed)
-			name = @"com.a3tweaks.asphaleia.authfailed";
-	}
 	if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
 		if (self.useSmallIcon) {
 			self.alertSheet.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
@@ -182,7 +162,11 @@
 			self.alertSheet.title = titleWithSpacingForIcon(@"Scanning finger...");
 		}
 		[NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-			self.alertSheet.title = self.title;
+			if (self.useSmallIcon) {
+				self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
+			} else {
+				self.alertSheet.title = titleWithSpacingForIcon(self.title);
+			}
 		} repeats:NO];
 		if ([[ASAuthenticationController sharedInstance] fingerglyph])
 			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:1 animated:YES completionHandler:nil];
@@ -190,20 +174,25 @@
 		if ([[ASAuthenticationController sharedInstance] fingerglyph])
 			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
 		if ([[ASAuthenticationController sharedInstance] fingerglyph])
 			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
 
 		if (self.delegate)
-			[self.delegate authAlertViewDismissed:self authorised:YES];
-
-		[[NSNotificationCenter defaultCenter] removeObserver:self];
-		[self dismiss];
+			[self.delegate authAlertView:self dismissed:NO authorised:YES fingerprint:[notification userInfo][@"fingerprint"]];
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
-		self.alertSheet.title = self.title;
+		if (self.useSmallIcon) {
+			self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
+		} else {
+			self.alertSheet.title = titleWithSpacingForIcon(self.title);
+		}
 		if ([[ASAuthenticationController sharedInstance] fingerglyph])
 			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
 	}
+}
+
+-(void)dismiss {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	%orig;
 }
 
 // Properties

@@ -128,6 +128,10 @@
 	return 44.f;
 }
 
+- (int)tableView:(id)arg1 titleAlignmentForFooterInSection:(int)arg2 {
+	return 1;
+}
+
 - (id)_tableView:(id)arg1 viewForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
     return nil;
 }
