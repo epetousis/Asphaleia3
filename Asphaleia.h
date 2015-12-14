@@ -129,7 +129,7 @@
 -(void)setTouchDownInIcon:(BOOL)icon;
 -(BOOL)isTouchDownInIcon;
 -(void)cancelLongPressTimer;
--(id)initWithDefaultSize;
+-(id)initWithContentType:(int)contentType;
 -(void)_setIcon:(id)icon animated:(BOOL)animated;
 -(void)setLabelAccessoryViewHidden:(BOOL)hidden;
 -(void)setLabelHidden:(BOOL)hidden;

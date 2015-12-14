@@ -462,7 +462,7 @@ BOOL currentBannerAuthenticated;
 
 	SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[[self _bulletin] sectionID]];
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithContentType:0];
 	[iconView _setIcon:appIcon animated:YES];
 	UIImage *iconImage = [iconView.icon getIconImage:2];
 	UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
@@ -624,7 +624,7 @@ BOOL currentBannerAuthenticated;
 	[ASAuthenticationController sharedInstance].appUserAuthorisedID = nil;
 
 	SBApplicationIcon *appIcon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-	SBIconView *iconView = [[%c(SBIconView) alloc] initWithDefaultSize];
+	SBIconView *iconView = [[%c(SBIconView) alloc] initWithContentType:0];
 	[iconView _setIcon:appIcon animated:YES];
 
 	[[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:application.bundleIdentifier customMessage:nil dismissedHandler:^(BOOL wasCancelled) {
