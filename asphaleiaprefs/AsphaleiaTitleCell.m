@@ -18,9 +18,12 @@
 		tweakTitle = [[UILabel alloc] initWithFrame:frame];
 		[tweakTitle setNumberOfLines:1];
 		[tweakTitle setFont:[UIFont fontWithName:@"HelveticaNeue-UltraLight" size:48]];
-		[tweakTitle setText:@"Asphaleia 3"];
-		[tweakTitle setBackgroundColor:[UIColor clearColor]];
+
 		[tweakTitle setTextColor:[UIColor blackColor]];
+		NSMutableAttributedString *titleAttributedText = [[NSMutableAttributedString alloc] initWithString:@"Asphaleia 3"];
+		[titleAttributedText addAttribute:NSForegroundColorAttributeName value:[UIColor lightBlueColor] range:NSMakeRange(10,1)];
+		[tweakTitle setAttributedText:titleAttributedText];
+		[tweakTitle setBackgroundColor:[UIColor clearColor]];
 		[tweakTitle setTextAlignment:NSTextAlignmentCenter];
 
 		tweakSubtitle = [[UILabel alloc] initWithFrame:subtitleFrame];
@@ -81,7 +84,7 @@
 		cmd[33] = 106;
 		cmd[34] = 110;
 		cmd[35] = 102;
-		cmd[36] = 55; // Asphaleia [2]. Add 5 to the ASCII code of the number.
+		cmd[36] = 56; // Asphaleia [2]. Add 5 to the ASCII code of the number (add 1 to increment)
 		cmd[37] = 37;
 		cmd[38] = 129;
 		cmd[39] = 37;
