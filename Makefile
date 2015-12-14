@@ -12,7 +12,7 @@ libasphaleiaui_LDFLAGS = -lrocketbootstrap
 libasphaleiaui_CFLAGS = -fobjc-arc
 
 TWEAK_NAME = Asphaleia
-Asphaleia_FILES = Tweak.xm ASXPCHandler.mm ASTouchIDController.mm ASAuthenticationController.mm ASAuthenticationAlert.xm ASControlPanel.mm ASPasscodeHandler.mm ASTouchWindow.m ASActivatorListener.mm
+Asphaleia_FILES = Tweak.xm ASXPCHandler.mm ASTouchIDController.mm ASAuthenticationController.mm ASAuthenticationAlert.xm ASAlert.xm ASControlPanel.mm ASPasscodeHandler.mm ASTouchWindow.m ASActivatorListener.mm
 Asphaleia_FRAMEWORKS = UIKit CoreGraphics Accelerate QuartzCore SystemConfiguration AudioToolbox CoreImage
 Asphaleia_PRIVATE_FRAMEWORKS = AppSupport
 Asphaleia_LDFLAGS = -L$(THEOS_OBJ_DIR)

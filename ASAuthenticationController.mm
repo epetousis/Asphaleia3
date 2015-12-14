@@ -41,7 +41,7 @@ static ASAuthenticationController *sharedCommonObj;
     [self deregisterForTouchIDNotifications];
 }
 
--(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate {
+-(ASAuthenticationAlert *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<ASAlertDelegate>)delegate {
     NSString *title;
     NSString *message;
     if (customMessage)
@@ -49,47 +49,50 @@ static ASAuthenticationController *sharedCommonObj;
     else
         message = @"Scan fingerprint to open.";
 
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
+    /*if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
         title = titleWithSpacingForIcon([iconView.icon displayNameForLocation:0]);
     } else {
         title = titleWithSpacingForIcon(iconView.icon.displayName);
+    }*/
+
+    UIImageView *imgView;
+    if (iconView) {
+        UIImage *iconImage = [iconView.icon getIconImage:2];
+        imgView = [[UIImageView alloc] initWithImage:iconImage];
+        imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+        //imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
+
+        if ([[ASPreferences sharedInstance] touchIDEnabled]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
+                if (!_fingerglyph) {
+                    _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+                    _fingerglyph.secondaryColor = [UIColor grayColor];
+                    _fingerglyph.primaryColor = [UIColor redColor];
+                    CGRect fingerframe = _fingerglyph.frame;
+                    fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+                    fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+                    _fingerglyph.frame = fingerframe;
+                    _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+                }
+                [imgView addSubview:_fingerglyph];
+            });
+        }
     }
 
-    __block UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                   message:message
-                   delegate:delegate
-         cancelButtonTitle:@"Cancel"
-         otherButtonTitles:@"Passcode",nil];
+    ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithTitle:title
+                   description:message
+                   icon:imgView
+                   smallIcon:NO
+                   delegate:delegate];
     alertView.tag = ASAuthenticationItem;
 
-    currentAuthAppBundleID = iconView.icon.applicationBundleID;
-    UIImage *iconImage = [iconView.icon getIconImage:2];
-    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-    imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
-
-    if ([[ASPreferences sharedInstance] touchIDEnabled]) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
-            if (!_fingerglyph) {
-                _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-                _fingerglyph.secondaryColor = [UIColor grayColor];
-                _fingerglyph.primaryColor = [UIColor redColor];
-                CGRect fingerframe = _fingerglyph.frame;
-                fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-                fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-                _fingerglyph.frame = fingerframe;
-                _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
-            }
-            [imgView addSubview:_fingerglyph];
-            [self addSubview:imgView toAlertView:alertView];
-        });
-    }
+    //currentAuthAppBundleID = iconView.icon.applicationBundleID;
 
     return alertView;
 }
 
--(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate {
+-(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAlertDelegate>)delegate {
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
@@ -154,54 +157,50 @@ static ASAuthenticationController *sharedCommonObj;
     }
     title = titleWithSpacingForSmallIcon(title);
 
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                   message:@"Scan fingerprint to access."
-                   delegate:delegate
-         cancelButtonTitle:@"Cancel"
-         otherButtonTitles:@"Passcode",nil];
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
+    imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+
+    ASAuthenticationAlert *alertView = [[objc_getClass("ASAlert") alloc] initWithTitle:title
+                   description:@"Scan fingerprint to access."
+                   
+                   delegate:delegate];
     alertView.tag = tag;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
-        imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-        imgView.center = CGPointMake(270/2,32); // 270 is the width of a UIAlertView.
-        [self addSubview:imgView toAlertView:alertView];
-    });
 
     return alertView;
 }
 
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    //[[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
-    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
-    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
-    [iconView _setIcon:appIcon animated:YES];
+    //SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
+    //SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+    /*SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
+    [iconView _setIcon:appIcon animated:YES];*/
 
-    if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
-        return NO;
-    }
+    //if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
+    //    return NO;
+    //}
 
-    authHandler = [handler copy];
+    //authHandler = [handler copy];
 
-    UIAlertView *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
+    ASAuthenticationAlert *alertView = [self returnAppAuthenticationAlertWithIconView:nil customMessage:customMessage delegate:self];
 
-    if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
-        return NO;
-    }
+    //if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
+    //    return NO;
+    //}
 
-    if (![[ASPreferences sharedInstance] touchIDEnabled]) {
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
+    /*if (![[ASPreferences sharedInstance] touchIDEnabled]) {
+        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
                 if (authenticated)
                     _appUserAuthorisedID = appIdentifier;
                 authHandler(!authenticated);
             }];
         return YES;
-    }
+    }*/
 
-    dispatch_async(dispatch_get_main_queue(), ^{
+    //dispatch_async(dispatch_get_main_queue(), ^{
         [alertView show];
-    });
+    //});
     return YES;
 }
 
@@ -213,7 +212,7 @@ static ASAuthenticationController *sharedCommonObj;
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
     authHandler = [handler copy];
 
-    UIAlertView *alertView = [self returnAuthenticationAlertOfType:alertType delegate:self];
+    ASAuthenticationAlert *alertView = [self returnAuthenticationAlertOfType:alertType delegate:self];
 
     if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
         return NO;
@@ -353,7 +352,7 @@ static ASAuthenticationController *sharedCommonObj;
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
         } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
-            [self.currentAuthAlert dismissWithClickedButtonIndex:-1 animated:YES];
+            [self.currentAuthAlert dismiss];
             CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
@@ -432,7 +431,7 @@ static ASAuthenticationController *sharedCommonObj;
 
 -(void)dismissAnyAuthenticationAlerts {
     if (self.currentAuthAlert)
-        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
+        [self.currentAuthAlert dismiss];
 }
 
 - (NSArray *)allSubviewsOfView:(UIView *)view
@@ -446,40 +445,28 @@ static ASAuthenticationController *sharedCommonObj;
     return [NSArray arrayWithArray:viewArray];
 }
 
--(void)addSubview:(UIView *)view toAlertView:(UIAlertView *)alertView {
-    UIView *labelSuperview;
-    for (id subview in [self allSubviewsOfView:[[alertView _alertController] view]]){
-        if ([subview isKindOfClass:[UILabel class]]) {
-            labelSuperview = [subview superview];
-        }
-    }
-    if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-        [labelSuperview addSubview:view];
-    }
-}
-
 // UIAlertView delegate methods
-- (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex {
+- (void)alertView:(ASAuthenticationAlert *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:currentAuthAppBundleID];
     SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithDefaultSize];
+    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
     [iconView _setIcon:appIcon animated:YES];
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
     self.currentAuthAlert = nil;
-    if (buttonIndex == [alertView firstOtherButtonIndex]) {
+    if (buttonIndex == 1) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(!authenticated);
         }];
-    } else if (buttonIndex == [alertView cancelButtonIndex]) {
+    } else if (buttonIndex == 0) {
         authHandler(YES);
     }
 }
 
-- (void)willPresentAlertView:(UIAlertView *)alertView {
+- (void)willPresentAlertView:(ASAuthenticationAlert *)alertView {
     if (self.currentAuthAlert)
-        [self.currentAuthAlert dismissWithClickedButtonIndex:[self.currentAuthAlert cancelButtonIndex] animated:YES];
+        [self.currentAuthAlert dismiss];
 
     self.currentAuthAlert = alertView;
 

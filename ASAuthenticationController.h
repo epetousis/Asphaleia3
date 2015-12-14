@@ -4,16 +4,13 @@
 #import "ASTouchIDController.h"
 #import "ASTouchWindow.h"
 #import "ASCommon.h"
+#import "ASAuthenticationAlert.h"
 
-@interface UIAlertView ()
--(id)_alertController;
-@end
-
-@interface ASAuthenticationController : NSObject <UIAlertViewDelegate> {
+@interface ASAuthenticationController : NSObject <ASAlertDelegate> {
 	ASCommonAuthenticationHandler authHandler;
 	NSString *currentAuthAppBundleID;
 }
-@property UIAlertView *currentAuthAlert;
+@property ASAuthenticationAlert *currentAuthAlert;
 @property SBIconView *currentHSIconView;
 @property PKGlyphView *fingerglyph;
 @property NSString *appUserAuthorisedID;
@@ -21,13 +18,12 @@
 @property NSString *temporarilyUnlockedAppBundleID;
 @property ASTouchWindow *anywhereTouchWindow;
 +(instancetype)sharedInstance;
--(UIAlertView *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<UIAlertViewDelegate>)delegate;
--(UIAlertView *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<UIAlertViewDelegate>)delegate;
+-(ASAuthenticationAlert *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<ASAlertDelegate>)delegate;
+-(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAlertDelegate>)delegate;
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)authenticateAppWithIconView:(SBIconView *)iconView authenticatedHandler:(ASCommonAuthenticationHandler)handler;
 -(void)dismissAnyAuthenticationAlerts;
--(void)addSubview:(UIView *)view toAlertView:(UIAlertView *)alertView;
 - (NSArray *)allSubviewsOfView:(UIView *)view;
 
 @end
