@@ -29,17 +29,17 @@ static ASCommon *sharedCommonObj;
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedCommonObj = [[ASCommon alloc] init];
-        addObserver(authenticationSuccessful, "com.a3tweaks.asphaleia2.xpc/AuthSucceeded");
-        addObserver(authenticationCancelled, "com.a3tweaks.asphaleia2.xpc/AuthCancelled");
+        addObserver(authenticationSuccessful, "com.a3tweaks.asphaleia.xpc/AuthSucceeded");
+        addObserver(authenticationCancelled, "com.a3tweaks.asphaleia.xpc/AuthCancelled");
     });
 
     return sharedCommonObj;
 }
 
 -(UIAlertView *)currentAuthAlert {
-    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
-    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/GetCurrentAuthAlert" userInfo:nil];
+    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/GetCurrentAuthAlert" userInfo:nil];
     return reply[@"currentAuthAlert"];
 }
 
@@ -47,9 +47,9 @@ static ASCommon *sharedCommonObj;
     if (objc_getClass("ASAuthenticationController"))
         return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateAppWithDisplayIdentifier:appIdentifier customMessage:customMessage dismissedHandler:handler];
 
-    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
-    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/AuthenticateApp" userInfo:@{ @"appIdentifier" : appIdentifier, @"customMessage" : customMessage }];
+    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/AuthenticateApp" userInfo:@{ @"appIdentifier" : appIdentifier, @"customMessage" : customMessage }];
     return [reply[@"isProtected"] boolValue];
 }
 
@@ -58,9 +58,9 @@ static ASCommon *sharedCommonObj;
         return [[objc_getClass("ASAuthenticationController") sharedInstance] authenticateFunction:alertType dismissedHandler:handler];
 
     authHandler = [handler copy];
-    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+    CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
-    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/AuthenticateFunction" userInfo:@{ @"alertType" : [NSNumber numberWithInt:alertType] }];
+    NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/AuthenticateFunction" userInfo:@{ @"alertType" : [NSNumber numberWithInt:alertType] }];
     return [reply[@"isProtected"] boolValue];
 }
 

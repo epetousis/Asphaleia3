@@ -16,7 +16,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>id</key>
 			<string>dynamicSelectionSwitchCell</string>
 			<key>key</key>

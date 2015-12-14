@@ -16,7 +16,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>controlPanel</string>
 			<key>label</key>
@@ -44,7 +44,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>controlPanelAllowedInApps</string>
 			<key>label</key>

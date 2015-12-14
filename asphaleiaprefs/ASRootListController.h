@@ -1,6 +1,6 @@
 #import <Preferences/PSListController.h>
 #import "modalPinVC.h"
-#define kPreferencesPath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist"
+#define kPreferencesPath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 #define kBundlePath @"/Library/PreferenceBundles/AsphaleiaPrefs.bundle"
 
 #define kPreferencesTemplatePath @"/private/var/mobile/Library/Preferences/%@.plist"

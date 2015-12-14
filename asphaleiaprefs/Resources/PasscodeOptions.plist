@@ -28,7 +28,7 @@
 			<key>default</key>
 			<true/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>simplePasscode</string>
 			<key>id</key>
@@ -54,7 +54,7 @@
 			<key>default</key>
 			<true/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>touchID</string>
 			<key>label</key>
@@ -70,7 +70,7 @@
 			<key>id</key>
 			<string>vibrateSwitchCell</string>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>vibrateOnFail</string>
 			<key>label</key>
@@ -90,7 +90,7 @@
 			<key>detail</key>
 			<string>PSListItemsController</string>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>timeInterval</string>
 			<key>label</key>

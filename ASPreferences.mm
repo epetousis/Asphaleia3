@@ -9,7 +9,7 @@
 #import <RocketBootstrap/RocketBootstrap.h>
 #import <AppSupport/CPDistributedMessagingCenter.h>
 
-static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia8.plist";
+static NSString *const kPreferencesFilePath = @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist";
 
 #define kPrefsChangedNotification "com.a3tweaks.asphaleia/ReloadPrefs"
 #define kDisableAsphaleiaNotification "com.a3tweaks.asphaleia/DisableAsphaleia"
@@ -75,9 +75,9 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 	if (objc_getClass("SBUIBiometricEventMonitor")) {
 		return [[objc_getClass("SBUIBiometricEventMonitor") sharedInstance] hasEnrolledIdentities];
 	} else {
-		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 		rocketbootstrap_distributedmessagingcenter_apply(centre);
-		NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/IsTouchIDDevice" userInfo:nil];
+		NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/IsTouchIDDevice" userInfo:nil];
 		return [reply[@"isTouchIDDevice"] boolValue];
 	}
 }
@@ -249,9 +249,9 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 	if (objc_getClass("SpringBoard") && objc_getClass("ASAuthenticationController")) {
 		tempUnlockedApp = [[objc_getClass("ASAuthenticationController") sharedInstance] temporarilyUnlockedAppBundleID];
 	} else {
-		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 		rocketbootstrap_distributedmessagingcenter_apply(centre);
-		NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/GetCurrentTempUnlockedApp" userInfo:nil];
+		NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/GetCurrentTempUnlockedApp" userInfo:nil];
 		tempUnlockedApp = reply[@"bundleIdentifier"];
 	}
 
@@ -344,9 +344,9 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 	if (objc_getClass("SpringBoard"))
 		return _asphaleiaDisabled;
 
-	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
-	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/ReadAsphaleiaState" userInfo:nil];
+	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/ReadAsphaleiaState" userInfo:nil];
 	return [reply[@"asphaleiaDisabled"] boolValue];
 }
 
@@ -356,18 +356,18 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 		return;
 	}
 
-	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
-	[centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/SetAsphaleiaState" userInfo:@{@"asphaleiaDisabled" : [NSNumber numberWithBool:value]}];
+	[centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/SetAsphaleiaState" userInfo:@{@"asphaleiaDisabled" : [NSNumber numberWithBool:value]}];
 }
 
 -(BOOL)itemSecurityDisabled {
 	if (objc_getClass("SpringBoard"))
 		return _itemSecurityDisabled;
 
-	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
-	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/ReadAsphaleiaState" userInfo:nil];
+	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/ReadAsphaleiaState" userInfo:nil];
 	return [reply[@"itemSecurityDisabled"] boolValue];
 }
 
@@ -377,9 +377,9 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 		return;
 	}
 
-	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
-	[centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/SetAsphaleiaState" userInfo:@{@"itemSecurityDisabled" : [NSNumber numberWithBool:value]}];
+	[centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/SetAsphaleiaState" userInfo:@{@"itemSecurityDisabled" : [NSNumber numberWithBool:value]}];
 }
 
 @end

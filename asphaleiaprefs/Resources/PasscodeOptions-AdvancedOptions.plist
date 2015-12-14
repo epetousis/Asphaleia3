@@ -16,7 +16,7 @@
 			<key>default</key>
 			<true/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>obscureAppContent</string>
 			<key>label</key>
@@ -36,7 +36,7 @@
 			<key>default</key>
 			<true/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>obscureBanners</string>
 			<key>label</key>
@@ -56,7 +56,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>easyUnlockIntoApp</string>
 			<key>label</key>
@@ -76,7 +76,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>delayAfterLock</string>
 			<key>label</key>
@@ -90,7 +90,7 @@
 			<key>detail</key>
 			<string>PSListItemsController</string>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>timeIntervalLock</string>
 			<key>label</key>
@@ -128,7 +128,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>wifiUnlock</string>
 			<key>label</key>
@@ -146,7 +146,7 @@
 			<key>noAutoCorrect</key>
 			<true/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>wifiNetwork</string>
 			<key>PostNotification</key>
