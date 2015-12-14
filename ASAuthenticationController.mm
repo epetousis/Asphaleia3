@@ -18,7 +18,7 @@
 
 void touchIDNotificationReceived(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     id fingerprint = nil;
-    if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"])
+    if ([(__bridge NSString *)name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"])
         fingerprint = [[ASTouchIDController sharedInstance] lastMatchedFingerprint];
     [[ASAuthenticationController sharedInstance] receivedNotificationOfName:(__bridge NSString *)name fingerprint:fingerprint];
 }
@@ -301,7 +301,7 @@ static ASAuthenticationController *sharedCommonObj;
         _fingerglyph.transform = CGAffineTransformMakeScale(1,1);
     }];
 
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
 
     [_currentHSIconView asphaleia_updateLabelWithText:@"Scan finger..."];
 
@@ -334,10 +334,10 @@ static ASAuthenticationController *sharedCommonObj;
                     break;
             }
             if (!correctFingerUsed)
-                name = @"com.a3tweaks.asphaleia8.authfailed";
+                name = @"com.a3tweaks.asphaleia.authfailed";
         }
         NSString *origTitle = self.currentAuthAlert.title;
-        if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+        if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
             if ([origTitle containsString:@"\n\n\n"]) {
                 self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
             } else {
@@ -348,19 +348,19 @@ static ASAuthenticationController *sharedCommonObj;
             } repeats:NO];
             if (_fingerglyph)
                 [_fingerglyph setState:1 animated:YES completionHandler:nil];
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
             [self.currentAuthAlert dismiss];
-            CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
+            CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
             _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(NO);
             self.currentAuthAlert = nil;
             currentAuthAppBundleID = nil;
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
             self.currentAuthAlert.title = origTitle;
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
@@ -368,19 +368,19 @@ static ASAuthenticationController *sharedCommonObj;
     } else if (self.currentHSIconView) {
         if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
             if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]])
-                name = @"com.a3tweaks.asphaleia8.authfailed";
+                name = @"com.a3tweaks.asphaleia.authfailed";
         }
         if (![[NSBundle mainBundle].bundleIdentifier isEqualToString:@"com.apple.springboard"])
             return;
-        if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+        if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
             if (_fingerglyph && _currentHSIconView) {
                 [_fingerglyph setState:1 animated:YES completionHandler:nil];
                 [_currentHSIconView asphaleia_updateLabelWithText:@"Scanning..."];
             }
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
             if (_fingerglyph)
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
             if (_fingerglyph && _currentHSIconView) {
                 [ASAuthenticationController sharedInstance].appUserAuthorisedID = currentAuthAppBundleID;
                 if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.3")) {
@@ -391,7 +391,7 @@ static ASAuthenticationController *sharedCommonObj;
                 [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
                 currentAuthAppBundleID = nil;
             }
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
             if (_fingerglyph && _currentHSIconView) {
                 [_fingerglyph setState:0 animated:YES completionHandler:nil];
                 [_currentHSIconView asphaleia_updateLabelWithText:@"Scan finger..."];
@@ -401,10 +401,10 @@ static ASAuthenticationController *sharedCommonObj;
 }
 
 -(void)registerForTouchIDNotifications {
-    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.fingerdown");
-    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.fingerup");
-    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.authsuccess");
-    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia8.authfailed");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.fingerdown");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.fingerup");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.authsuccess");
+    addObserver(touchIDNotificationReceived, "com.a3tweaks.asphaleia.authfailed");
 }
 
 -(void)deregisterForTouchIDNotifications {
@@ -451,7 +451,7 @@ static ASAuthenticationController *sharedCommonObj;
     SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
     SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
     [iconView _setIcon:appIcon animated:YES];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
     self.currentAuthAlert = nil;
     if (buttonIndex == 1) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
@@ -471,7 +471,7 @@ static ASAuthenticationController *sharedCommonObj;
     self.currentAuthAlert = alertView;
 
     if ([[ASPreferences sharedInstance] touchIDEnabled])
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.startmonitoring"), NULL, NULL, YES);
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
 }
 
 @end

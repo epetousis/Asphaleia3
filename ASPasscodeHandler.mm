@@ -15,9 +15,9 @@
 void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
 	[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
         if (authenticated) {
-        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.passcodeauthsuccess"), NULL, NULL, YES);
+        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.passcodeauthsuccess"), NULL, NULL, YES);
         } else {
-        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.passcodeauthfailed"), NULL, NULL, YES);
+        	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.passcodeauthfailed"), NULL, NULL, YES);
         }
     }];
 }
@@ -29,7 +29,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
     static dispatch_once_t token = 0;
     dispatch_once(&token, ^{
         sharedInstance = [self new];
-        addObserver(showPasscodeView,"com.a3tweaks.asphaleia8.showpasscodeview");
+        addObserver(showPasscodeView,"com.a3tweaks.asphaleia.showpasscodeview");
     });
     return sharedInstance;
 }

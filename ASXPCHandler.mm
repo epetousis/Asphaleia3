@@ -22,44 +22,44 @@ static ASXPCHandler *sharedHandlerObj;
 }
 
 - (NSDictionary *)handleMessageNamed:(NSString *)name withUserInfo:(NSDictionary *)userInfo {
-	if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive"]) {
+	if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/CheckSlideUpControllerActive"]) {
 		return @{ @"active" : [NSNumber numberWithBool:_slideUpControllerActive] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/SetAsphaleiaState"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/SetAsphaleiaState"]) {
 		if (userInfo[@"asphaleiaDisabled"])
 			[ASPreferences sharedInstance].asphaleiaDisabled = [userInfo[@"asphaleiaDisabled"] boolValue];
 		if (userInfo[@"itemSecurityDisabled"])
 			[ASPreferences sharedInstance].itemSecurityDisabled = [userInfo[@"itemSecurityDisabled"] boolValue];
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/ReadAsphaleiaState"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/ReadAsphaleiaState"]) {
 		return @{ @"asphaleiaDisabled" : [NSNumber numberWithBool:[ASPreferences sharedInstance].asphaleiaDisabled], @"itemSecurityDisabled" : [NSNumber numberWithBool:[ASPreferences sharedInstance].itemSecurityDisabled] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/SetUserAuthorisedApp"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/SetUserAuthorisedApp"]) {
 		[ASAuthenticationController sharedInstance].appUserAuthorisedID = userInfo[@"appIdentifier"];
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/AuthenticateApp"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/AuthenticateApp"]) {
 		BOOL isProtected = [[ASAuthenticationController sharedInstance] authenticateAppWithDisplayIdentifier:userInfo[@"appIdentifier"] customMessage:userInfo[@"customMessage"] dismissedHandler:^(BOOL wasCancelled) {
 			if (wasCancelled)
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia2.xpc/AuthCancelled"), NULL, NULL, YES);
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.xpc/AuthCancelled"), NULL, NULL, YES);
 			else
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia2.xpc/AuthSucceeded"), NULL, NULL, YES);
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.xpc/AuthSucceeded"), NULL, NULL, YES);
 		}];
 		return @{ @"isProtected" : [NSNumber numberWithBool:isProtected] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/AuthenticateFunction"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/AuthenticateFunction"]) {
 		BOOL isProtected = [[ASAuthenticationController sharedInstance] authenticateFunction:[userInfo[@"alertType"] intValue] dismissedHandler:^(BOOL wasCancelled) {
 			if (wasCancelled)
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia2.xpc/AuthCancelled"), NULL, NULL, YES);
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.xpc/AuthCancelled"), NULL, NULL, YES);
 			else
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia2.xpc/AuthSucceeded"), NULL, NULL, YES);
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.xpc/AuthSucceeded"), NULL, NULL, YES);
 		}];
 		return @{ @"isProtected" : [NSNumber numberWithBool:isProtected] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/GetCurrentAuthAlert"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/GetCurrentAuthAlert"]) {
 		if ([ASAuthenticationController sharedInstance].currentAuthAlert)
 			return @{ @"currentAuthAlert" : [ASAuthenticationController sharedInstance].currentAuthAlert };
 		else
 			return @{ @"currentAuthAlert" : [NSNull null] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/GetCurrentTempUnlockedApp"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/GetCurrentTempUnlockedApp"]) {
 		if ([ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID)
 			return @{ @"bundleIdentifier" : [ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID };
 		else
 			return @{ @"bundleIdentifier" : [NSNull null] };
-	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia2.xpc/IsTouchIDDevice"]) {
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/IsTouchIDDevice"]) {
 		return @{ @"isTouchIDDevice" : [NSNumber numberWithBool:[ASPreferences isTouchIDDevice]] };
 	}
 	return nil;

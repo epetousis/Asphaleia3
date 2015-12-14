@@ -14,7 +14,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>preventAppDeletion</string>
 			<key>label</key>
@@ -32,7 +32,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>preventPowerOff</string>
 			<key>label</key>
@@ -50,7 +50,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>secureSwitcher</string>
 			<key>label</key>
@@ -68,7 +68,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>secureCC</string>
 			<key>label</key>
@@ -86,7 +86,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>secureSpotlight</string>
 			<key>label</key>
@@ -106,7 +106,7 @@
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
-			<string>com.a3tweaks.asphaleia8</string>
+			<string>com.a3tweaks.asphaleia</string>
 			<key>key</key>
 			<string>securePhotos</string>
 			<key>label</key>

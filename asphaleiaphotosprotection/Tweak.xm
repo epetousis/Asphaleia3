@@ -169,9 +169,9 @@ SEL origSelector;
 }
 %new
 -(void)showAuthAlert:(id)sender {
-	CPDistributedMessagingCenter *centre = [%c(CPDistributedMessagingCenter) centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	CPDistributedMessagingCenter *centre = [%c(CPDistributedMessagingCenter) centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
-	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia2.xpc/CheckSlideUpControllerActive" userInfo:nil];
+	NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/CheckSlideUpControllerActive" userInfo:nil];
 
 	if (authenticated || ![[ASPreferences sharedInstance] securePhotos] || ([reply[@"active"] boolValue] && [ASPreferences devicePasscodeSet]) || authenticating) {
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];

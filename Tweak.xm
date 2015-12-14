@@ -29,10 +29,10 @@ SBBannerContainerViewController *controller;
 CPDistributedMessagingCenter *centre;
 
 void RegisterForTouchIDNotifications(id observer, SEL selector) {
-	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerdown" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.fingerup" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.authsuccess" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia8.authfailed" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia.fingerdown" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia.fingerup" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia.authsuccess" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:observer selector:selector name:@"com.a3tweaks.asphaleia.authfailed" object:nil];
 }
 
 void DeregisterForTouchIDNotifications(id observer) {
@@ -86,7 +86,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		}];
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 			[[ASAuthenticationController sharedInstance].currentHSIconView setHighlighted:NO];
-			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia8.stopmonitoring"), NULL, NULL, YES);
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
 
 			[[ASAuthenticationController sharedInstance].fingerglyph removeFromSuperview];
 			[ASAuthenticationController sharedInstance].fingerglyph.transform = CGAffineTransformMakeScale(1,1);
@@ -563,13 +563,13 @@ BOOL currentBannerAuthenticated;
 			return;
 		}
 	}
-	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerdown"]) {
+	if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
 		if (bannerFingerGlyph)
 			[bannerFingerGlyph setState:1 animated:YES completionHandler:nil];
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.fingerup"]) {
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
 		if (bannerFingerGlyph)
 			[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authsuccess"]) {
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
 		if (bannerFingerGlyph && notificationBlurView) {
 			currentBannerAuthenticated = YES;
 			[ASAuthenticationController sharedInstance].appUserAuthorisedID = [[self _bulletin] sectionID];
@@ -581,7 +581,7 @@ BOOL currentBannerAuthenticated;
 					[bannerFingerGlyph setState:0 animated:NO completionHandler:nil];
 			}];
 		}
-	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia8.authfailed"]) {
+	} else if ([[notification name] isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
 		if (bannerFingerGlyph)
 			[bannerFingerGlyph setState:0 animated:YES completionHandler:nil];
 	}
@@ -765,7 +765,7 @@ BOOL currentSwitchAuthenticated;
 	loadPreferences();
 	[[ASControlPanel sharedInstance] load];
 	[[ASActivatorListener sharedInstance] load];
-	centre = [CPDistributedMessagingCenter centerNamed:@"com.a3tweaks.asphaleia2.xpc"];
+	centre = [CPDistributedMessagingCenter centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 	rocketbootstrap_distributedmessagingcenter_apply(centre);
 	[centre runServerOnCurrentThread];
 	for (NSString *notification in xpcNotifications)
