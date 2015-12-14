@@ -197,6 +197,18 @@
 -(void)matchResult:(id)result withDetails:(id)details;
 @end
 
+@interface SBWorkspaceApplication : NSObject
+@property(retain, nonatomic) SBApplication *application;
+@end
+
+@interface SBSceneLayoutWorkspaceTransaction : NSObject
+@property(readonly, retain, nonatomic) NSDictionary *activatingApplications;
+@end
+
+@interface SBToAppsWorkspaceTransaction : NSObject
+@property(readonly, retain, nonatomic) SBSceneLayoutWorkspaceTransaction *layoutTransaction;
+@end
+
 // Auxo LE
 @interface AuxoCardView : UIView
 @property(readonly, nonatomic) NSString *displayIdentifier;

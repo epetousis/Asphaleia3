@@ -190,7 +190,9 @@ BOOL switcherAuthenticating;
 
 -(BOOL)clickedMenuButton {
 	if (![[ASAuthenticationController sharedInstance] currentAuthAlert])
-		%orig;
+		return %orig;
+
+	return NO;
 }
 
 %end
@@ -600,7 +602,7 @@ BOOL currentBannerAuthenticated;
 
 %end
 
-%hook SBWorkspace
+%hook SBMainWorkspace
 
 -(void)setCurrentTransaction:(id)transaction {
 	asphaleiaLog();
@@ -609,7 +611,13 @@ BOOL currentBannerAuthenticated;
 		return;
 	}
 
-	SBApplication *application = MSHookIvar<SBApplication *>(transaction, "_toApp");
+	NSDictionary *activatingApplications = [[transaction layoutTransaction] activatingApplications];
+	if (activatingApplications.allKeys.count == 0) {
+		%orig;
+		return;
+	}
+	NSString *firstKey = activatingApplications.allKeys[0];
+	SBApplication *application = [activatingApplications[firstKey] application];
 	if (![[ASPreferences sharedInstance] requiresSecurityForApp:[application bundleIdentifier]] ||
 		[[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]] ||
 		[ASAuthenticationController sharedInstance].catchAllIgnoreRequest ||
