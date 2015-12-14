@@ -41,57 +41,24 @@ static ASAuthenticationController *sharedCommonObj;
     [self deregisterForTouchIDNotifications];
 }
 
--(ASAuthenticationAlert *)returnAppAuthenticationAlertWithIconView:(SBIconView *)iconView customMessage:(NSString *)customMessage delegate:(id<ASAlertDelegate>)delegate {
-    NSString *title;
+-(ASAuthenticationAlert *)returnAppAuthenticationAlertWithApplication:(NSString *)appIdentifier customMessage:(NSString *)customMessage delegate:(id<ASAuthenticationAlertDelegate>)delegate {
     NSString *message;
     if (customMessage)
         message = customMessage;
     else
         message = @"Scan fingerprint to open.";
 
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
-        title = [iconView.icon displayNameForLocation:0];
-    } else {
-        title = iconView.icon.displayName;
-    }
-
-    UIImageView *imgView;
-    if (iconView) {
-        UIImage *iconImage = [iconView.icon getIconImage:2];
-        imgView = [[UIImageView alloc] initWithImage:iconImage];
-        imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-
-        if ([[ASPreferences sharedInstance] touchIDEnabled]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
-                if (!_fingerglyph) {
-                    _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-                    _fingerglyph.secondaryColor = [UIColor grayColor];
-                    _fingerglyph.primaryColor = [UIColor redColor];
-                    CGRect fingerframe = _fingerglyph.frame;
-                    fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
-                    fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
-                    _fingerglyph.frame = fingerframe;
-                    _fingerglyph.center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
-                }
-                [imgView addSubview:_fingerglyph];
-            });
-        }
-    }
-
-    ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithTitle:title
+    ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithApplication:appIdentifier
                    message:message
-                   icon:imgView
-                   smallIcon:NO
                    delegate:delegate];
     alertView.tag = ASAuthenticationItem;
 
-    currentAuthAppBundleID = iconView.icon.applicationBundleID;
+    currentAuthAppBundleID = appIdentifier;
 
     return alertView;
 }
 
--(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAlertDelegate>)delegate {
+-(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAuthenticationAlertDelegate>)delegate {
     NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 
     NSString *title;
@@ -154,7 +121,6 @@ static ASAuthenticationController *sharedCommonObj;
             tag = ASAuthenticationFunction;
             break;
     }
-    title = titleWithSpacingForSmallIcon(title);
 
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
@@ -172,18 +138,13 @@ static ASAuthenticationController *sharedCommonObj;
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
     [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
-    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
-    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
-    [iconView _setIcon:appIcon animated:YES];
-
     if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
         return NO;
     }
 
     authHandler = [handler copy];
 
-    ASAuthenticationAlert *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
+    ASAuthenticationAlert *alertView = [self returnAppAuthenticationAlertWithApplication:appIdentifier customMessage:customMessage delegate:self];
 
     if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
         return NO;
@@ -318,6 +279,7 @@ static ASAuthenticationController *sharedCommonObj;
 {
     if (self.currentAuthAlert) {
         if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+            // why did I put the fingerprint code here?
             BOOL correctFingerUsed;
             switch (self.currentAuthAlert.tag) {
                 case ASAuthenticationItem:
@@ -336,34 +298,13 @@ static ASAuthenticationController *sharedCommonObj;
             if (!correctFingerUsed)
                 name = @"com.a3tweaks.asphaleia.authfailed";
         }
-        NSString *origTitle = self.currentAuthAlert.title;
-        if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
-            if ([origTitle containsString:@"\n\n\n"]) {
-                self.currentAuthAlert.title = titleWithSpacingForIcon(@"Scanning finger...");
-            } else {
-                self.currentAuthAlert.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
-            }
-            [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
-                self.currentAuthAlert.title = origTitle;
-            } repeats:NO];
-            if (_fingerglyph)
-                [_fingerglyph setState:1 animated:YES completionHandler:nil];
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
-            if (_fingerglyph)
-                [_fingerglyph setState:0 animated:YES completionHandler:nil];
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
+        if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
             [self.currentAuthAlert dismiss];
             CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-            if (_fingerglyph)
-                [_fingerglyph setState:0 animated:YES completionHandler:nil];
             _appUserAuthorisedID = currentAuthAppBundleID;
             authHandler(NO);
             self.currentAuthAlert = nil;
             currentAuthAppBundleID = nil;
-        } else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
-            self.currentAuthAlert.title = origTitle;
-            if (_fingerglyph)
-                [_fingerglyph setState:0 animated:YES completionHandler:nil];
         }
     } else if (self.currentHSIconView) {
         if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
@@ -411,24 +352,6 @@ static ASAuthenticationController *sharedCommonObj;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
--(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
-    UIGraphicsBeginImageContextWithOptions(origImage.size, NO, origImage.scale);
-    CGContextRef imgContext = UIGraphicsGetCurrentContext();
-    CGRect imageRect = CGRectMake(0, 0, origImage.size.width, origImage.size.height);
-    CGContextScaleCTM(imgContext, 1, -1);
-    CGContextTranslateCTM(imgContext, 0, -imageRect.size.height);
-    CGContextSaveGState(imgContext);
-    CGContextClipToMask(imgContext, imageRect, origImage.CGImage);
-    [tintColour set];
-    CGContextFillRect(imgContext, imageRect);
-    CGContextRestoreGState(imgContext);
-    CGContextSetBlendMode(imgContext, kCGBlendModeMultiply);
-    CGContextDrawImage(imgContext, imageRect, origImage.CGImage);
-    UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return finalImage;
-}
-
 -(void)dismissAnyAuthenticationAlerts {
     if (self.currentAuthAlert)
         [self.currentAuthAlert dismiss];
@@ -445,19 +368,9 @@ static ASAuthenticationController *sharedCommonObj;
     return [NSArray arrayWithArray:viewArray];
 }
 
-// UIAlertView delegate methods
-- (void)alertView:(ASAuthenticationAlert *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 1) {
-        SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:currentAuthAppBundleID];
-        SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-        SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
-        [iconView _setIcon:appIcon animated:YES];
-        [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
-            if (authenticated)
-                _appUserAuthorisedID = currentAuthAppBundleID;
-            authHandler(!authenticated);
-        }];
-    } else if (buttonIndex == 0) {
+// ASAuthenticationAlert delegate methods
+- (void)authAlertViewDismissed:(ASAuthenticationAlert *)alertView authorised:(BOOL)authorised {
+    if (!authorised) {
         authHandler(YES);
     }
 }

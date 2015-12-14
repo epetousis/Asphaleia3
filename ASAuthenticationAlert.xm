@@ -2,25 +2,67 @@
 #import "ASAuthenticationController.h"
 #import "ASPreferences.h"
 #import <SpringBoard/SBAlertItemsController.h>
+#import "NSTimer+Blocks.h"
+#import "ASPasscodeHandler.h"
 
 #define titleWithSpacingForIcon(t) [NSString stringWithFormat:@"\n\n\n%@",t]
-#define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"%@",t]
+#define titleWithSpacingForSmallIcon(t) [NSString stringWithFormat:@"\n\n%@",t]
 
 @interface ASAuthenticationAlert ()
 -(NSArray *)allSubviewsOfView:(UIView *)view;
 -(void)addSubviewToAlert:(UIView *)view;
++(PKGlyphView *)sharedGlyph;
+-(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour;
 @end
 
 %subclass ASAuthenticationAlert : SBAlertItem
 
 %new
--(id)initWithTitle:(NSString *)title message:(NSString *)message icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAlertDelegate>)delegate {
+-(id)initWithTitle:(NSString *)title message:(NSString *)message icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAuthenticationAlertDelegate>)delegate {
 	if ((self = [self init])) {
 		self.title = title;
 		self.message = message;
 		self.delegate = delegate;
 		self.icon = icon;
 		self.useSmallIcon = useSmallIcon;
+	}
+	return self;
+}
+
+%new
+-(id)initWithApplication:(NSString *)identifier message:(NSString *)message delegate:(id<ASAuthenticationAlertDelegate>)delegate {
+	if (!identifier)
+		return nil;
+
+	if ((self = [self init])) {
+		SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:identifier];
+		self.title = application.displayName;
+		self.message = message;
+		self.delegate = delegate;
+
+		SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+		SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
+		[iconView _setIcon:appIcon animated:YES];
+
+		UIImageView *imgView;
+		UIImage *iconImage = [iconView.icon getIconImage:2];
+		imgView = [[UIImageView alloc] initWithImage:iconImage];
+		imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
+
+		if ([[ASPreferences sharedInstance] touchIDEnabled]) {
+			dispatch_async(dispatch_get_main_queue(), ^{
+				imgView.image = [self colouriseImage:iconImage withColour:[UIColor colorWithWhite:0.f alpha:0.5f]];
+				CGRect fingerframe = [[ASAuthenticationController sharedInstance] fingerglyph].frame;
+				fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
+				fingerframe.size.width = [iconView _iconImageView].frame.size.width-10;
+				[[ASAuthenticationController sharedInstance] fingerglyph].frame = fingerframe;
+				[[ASAuthenticationController sharedInstance] fingerglyph].center = CGPointMake(CGRectGetMidX(imgView.bounds),CGRectGetMidY(imgView.bounds));
+				[imgView addSubview:[[ASAuthenticationController sharedInstance] fingerglyph]];
+			});
+		}
+		self.icon = imgView;
+
+		self.useSmallIcon = NO;
 	}
 	return self;
 }
@@ -43,11 +85,21 @@
 }
 
 - (void)alertView:(id)arg1 clickedButtonAtIndex:(int)arg2 {
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-    [[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
-	if (self.delegate)
-		[self.delegate alertView:arg1 clickedButtonAtIndex:arg2];
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
+	[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
+	if (self.delegate) {
+		if (arg2 == 0) {
+			[self.delegate authAlertViewDismissed:arg1 authorised:NO];
+		} else if (arg2 == 1) {
+			SBIconView *icon = [self.icon isKindOfClass:objc_getClass("SBIconView")] ? (SBIconView *)self.icon : nil;
+    		[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
+    		    if (authenticated)
+    		        [self.delegate authAlertViewDismissed:arg1 authorised:YES];
+    		}];
+		}
+	}
 
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[self dismiss];
 }
 
@@ -57,47 +109,107 @@
 
 %new
 -(void)addSubviewToAlert:(UIView *)view {
-    UIView *labelSuperview;
-    for (id subview in [self allSubviewsOfView:[[self alertController] view]]){
-        if ([subview isKindOfClass:[UILabel class]]) {
-            labelSuperview = [subview superview];
-        }
-    }
-    if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
-        [labelSuperview addSubview:view];
-    }
+	UIView *labelSuperview;
+	for (id subview in [self allSubviewsOfView:[[self alertController] view]]){
+		if ([subview isKindOfClass:[UILabel class]]) {
+			labelSuperview = [subview superview];
+		}
+	}
+	if ([labelSuperview respondsToSelector:@selector(addSubview:)]) {
+		[labelSuperview addSubview:view];
+	}
 }
 
 %new
 - (NSArray *)allSubviewsOfView:(UIView *)view
 {
-    NSMutableArray *viewArray = [[NSMutableArray alloc] init];
-    [viewArray addObject:view];
-    for (UIView *subview in view.subviews)
-    {
-        [viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
-    }
-    return [NSArray arrayWithArray:viewArray];
+	NSMutableArray *viewArray = [[NSMutableArray alloc] init];
+	[viewArray addObject:view];
+	for (UIView *subview in view.subviews)
+	{
+		[viewArray addObjectsFromArray:(NSArray *)[self allSubviewsOfView:subview]];
+	}
+	return [NSArray arrayWithArray:viewArray];
 }
 
 %new
 -(void)show {
 	if ([[ASAuthenticationController sharedInstance] currentAuthAlert])
-        [[[ASAuthenticationController sharedInstance] currentAuthAlert] dismiss];
+		[[[ASAuthenticationController sharedInstance] currentAuthAlert] dismiss];
 
-    [[ASAuthenticationController sharedInstance] setCurrentAuthAlert:self];
+	[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:self];
 
-    if ([[ASPreferences sharedInstance] touchIDEnabled])
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
+	if ([[ASPreferences sharedInstance] touchIDEnabled])
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
+
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.fingerdown" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.fingerup" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.authsuccess" object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedNotification:fingerprint:) name:@"com.a3tweaks.asphaleia.authfailed" object:nil];
 
 	if (objc_getClass("SBAlertItemsController"))
 		[[%c(SBAlertItemsController) sharedInstance] activateAlertItem:self];
+}
+
+%new
+-(void)receivedNotification:(NSNotification *)notification fingerprint:(id)fingerprint
+{
+	NSString *name = [notification name];
+	if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+		BOOL correctFingerUsed;
+		switch (self.alertSheet.tag) {
+			case ASAuthenticationItem:
+				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
+				break;
+			case ASAuthenticationFunction:
+				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsAdvancedSecurity:[fingerprint name]];
+				break;
+			case ASAuthenticationSecurityMod:
+				correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecurityMods:[fingerprint name]];
+				break;
+			default:
+				correctFingerUsed = YES;
+				break;
+		}
+		if (!correctFingerUsed)
+			name = @"com.a3tweaks.asphaleia.authfailed";
+	}
+	if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
+		if (self.useSmallIcon) {
+			self.alertSheet.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
+		} else {
+			self.alertSheet.title = titleWithSpacingForIcon(@"Scanning finger...");
+		}
+		[NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+			self.alertSheet.title = self.title;
+		} repeats:NO];
+		if ([[ASAuthenticationController sharedInstance] fingerglyph])
+			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:1 animated:YES completionHandler:nil];
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerup"]) {
+		if ([[ASAuthenticationController sharedInstance] fingerglyph])
+			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
+		if ([[ASAuthenticationController sharedInstance] fingerglyph])
+			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
+
+		if (self.delegate)
+			[self.delegate authAlertViewDismissed:self authorised:YES];
+
+		[[NSNotificationCenter defaultCenter] removeObserver:self];
+		[self dismiss];
+	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
+		self.alertSheet.title = self.title;
+		if ([[ASAuthenticationController sharedInstance] fingerglyph])
+			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
+	}
 }
 
 // Properties
 %new
 -(void)setTitle:(NSString *)title {
 	objc_setAssociatedObject(self, @selector(title), title, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	self.alertSheet.title = title;
 }
 %new
 -(NSString *)title {
@@ -107,6 +219,7 @@
 %new
 -(void)setMessage:(NSString *)message {
 	objc_setAssociatedObject(self, @selector(message), message, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	self.alertSheet.message = message;
 }
 %new
 -(NSString *)message {
@@ -114,11 +227,11 @@
 }
 
 %new
--(void)setDelegate:(id<ASAlertDelegate>)delegate {
+-(void)setDelegate:(id<ASAuthenticationAlertDelegate>)delegate {
 	objc_setAssociatedObject(self, @selector(delegate), delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 %new
--(id<ASAlertDelegate>)delegate {
+-(id<ASAuthenticationAlertDelegate>)delegate {
 	return objc_getAssociatedObject(self, @selector(delegate));
 }
 
@@ -147,6 +260,25 @@
 %new
 -(BOOL)useSmallIcon {
 	return [objc_getAssociatedObject(self, @selector(useSmallIcon)) boolValue];
+}
+
+// Other
+-(UIImage *)colouriseImage:(UIImage *)origImage withColour:(UIColor *)tintColour {
+	UIGraphicsBeginImageContextWithOptions(origImage.size, NO, origImage.scale);
+	CGContextRef imgContext = UIGraphicsGetCurrentContext();
+	CGRect imageRect = CGRectMake(0, 0, origImage.size.width, origImage.size.height);
+	CGContextScaleCTM(imgContext, 1, -1);
+	CGContextTranslateCTM(imgContext, 0, -imageRect.size.height);
+	CGContextSaveGState(imgContext);
+	CGContextClipToMask(imgContext, imageRect, origImage.CGImage);
+	[tintColour set];
+	CGContextFillRect(imgContext, imageRect);
+	CGContextRestoreGState(imgContext);
+	CGContextSetBlendMode(imgContext, kCGBlendModeMultiply);
+	CGContextDrawImage(imgContext, imageRect, origImage.CGImage);
+	UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	return finalImage;
 }
 
 %end
