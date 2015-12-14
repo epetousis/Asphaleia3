@@ -111,8 +111,10 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section < 3) return 106.0f;
-    else return 44.0f;
+    if (indexPath.section < 3)
+        return 106.0f;
+    else
+        return 44.0f;
 }
 
 - (CGFloat)tableView:(id)arg1 estimatedHeightForRowAtIndexPath:(id)arg2 {
@@ -121,6 +123,10 @@
 
 - (id)_tableView:(id)arg1 viewForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
     return nil;
+}
+
+- (CGFloat)_tableView:(id)arg1 heightForCustomInSection:(long long)arg2 isHeader:(bool)arg3 {
+    return 0.0f;
 }
 
 @end

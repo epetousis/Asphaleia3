@@ -244,11 +244,7 @@ static ASAuthenticationController *sharedCommonObj;
 
     _currentHSIconView = iconView;
 
-    if (!_fingerglyph) {
-        _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
-        _fingerglyph.secondaryColor = [UIColor grayColor];
-        _fingerglyph.primaryColor = [UIColor redColor];
-    }
+    [self initialiseGlyphIfRequired];
 
     CGRect fingerframe = _fingerglyph.frame;
     fingerframe.size.height = [iconView _iconImageView].frame.size.height-10;
@@ -297,14 +293,6 @@ static ASAuthenticationController *sharedCommonObj;
             }
             if (!correctFingerUsed)
                 name = @"com.a3tweaks.asphaleia.authfailed";
-        }
-        if ([name isEqualToString:@"com.a3tweaks.asphaleia.authsuccess"]) {
-            [self.currentAuthAlert dismiss];
-            CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-            _appUserAuthorisedID = currentAuthAppBundleID;
-            authHandler(NO);
-            self.currentAuthAlert = nil;
-            currentAuthAppBundleID = nil;
         }
     } else if (self.currentHSIconView) {
         if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
@@ -368,11 +356,24 @@ static ASAuthenticationController *sharedCommonObj;
     return [NSArray arrayWithArray:viewArray];
 }
 
+-(void)initialiseGlyphIfRequired {
+    if (!_fingerglyph) {
+        _fingerglyph = [[objc_getClass("PKGlyphView") alloc] initWithStyle:1];
+        _fingerglyph.secondaryColor = [UIColor grayColor];
+        _fingerglyph.primaryColor = [UIColor redColor];
+    }
+}
+
 // ASAuthenticationAlert delegate methods
 - (void)authAlertViewDismissed:(ASAuthenticationAlert *)alertView authorised:(BOOL)authorised {
-    if (!authorised) {
-        authHandler(YES);
-    }
+    [self.currentAuthAlert dismiss];
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
+    if (authorised)
+        _appUserAuthorisedID = currentAuthAppBundleID;
+
+    authHandler(!authorised);
+    self.currentAuthAlert = nil;
+    currentAuthAppBundleID = nil;
 }
 
 @end

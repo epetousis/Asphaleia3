@@ -18,6 +18,7 @@
 @property NSString *temporarilyUnlockedAppBundleID;
 @property ASTouchWindow *anywhereTouchWindow;
 +(instancetype)sharedInstance;
+-(void)initialiseGlyphIfRequired;
 -(ASAuthenticationAlert *)returnAppAuthenticationAlertWithApplication:(NSString *)appIdentifier customMessage:(NSString *)customMessage delegate:(id<ASAuthenticationAlertDelegate>)delegate;
 -(ASAuthenticationAlert *)returnAuthenticationAlertOfType:(ASAuthenticationAlertType)alertType delegate:(id<ASAuthenticationAlertDelegate>)delegate;
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler;
