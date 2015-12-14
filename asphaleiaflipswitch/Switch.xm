@@ -30,7 +30,7 @@
 }
 
 - (NSString *)titleForSwitchIdentifier:(NSString *)switchIdentifier {
-	return @"Asphaleia 2";
+	return @"Asphaleia";
 }
 
 - (FSSwitchState)stateForSwitchIdentifier:(NSString *)switchIdentifier {

@@ -49,18 +49,17 @@ static ASAuthenticationController *sharedCommonObj;
     else
         message = @"Scan fingerprint to open.";
 
-    /*if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
-        title = titleWithSpacingForIcon([iconView.icon displayNameForLocation:0]);
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.4")) {
+        title = [iconView.icon displayNameForLocation:0];
     } else {
-        title = titleWithSpacingForIcon(iconView.icon.displayName);
-    }*/
+        title = iconView.icon.displayName;
+    }
 
     UIImageView *imgView;
     if (iconView) {
         UIImage *iconImage = [iconView.icon getIconImage:2];
         imgView = [[UIImageView alloc] initWithImage:iconImage];
         imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
-        //imgView.center = CGPointMake(270/2,41); // 270 is the width of a UIAlertView.
 
         if ([[ASPreferences sharedInstance] touchIDEnabled]) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -81,13 +80,13 @@ static ASAuthenticationController *sharedCommonObj;
     }
 
     ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithTitle:title
-                   description:message
+                   message:message
                    icon:imgView
                    smallIcon:NO
                    delegate:delegate];
     alertView.tag = ASAuthenticationItem;
 
-    //currentAuthAppBundleID = iconView.icon.applicationBundleID;
+    currentAuthAppBundleID = iconView.icon.applicationBundleID;
 
     return alertView;
 }
@@ -160,9 +159,10 @@ static ASAuthenticationController *sharedCommonObj;
     UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
     imgView.frame = CGRectMake(0,0,iconImage.size.width,iconImage.size.height);
 
-    ASAuthenticationAlert *alertView = [[objc_getClass("ASAlert") alloc] initWithTitle:title
-                   description:@"Scan fingerprint to access."
-                   
+    ASAuthenticationAlert *alertView = [[objc_getClass("ASAuthenticationAlert") alloc] initWithTitle:title
+                   message:@"Scan fingerprint to access."
+                   icon:imgView
+                   smallIcon:YES
                    delegate:delegate];
     alertView.tag = tag;
 
@@ -170,37 +170,37 @@ static ASAuthenticationController *sharedCommonObj;
 }
 
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
-    //[[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
+    [[objc_getClass("SBIconController") sharedInstance] asphaleia_resetAsphaleiaIconView];
 
-    //SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
-    //SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-    /*SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
-    [iconView _setIcon:appIcon animated:YES];*/
+    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:appIdentifier];
+    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
+    [iconView _setIcon:appIcon animated:YES];
 
-    //if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
-    //    return NO;
-    //}
+    if (![[ASPreferences sharedInstance] requiresSecurityForApp:appIdentifier]) {
+        return NO;
+    }
 
-    //authHandler = [handler copy];
+    authHandler = [handler copy];
 
-    ASAuthenticationAlert *alertView = [self returnAppAuthenticationAlertWithIconView:nil customMessage:customMessage delegate:self];
+    ASAuthenticationAlert *alertView = [self returnAppAuthenticationAlertWithIconView:iconView customMessage:customMessage delegate:self];
 
-    //if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
-    //    return NO;
-    //}
+    if (![[ASPreferences sharedInstance] touchIDEnabled] && ![[ASPreferences sharedInstance] passcodeEnabled]) {
+        return NO;
+    }
 
-    /*if (![[ASPreferences sharedInstance] touchIDEnabled]) {
+    if (![[ASPreferences sharedInstance] touchIDEnabled]) {
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:nil eventBlock:^void(BOOL authenticated){
                 if (authenticated)
                     _appUserAuthorisedID = appIdentifier;
                 authHandler(!authenticated);
             }];
         return YES;
-    }*/
+    }
 
-    //dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         [alertView show];
-    //});
+    });
     return YES;
 }
 
@@ -447,13 +447,11 @@ static ASAuthenticationController *sharedCommonObj;
 
 // UIAlertView delegate methods
 - (void)alertView:(ASAuthenticationAlert *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:currentAuthAppBundleID];
-    SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
-    SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
-    [iconView _setIcon:appIcon animated:YES];
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-    self.currentAuthAlert = nil;
     if (buttonIndex == 1) {
+        SBApplication *application = [[objc_getClass("SBApplicationController") sharedInstance] applicationWithBundleIdentifier:currentAuthAppBundleID];
+        SBApplicationIcon *appIcon = [[objc_getClass("SBApplicationIcon") alloc] initWithApplication:application];
+        SBIconView *iconView = [[objc_getClass("SBIconView") alloc] initWithContentType:0];
+        [iconView _setIcon:appIcon animated:YES];
         [[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:iconView eventBlock:^void(BOOL authenticated){
             if (authenticated)
                 _appUserAuthorisedID = currentAuthAppBundleID;
@@ -462,16 +460,6 @@ static ASAuthenticationController *sharedCommonObj;
     } else if (buttonIndex == 0) {
         authHandler(YES);
     }
-}
-
-- (void)willPresentAlertView:(ASAuthenticationAlert *)alertView {
-    if (self.currentAuthAlert)
-        [self.currentAuthAlert dismiss];
-
-    self.currentAuthAlert = alertView;
-
-    if ([[ASPreferences sharedInstance] touchIDEnabled])
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.startmonitoring"), NULL, NULL, YES);
 }
 
 @end

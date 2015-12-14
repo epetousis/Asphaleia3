@@ -1,10 +1,8 @@
 #import "../ASCommon.h"
-#import "../ASPasscodeHandler.h"
 #import "../ASPreferences.h"
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 #import <AssetsLibrary/AssetsLibrary.h>
-#import "../NSTimer+Blocks.h"
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <dlfcn.h>
 #import <RocketBootstrap/RocketBootstrap.h>
@@ -32,7 +30,7 @@ BOOL authenticating;
 		} else {
 			[self dismissViewControllerAnimated:YES completion:nil];
 			if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 				[alert show];
 				[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 			}
@@ -73,7 +71,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 			authenticated = YES;
 			%orig(arg1,block1,block2);
 			if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 				[alert show];
 				[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 			}
@@ -118,7 +116,7 @@ PHAuthBlock authBlock;
 				%orig(authBlock);
 				authenticated = YES;
 				if ([[ASPreferences sharedInstance] showPhotosProtectMessage]) {
-					UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia 2" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+					UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You have allowed this app to access your photos until you close it. If no photos are shown, try opening this section of the app again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 					[alert show];
 					[[ASPreferences sharedInstance] increasePhotosProtectMessageCount];
 				}
