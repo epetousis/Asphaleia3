@@ -647,14 +647,14 @@ BOOL currentBannerAuthenticated;
 
 %hook SBUIBiometricEventMonitor
 
-- (void)_setMatchingEnabled:(BOOL)arg1 {
+/*- (void)_setMatchingEnabled:(BOOL)arg1 {
 	BOOL deviceLocked = MSHookIvar<BOOL>(self, "_deviceLocked");
 	BOOL screenOn = MSHookIvar<BOOL>(self, "_screenIsOn");
 	if (!arg1 && !deviceLocked && screenOn)
 		return;
 	else
 		%orig;
-}
+}*/
 
 - (void)removeObserver:(id)arg1 {
 	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
