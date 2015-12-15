@@ -345,8 +345,9 @@ static ASAuthenticationController *sharedCommonObj;
 
 // ASAuthenticationAlert delegate methods
 - (void)authAlertView:(ASAuthenticationAlert *)alertView dismissed:(BOOL)dismissed authorised:(BOOL)authorised fingerprint:(BiometricKitIdentity *)fingerprint {
-    BOOL correctFingerUsed = NO;
+    BOOL correctFingerUsed = YES;
     if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+        correctFingerUsed = NO;
         switch (self.currentAuthAlert.tag) {
             case ASAuthenticationItem:
                 correctFingerUsed = [[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]];
