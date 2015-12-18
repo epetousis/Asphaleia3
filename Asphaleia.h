@@ -201,12 +201,12 @@
 @property(retain, nonatomic) SBApplication *application;
 @end
 
-@interface SBSceneLayoutWorkspaceTransaction : NSObject
-@property(readonly, retain, nonatomic) NSDictionary *activatingApplications;
-@end
-
 @interface SBToAppsWorkspaceTransaction : NSObject
-@property(readonly, retain, nonatomic) SBSceneLayoutWorkspaceTransaction *layoutTransaction;
+- (_Bool)toAndFromAppsDiffer;
+@property(readonly, retain, nonatomic) NSArray *deactivatingApplications;
+@property(readonly, retain, nonatomic) NSArray *activatingApplications;
+@property(readonly, retain, nonatomic) NSArray *fromApplications;
+@property(readonly, retain, nonatomic) NSArray *toApplications;
 @end
 
 @interface SBUIPasscodeLockViewSimpleFixedDigitKeypad : NSObject

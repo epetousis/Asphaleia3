@@ -606,18 +606,17 @@ BOOL currentBannerAuthenticated;
 
 -(void)setCurrentTransaction:(id)transaction {
 	asphaleiaLog();
-	if (![transaction isKindOfClass:[%c(SBAppToAppWorkspaceTransaction) class]]) {
+	if (![transaction isKindOfClass:%c(SBAppToAppWorkspaceTransaction)] || [transaction isKindOfClass:%c(SBRotateScenesWorkspaceTransaction)]) {
 		%orig;
 		return;
 	}
 
-	NSDictionary *activatingApplications = [[transaction layoutTransaction] activatingApplications];
-	if (activatingApplications.allKeys.count == 0) {
+	NSArray *activatingApplications = [transaction activatingApplications];
+	if (activatingApplications.count == 0) {
 		%orig;
 		return;
 	}
-	NSString *firstKey = activatingApplications.allKeys[0];
-	SBApplication *application = [activatingApplications[firstKey] application];
+	SBApplication *application = [activatingApplications[0] application];
 	if (![[ASPreferences sharedInstance] requiresSecurityForApp:[application bundleIdentifier]] ||
 		[[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]] ||
 		[ASAuthenticationController sharedInstance].catchAllIgnoreRequest ||
