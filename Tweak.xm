@@ -782,6 +782,12 @@ BOOL currentSwitchAuthenticated;
 %end
 
 %ctor {
+	if (![[[NSBundle mainBundle] bundleIdentifier] isEqualToString:@"com.apple.springboard"]) {
+		NSLog(@"[Asphaleia] Attempting to load into non-SpringBoard process. Stop.");
+		return;
+	} else {
+		%init;
+	}
 	dlopen("/Library/MobileSubstrate/DynamicLibraries/Flipswitch.dylib", RTLD_NOW);
 	loadPreferences();
 	[[ASControlPanel sharedInstance] load];
