@@ -7,6 +7,7 @@
 @interface ASAlert ()
 @property (nonatomic) NSMutableArray *buttons;
 @property (nonatomic) UIView *aboveTitleSubview;
+@property int cancelButtonIndex;
 -(NSArray *)allSubviewsOfView:(UIView *)view;
 -(void)addSubviewToAlert:(UIView *)view;
 @end
@@ -32,6 +33,8 @@
 	for (NSString *button in self.buttons)
 		[self.alertSheet addButtonWithTitle:button];
 
+	self.alertSheet.cancelButtonIndex = self.cancelButtonIndex;
+
 	if (self.aboveTitleSubview) {
 		self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
 		self.aboveTitleSubview.center = CGPointMake(270/2,32);
@@ -42,7 +45,7 @@
 }
 
 - (void)alertView:(id)arg1 clickedButtonAtIndex:(int)arg2 {
-	if (self.delegate)
+	if (self.delegate && [self.delegate respondsToSelector:@selector(alertView:clickedButtonAtIndex:)])
 		[self.delegate alertView:arg1 clickedButtonAtIndex:arg2];
 
 	[self dismiss];
@@ -79,7 +82,7 @@
 
 %new
 -(void)show {
-	if (self.delegate)
+	if (self.delegate && [self.delegate respondsToSelector:@selector(willPresentAlertView:)])
 		[self.delegate willPresentAlertView:self];
 	if (objc_getClass("SBAlertItemsController"))
 		[[%c(SBAlertItemsController) sharedInstance] activateAlertItem:self];
@@ -152,6 +155,15 @@
 %new
 -(UIView *)aboveTitleSubview {
 	return objc_getAssociatedObject(self, @selector(aboveTitleSubview));
+}
+
+%new
+-(void)setCancelButtonIndex:(int)cancelButtonIndex {
+	objc_setAssociatedObject(self, @selector(cancelButtonIndex), [NSNumber numberWithInt:cancelButtonIndex], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(int)cancelButtonIndex {
+	return [objc_getAssociatedObject(self, @selector(cancelButtonIndex)) intValue];
 }
 
 %end

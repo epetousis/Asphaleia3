@@ -17,6 +17,7 @@
 -(id)alertController;
 -(void)addButtonWithTitle:(NSString *)buttonTitle;
 -(void)removeButtonWithTitle:(NSString *)buttonTitle;
+-(void)setCancelButtonIndex:(int)cancelButtonIndex;
 -(void)setAboveTitleSubview:(UIView *)view;
 -(void)show;
 
