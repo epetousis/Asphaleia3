@@ -406,14 +406,14 @@ static BOOL openURLHasAuthenticated;
 	openURLHasAuthenticated = NO;
 }
 
--(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
+-(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)publicURL animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result {
 	asphaleiaLog();
-	if (result)
-		[result invoke];
-	if (![[ASPreferences sharedInstance] requiresSecurityForApp:[application bundleIdentifier]] || openURLHasAuthenticated || [[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]]) {
+	if (![[ASPreferences sharedInstance] requiresSecurityForApp:[application bundleIdentifier]] || openURLHasAuthenticated || [[ASAuthenticationController sharedInstance].appUserAuthorisedID isEqualToString:[application bundleIdentifier]] || !publicURL) {
 		%orig;
 		return;
 	}
+	if (result)
+		[result invoke];
 
 	[ASAuthenticationController sharedInstance].catchAllIgnoreRequest = YES;
 	if ([[settings description] containsString:@"fromLocked = BSSettingFlagYes"]) {
