@@ -145,6 +145,17 @@
 		else {
 			NSLog(@"This copy of Asphaleia is legitimate.");
 		}
+
+		NSDateComponents *components = [[NSDateComponents alloc] init];
+		NSInteger currentYear = [[NSCalendar currentCalendar] component:NSCalendarUnitYear fromDate:[NSDate date]];
+		[components setDay:25];
+		[components setMonth:12];
+		[components setYear:currentYear];
+		NSDate *christmas = [[NSCalendar currentCalendar] dateFromComponents:components];
+		BOOL isChristmas = [[NSCalendar currentCalendar] isDate:[NSDate date] inSameDayAsDate:christmas];
+		if (isChristmas) {
+			[tweakThankSubtitle setText:@"Merry Christmas!"];
+		}
 	}
 
 	return self;
