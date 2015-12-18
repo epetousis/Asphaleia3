@@ -52,11 +52,13 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
             if (addRemoveFromSecureAppsTitle)
                 [buttonTitleArray addObject:addRemoveFromSecureAppsTitle];
 
-            self.alertView = [[objc_getClass("ASAlert") alloc] initWithTitle:titleWithSpacingForSmallIcon(@"Asphaleia Control Panel")
+            self.alertView = [[objc_getClass("ASAlert") alloc] initWithTitle:@"Asphaleia Control Panel"
                                 message:nil
                                 delegate:self];
             for (NSString *buttonTitle in buttonTitleArray)
                 [self.alertView addButtonWithTitle:buttonTitle];
+            [self.alertView addButtonWithTitle:@"Close"];
+            [self.alertView setCancelButtonIndex:buttonTitleArray.count];
             NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
             UIImage *iconImage = [UIImage imageNamed:@"IconDefault.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
             UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImage];
@@ -75,20 +77,22 @@ static NSString *img = @"iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAKQWlDQ1B
     SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
     NSString *bundleID = [frontmostApp bundleIdentifier];
     switch (buttonIndex) {
-        case 1:
+        case 0:
             [ASPreferences sharedInstance].itemSecurityDisabled = ![ASPreferences sharedInstance].itemSecurityDisabled;
             if ([ASPreferences sharedInstance].itemSecurityDisabled && [[ASPreferences sharedInstance] protectAllApps]) {
                 [[ASPreferences sharedInstance] setObject:[NSNumber numberWithBool:NO] forKey:kProtectAllAppsKey];
             }
             break;
-        case 2:
+        case 1:
             [[ASPreferences sharedInstance] setObject:[NSNumber numberWithBool:![[ASPreferences sharedInstance] protectAllApps]] forKey:kProtectAllAppsKey];
 
             if ([ASPreferences sharedInstance].itemSecurityDisabled && [[ASPreferences sharedInstance] protectAllApps]) {
                 [ASPreferences sharedInstance].itemSecurityDisabled = NO;
             }
             break;
-        case 3:
+        case 2:
+            if (alertView.cancelButtonIndex == 2)
+                break;
             if (![[ASPreferences sharedInstance] objectForKey:kSecuredAppsKey])
                 [[ASPreferences sharedInstance] setObject:[NSMutableDictionary dictionary] forKey:kSecuredAppsKey];
 
