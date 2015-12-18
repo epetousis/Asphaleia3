@@ -36,11 +36,11 @@ static ASCommon *sharedCommonObj;
     return sharedCommonObj;
 }
 
--(UIAlertView *)currentAuthAlert {
+-(BOOL)displayingAuthAlert {
     CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
     rocketbootstrap_distributedmessagingcenter_apply(centre);
     NSDictionary *reply = [centre sendMessageAndReceiveReplyName:@"com.a3tweaks.asphaleia.xpc/GetCurrentAuthAlert" userInfo:nil];
-    return reply[@"currentAuthAlert"];
+    return [reply[@"displayingAuthAlert"] boolValue];
 }
 
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler {
