@@ -35,12 +35,13 @@
 {
 	if ([TWTweetComposeViewController canSendTweet]) {		
 		TWTweetComposeViewController *controller = [[TWTweetComposeViewController alloc] init];
-		[controller setInitialText:@"Securing my apps with #Asphaleia2 from @A3tweaks!"];
+		[controller setInitialText:@"Securing my apps with #Asphaleia3 from @A3tweaks!"];
 		
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"You don't seem to be able to tweet right now." delegate:nil cancelButtonTitle:@"Okay." otherButtonTitles:nil];
-		[alert show];
+		UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Asphaleia" message:@"You don't seem to be able to tweet right now." preferredStyle:UIAlertControllerStyleAlert];
+		[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
+		[self presentViewController:alert animated:YES completion:nil];
 	}
 }
 
@@ -129,8 +130,9 @@
 	}
 	else
 	{
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Asphaleia" message:@"Something went wrong while trying to compose the support email." delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil];
-		[alert show];
+		UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Asphaleia" message:@"Something went wrong while trying to compose the support email." preferredStyle:UIAlertControllerStyleAlert];
+		[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
+		[self presentViewController:alert animated:YES completion:nil];
 	}
 }
 - (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
