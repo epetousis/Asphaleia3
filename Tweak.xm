@@ -658,10 +658,13 @@ BOOL currentBannerAuthenticated;
 
 - (void)removeObserver:(id)arg1 {
 	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
-	if ([[ASTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[ASTouchIDController sharedInstance]])
+	if ([[ASTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[ASTouchIDController sharedInstance]]) {
 		[[[ASTouchIDController sharedInstance] oldObservers] removeObject:arg1];
-	else
+		if ([currentObservers containsObject:arg1])
+			[currentObservers removeObject:arg1];
+	} else {
 		%orig;
+	}
 }
 
 -(void)matchResult:(id)result withDetails:(id)details {
