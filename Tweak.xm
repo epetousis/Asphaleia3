@@ -131,22 +131,21 @@ void DeregisterForTouchIDNotifications(id observer) {
 		%orig;
 }
 
-- (void)_layoutContainer {
+- (void)prepareToBecomeVisibleIfNecessary {
 	%orig;
 	if (![[ASPreferences sharedInstance] requiresSecurityForApp:self.displayItem.displayIdentifier] || ![[ASPreferences sharedInstance] obscureAppContent]) {
 		return;
 	}
 
-	SBAppSwitcherSnapshotView *snapshot = self;
 	CAFilter* filter = [CAFilter filterWithName:@"gaussianBlur"];
 	[filter setValue:@10 forKey:@"inputRadius"];
-	UIView *snapshotImageView = MSHookIvar<UIView *>(snapshot,"_containerView");
+	UIView *snapshotImageView = MSHookIvar<UIView *>(self,"_containerView");
 	snapshotImageView.layer.filters = [NSArray arrayWithObject:filter];
 
 	NSBundle *asphaleiaAssets = [[NSBundle alloc] initWithPath:kBundlePath];
 	UIImage *obscurityEye = [UIImage imageNamed:@"unocme.png" inBundle:asphaleiaAssets compatibleWithTraitCollection:nil];
 
-	UIView *obscurityView = [[UIView alloc] initWithFrame:snapshot.bounds];
+	UIView *obscurityView = [[UIView alloc] initWithFrame:self.bounds];
 	obscurityView.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7f];
 
 	UIImageView *imageView = [[UIImageView alloc] init];
@@ -158,6 +157,18 @@ void DeregisterForTouchIDNotifications(id observer) {
 	obscurityView.tag = 80085; // ;)
 
 	[self addSubview:obscurityView];
+	objc_setAssociatedObject(self, @selector(asphaleia_obscurityView), obscurityView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)respondToBecomingInvisibleIfNecessary {
+	self.layer.filters = nil;
+	UIView *obscurityView = objc_getAssociatedObject(self, @selector(asphaleia_obscurityView));
+	if (obscurityView) {
+		[obscurityView removeFromSuperview];
+	}
+
+	objc_setAssociatedObject(self, @selector(asphaleia_obscurityView), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	%orig;
 }
 
 %end
