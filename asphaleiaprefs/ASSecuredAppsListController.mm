@@ -65,6 +65,12 @@ static UIImage *defaultImage;
                                     @"com.apple.CoreAuthUI",
                                     @"com.apple.CloudKit.ShareBear",
                                     @"com.apple.social.SLGoogleAuth",
+                                    @"com.apple.StoreDemoViewService",
+                                    @"com.apple.social.SLYahooAuth",
+                                    @"com.apple.SafariViewService",
+                                    @"com.apple.Home.HomeUIService",
+                                    @"com.apple.appleseed.FeedbackAssistant",
+                                    @"com.apple.Diagnostics.Mitosis",
                                     nil];
 
     NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:@"" ascending:YES selector:@selector(localizedStandardCompare:)];
