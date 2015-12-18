@@ -20,7 +20,7 @@ BOOL authenticating;
 		%orig;
 		return;
 	}
-	if ([ASCommon sharedInstance].currentAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert)
 		return;
 	authenticating = YES;
 	[[ASCommon sharedInstance] authenticateFunction:ASAuthenticationAlertPhotos dismissedHandler:^(BOOL wasCancelled){
@@ -59,7 +59,7 @@ ALAssetsLibraryAccessFailureBlock block2;
 			%orig;
 		return;
 	}
-	if ([ASCommon sharedInstance].currentAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert)
 		return;
 	authenticating = YES;
 
@@ -105,7 +105,7 @@ PHAuthBlock authBlock;
 			%orig;
 		return;
 	}
-	if ([ASCommon sharedInstance].currentAuthAlert)
+	if ([ASCommon sharedInstance].displayingAuthAlert)
 		return;
 	authenticating = YES;
 
@@ -175,7 +175,7 @@ SEL origSelector;
 		[origTarget performSelectorOnMainThread:origSelector withObject:self waitUntilDone:NO];
 		return;
 	}
-	if ([[ASCommon sharedInstance] currentAuthAlert])
+	if ([[ASCommon sharedInstance] displayingAuthAlert])
 		return;
 	authenticating = YES;
 

@@ -25,7 +25,7 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 	ASCommonAuthenticationHandler authHandler;
 }
 +(instancetype)sharedInstance;
--(UIAlertView *)currentAuthAlert;
+-(BOOL)displayingAuthAlert;
 -(BOOL)authenticateAppWithDisplayIdentifier:(NSString *)appIdentifier customMessage:(NSString *)customMessage dismissedHandler:(ASCommonAuthenticationHandler)handler;
 -(BOOL)authenticateFunction:(ASAuthenticationAlertType)alertType dismissedHandler:(ASCommonAuthenticationHandler)handler;
 

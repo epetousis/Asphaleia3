@@ -51,9 +51,9 @@ static ASXPCHandler *sharedHandlerObj;
 		return @{ @"isProtected" : [NSNumber numberWithBool:isProtected] };
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/GetCurrentAuthAlert"]) {
 		if ([ASAuthenticationController sharedInstance].currentAuthAlert)
-			return @{ @"currentAuthAlert" : [ASAuthenticationController sharedInstance].currentAuthAlert };
+			return @{ @"displayingAuthAlert" : @YES };
 		else
-			return @{ @"currentAuthAlert" : [NSNull null] };
+			return @{ @"displayingAuthAlert" : @NO };
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.xpc/GetCurrentTempUnlockedApp"]) {
 		if ([ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID)
 			return @{ @"bundleIdentifier" : [ASAuthenticationController sharedInstance].temporarilyUnlockedAppBundleID };
