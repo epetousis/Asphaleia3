@@ -235,7 +235,7 @@ UIWindow *blurredWindow;
 	}
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
-	if ([[ASPreferences sharedInstance] requiresSecurityForApp:[frontmostApp bundleIdentifier]] && ![[ASPreferences sharedInstance] unlockToAppUnsecurely] && frontmostApp) {
+	if ([[ASPreferences sharedInstance] requiresSecurityForApp:[frontmostApp bundleIdentifier]] && ![[ASPreferences sharedInstance] unlockToAppUnsecurely] && frontmostApp && !blurredWindow) {
 		blurredWindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 		blurredWindow.backgroundColor = [UIColor clearColor];
 
@@ -275,7 +275,7 @@ UIWindow *blurredWindow;
 			}
 
 			if (wasCancelled) {
-				[[%c(SBUIController) sharedInstanceIfExists] clickedMenuButton];
+				[(SpringBoard *)[UIApplication sharedApplication] handleGotoHomeScreenShortcut:nil];
 			}
 		}];
 	}
