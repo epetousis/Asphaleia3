@@ -161,7 +161,7 @@
 		} else {
 			self.alertSheet.title = titleWithSpacingForIcon(@"Scanning finger...");
 		}
-		[NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
+		self.resetFingerprintTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
 			if (self.useSmallIcon) {
 				self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
 			} else {
@@ -192,6 +192,10 @@
 
 -(void)dismiss {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	if (self.resetFingerprintTimer) {
+		[self.resetFingerprintTimer invalidate];
+		self.resetFingerprintTimer = nil;
+	}
 	%orig;
 }
 
@@ -250,6 +254,15 @@
 %new
 -(BOOL)useSmallIcon {
 	return [objc_getAssociatedObject(self, @selector(useSmallIcon)) boolValue];
+}
+
+%new
+-(void)setResetFingerprintTimer:(NSTimer *)resetFingerprintTimer {
+	objc_setAssociatedObject(self, @selector(resetFingerprintTimer), resetFingerprintTimer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+%new
+-(UIView *)resetFingerprintTimer {
+	return objc_getAssociatedObject(self, @selector(resetFingerprintTimer));
 }
 
 // Other

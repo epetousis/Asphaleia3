@@ -15,6 +15,7 @@
 @property (nonatomic, weak) id<ASAuthenticationAlertDelegate> delegate;
 @property(nonatomic) NSInteger tag;
 @property (nonatomic) UIView *icon;
+@property (nonatomic) NSTimer *resetFingerprintTimer;
 @property BOOL useSmallIcon;
 -(id)initWithTitle:(NSString *)title message:(NSString *)message icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAuthenticationAlertDelegate>)delegate;
 -(id)initWithApplication:(NSString *)identifier message:(NSString *)message delegate:(id<ASAuthenticationAlertDelegate>)delegate;
