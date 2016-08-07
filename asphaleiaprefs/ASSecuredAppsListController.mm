@@ -71,6 +71,7 @@ static UIImage *defaultImage;
                                     @"com.apple.Home.HomeUIService",
                                     @"com.apple.appleseed.FeedbackAssistant",
                                     @"com.apple.Diagnostics.Mitosis",
+                                    @"com.apple.managedconfiguration.MDMRemoteAlertService",
                                     nil];
 
     NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:@"" ascending:YES selector:@selector(localizedStandardCompare:)];
