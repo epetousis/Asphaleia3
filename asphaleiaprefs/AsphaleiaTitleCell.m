@@ -37,7 +37,7 @@
 		tweakThankSubtitle = [[UILabel alloc] initWithFrame:thankSubtitleFrame];
 		[tweakThankSubtitle setNumberOfLines:1];
 		[tweakThankSubtitle setFont:[UIFont fontWithName:@"HelveticaNeue-Regular" size:18]];
-		[tweakThankSubtitle setText:@"Thank you for your purchase."];
+		[tweakThankSubtitle setText:@"BETA BUILD, NOT FINAL PRODUCT"];
 		[tweakThankSubtitle setBackgroundColor:[UIColor clearColor]];
 		[tweakThankSubtitle setTextColor:subtitleColor];
 		[tweakThankSubtitle setTextAlignment:NSTextAlignmentCenter];
