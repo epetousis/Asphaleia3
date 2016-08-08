@@ -93,9 +93,11 @@
 			[self.delegate authAlertView:arg1 dismissed:YES authorised:NO fingerprint:nil];
 		} else if (arg2 == 1) {
 			SBIconView *icon = [self.icon isKindOfClass:objc_getClass("SBIconView")] ? (SBIconView *)self.icon : nil;
+			
+			id delegateReference = self.delegate;
 			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
 				if (authenticated)
-					[self.delegate authAlertView:arg1 dismissed:YES authorised:YES fingerprint:nil];
+					[delegateReference authAlertView:arg1 dismissed:YES authorised:YES fingerprint:nil];
 			}];
 		}
 	}
