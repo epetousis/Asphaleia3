@@ -4,7 +4,7 @@ https://github.com/Sassoty/BioTesting */
 @class ASTouchIDController;
 @protocol SBUIBiometricEventMonitorDelegate
 @required
--(void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
+- (void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
 @end
 
 typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor, unsigned event);
@@ -17,7 +17,7 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 - (void)_startMatching;
 - (void)_setMatchingEnabled:(BOOL)arg1;
 - (BOOL)isMatchingEnabled;
--(BOOL)hasEnrolledIdentities;
+- (BOOL)hasEnrolledIdentities;
 @end
 
 #define TouchIDFingerDown  1
@@ -40,7 +40,7 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 @property (readonly) NSHashTable *oldObservers;
 @property (readonly) id lastMatchedFingerprint;
 @property BOOL shouldBlockLockscreenMonitor;
-+(instancetype)sharedInstance;
--(void)startMonitoring;
--(void)stopMonitoring;
++ (instancetype)sharedInstance;
+- (void)startMonitoring;
+- (void)stopMonitoring;
 @end

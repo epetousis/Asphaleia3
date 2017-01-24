@@ -1,6 +1,5 @@
 ARCHS = armv7 armv7s arm64
-TARGET = iphone:clang:latest
-GO_EASY_ON_ME = 1
+TARGET = iphone:9.2
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = AsphaleiaPrefs
