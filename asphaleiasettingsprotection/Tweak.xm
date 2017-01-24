@@ -9,12 +9,11 @@
 @property (assign,nonatomic) Class detailControllerClass;
 @end
 @interface PrefsListController : PSListController
--(void)lazyLoadBundle:(PSSpecifier *)specifier;
--(id)table;
+- (void)lazyLoadBundle:(PSSpecifier *)specifier;
+- (id)table;
 @end
 
 %hook PrefsListController
-
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (![[ASPreferences sharedInstance] requiresSecurityForPanel:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]]) {
 		%orig;
@@ -28,7 +27,6 @@
 		}
 	}];
 }
-
 %end
 
 %ctor {
