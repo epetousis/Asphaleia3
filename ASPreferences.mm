@@ -105,14 +105,14 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 
 		status = SecItemDelete((__bridge CFDictionaryRef)query);
 
-		return true;
+		return YES;
 	}
 
 	if (status == errSecDecode) {
-		return false;
+		return NO;
 	}
 
-	return false;
+	return YES;
 }
 
 - (id)objectForKey:(NSString *)key {

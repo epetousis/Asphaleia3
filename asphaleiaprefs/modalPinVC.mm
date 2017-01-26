@@ -13,18 +13,19 @@
 #import <sys/sysctl.h>
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 
-@interface AsphaleiaPrefsListController: PSListController {
-}
--(void)goBack;
--(void)authenticated;
-@property BOOL passcodeViewIsTransitioning;
-@end
-@interface passcodeOptions: PSListController {
-}
+@interface UIScreen ()
+- (CGRect)_referenceBounds;
 @end
 
-@interface modalPinVC () {
-}
+@interface AsphaleiaPrefsListController: PSListController
+- (void)goBack;
+- (void)authenticated;
+@property BOOL passcodeViewIsTransitioning;
+@end
+@interface passcodeOptions: PSListController
+@end
+
+@interface modalPinVC ()
 @property UITextField *textField;
 @property (retain) NSString *oldPasscode;
 @property CGFloat screenWidth;
@@ -37,7 +38,7 @@
     [super viewDidLoad];
     self.screenWidth = [UIScreen mainScreen].bounds.size.width;
     self.modalPresentationStyle = UIModalPresentationCurrentContext;
-    self.view = [[UIView alloc]initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.view = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
     UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0,20, self.view.frame.size.width, 44.0)];
     navBar.tintColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
@@ -68,19 +69,19 @@
         _altView = [[UIView alloc]init];
         _altView.frame = CGRectMake(0, 64, self.screenWidth, [UIScreen mainScreen].bounds.size.height - 216 - 64);
 
-        UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
-        dashContainerView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds),((_altView.frame.size.height-20)/2)+7);
+        UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,233,19)];
+        dashContainerView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen]._referenceBounds),((_altView.frame.size.height-20)/2)+7);
         [_altView addSubview:dashContainerView];
 
-        NSMutableArray *overallAray = [[NSMutableArray alloc]init];
-        NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
-        for (int k = 1; k < 5; k++) {
-            UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
+        NSMutableArray *overallAray = [[NSMutableArray alloc] init];
+        NSMutableArray *pageArray = [[NSMutableArray alloc] initWithCapacity:4];
+        for (int k = 1; k < 7; k++) {
+            UIImageView *dashView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
             dashView.frame = CGRectMake(/*86+*/((k-1)*43), 0, 18, 19);
             [dashContainerView addSubview:dashView];
             [pageArray addObject:dashView];
         }
-        [overallAray addObject:[[NSArray alloc]initWithArray:pageArray]];
+        [overallAray addObject:[[NSArray alloc] initWithArray:pageArray]];
 
 
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
@@ -100,7 +101,7 @@
 
         [self.view addSubview:_altView];
 
-        if ([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
+        if ([[NSFileManager defaultManager] fileExistsAtPath:prefpath]){
             NSDictionary *prefs=[[NSDictionary alloc]initWithContentsOfFile:prefpath];
             if ([prefs objectForKey:@"passcode"]) {
                 self.oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
@@ -129,11 +130,11 @@
 
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:8];
         for (int i = 1; i < 3; i++) {
-            NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
+            NSMutableArray *pageArray = [[NSMutableArray alloc] initWithCapacity:4];
             UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
-            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen].bounds),((_scrollView.frame.size.height-20)/2)+7);
+            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen]._referenceBounds),((_scrollView.frame.size.height-20)/2)+7);
             [_scrollView addSubview:dashContainerView];
-            for (int k = 1; k < 5; k++) {
+            for (int k = 1; k < 7; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                 dashView.frame = CGRectMake(/*86+*/(k-1)*43, 0, 18, 19);
                 [dashContainerView addSubview:dashView];
@@ -145,7 +146,7 @@
         }
 
 
-        NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
+        NSMutableArray *labelArray = [[NSMutableArray alloc] initWithCapacity:6];
         UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
@@ -186,11 +187,11 @@
 
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:12];
         for (int i = 1; i < 4; i++) {
-            NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
+            NSMutableArray *pageArray = [[NSMutableArray alloc] initWithCapacity:4];
             UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
-            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen].bounds),((_scrollView.frame.size.height-20)/2)+7);
+            dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen]._referenceBounds),((_scrollView.frame.size.height-20)/2)+7);
             [_scrollView addSubview:dashContainerView];
-            for (int k = 1; k < 5; k++) {
+            for (int k = 1; k < 7; k++) {
                 UIImageView *dashView = [[UIImageView alloc]initWithImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                 dashView.frame = CGRectMake(/*86+*/(k-1)*43, 0, 18, 19);
                 [dashContainerView addSubview:dashView];
@@ -260,7 +261,7 @@
             }
             i++;
         }
-        if (textField.text.length == 4) {
+        if (textField.text.length == 6) {
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 if ([textField.text isEqualToString:self.oldPasscode]) {
                     [(AsphaleiaPrefsListController *)_delegate authenticated];
@@ -288,7 +289,7 @@
             }
             i++;
         }
-        if (textField.text.length == 4) {
+        if (textField.text.length == 6) {
             if (_currentPage == 1) {
                 [self scrollToPage:_currentPage];
                 _currentPage++;
@@ -344,7 +345,7 @@
             }
             i++;
         }
-        if (textField.text.length == 4) {
+        if (textField.text.length == 6) {
             if (_currentPage == 1) {
                 if ([textField.text isEqualToString:self.oldPasscode]) {
                     [self scrollToPage:_currentPage];
