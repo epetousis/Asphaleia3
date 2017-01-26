@@ -278,3 +278,17 @@
 -(double)_entryFieldBottomYDistanceFromNumberPadTopButton;
 -(unsigned long long)numberOfDigits;
 @end
+
+@interface SBUIPasscodeLockViewWithKeypad : UIView
+@property (nonatomic,readonly) NSString * passcode;
+@property (nonatomic,retain) UILabel * statusTitleView;
+-(void)setDelegate:(id)arg1 ;
+-(void)_setLuminosityBoost:(double)arg1 ;
+-(id)initWithLightStyle:(BOOL)arg1 ;
+-(void)setShowsEmergencyCallButton:(BOOL)arg1 ;
+-(void)setBackgroundAlpha:(double)arg1 ;
+-(void)_layoutStatusView;
+-(void)_luminanceBoostDidChange;
+-(void)updateStatusText:(id)arg1 subtitle:(id)arg2 animated:(BOOL)arg3 ;
+-(void)resetForFailedPasscode;
+@end

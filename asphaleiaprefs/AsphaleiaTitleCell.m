@@ -2,8 +2,7 @@
 
 @implementation AsphaleiaTitleCell
 
-- (id)initWithSpecifier:(PSSpecifier *)specifier
-{
+- (id)initWithSpecifier:(PSSpecifier *)specifier {
 	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
 
 	if (self) {
@@ -17,7 +16,7 @@
 
 		tweakTitle = [[UILabel alloc] initWithFrame:frame];
 		[tweakTitle setNumberOfLines:1];
-		[tweakTitle setFont:[UIFont fontWithName:@"HelveticaNeue-UltraLight" size:48]];
+		[tweakTitle setFont:[UIFont systemFontOfSize:48]];
 
 		[tweakTitle setTextColor:[UIColor blackColor]];
 		NSMutableAttributedString *titleAttributedText = [[NSMutableAttributedString alloc] initWithString:@"Asphaleia 3"];
@@ -28,7 +27,7 @@
 
 		tweakSubtitle = [[UILabel alloc] initWithFrame:subtitleFrame];
 		[tweakSubtitle setNumberOfLines:1];
-		[tweakSubtitle setFont:[UIFont fontWithName:@"HelveticaNeue-Regular" size:18]];
+		[tweakSubtitle setFont:[UIFont systemFontOfSize:18]];
 		[tweakSubtitle setText:@"by Sentry and evilgoldfish"];
 		[tweakSubtitle setBackgroundColor:[UIColor clearColor]];
 		[tweakSubtitle setTextColor:subtitleColor];
@@ -36,7 +35,7 @@
 
 		tweakThankSubtitle = [[UILabel alloc] initWithFrame:thankSubtitleFrame];
 		[tweakThankSubtitle setNumberOfLines:1];
-		[tweakThankSubtitle setFont:[UIFont fontWithName:@"HelveticaNeue-Regular" size:18]];
+		[tweakThankSubtitle setFont:[UIFont systemFontOfSize:18]];
 		[tweakThankSubtitle setText:@"BETA BUILD, NOT FINAL PRODUCT"];
 		[tweakThankSubtitle setBackgroundColor:[UIColor clearColor]];
 		[tweakThankSubtitle setTextColor:subtitleColor];
@@ -140,10 +139,10 @@
 		pclose(fp);
 		if ([output length] != 28 && [output length] != 58) {
 			[tweakThankSubtitle setText:@"Please don't pirate."];
-			NSLog(@"This copy of Asphaleia has been pirated. :(");
+			HBLogInfo(@"This copy of Asphaleia has been pirated. :(");
 		}
 		else {
-			NSLog(@"This copy of Asphaleia is legitimate.");
+			HBLogInfo(@"This copy of Asphaleia is legitimate.");
 		}
 
 		NSDateComponents *components = [[NSDateComponents alloc] init];

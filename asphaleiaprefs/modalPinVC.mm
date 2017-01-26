@@ -9,7 +9,7 @@
 #import "modalPinVC.h"
 #import <AudioToolbox/AudioToolbox.h>
 #import <Preferences/PSListController.h>
-#import <sys/socket.h> 
+#import <sys/socket.h>
 #import <sys/sysctl.h>
 #define prefpath @"/var/mobile/Library/Preferences/com.a3tweaks.asphaleia.plist"
 
@@ -32,8 +32,7 @@
 @end
 
 @implementation modalPinVC
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     // NSLog(@"========initted");
     [super viewDidLoad];
     self.screenWidth = [UIScreen mainScreen].bounds.size.width;
@@ -49,8 +48,8 @@
     topView.backgroundColor = [UIColor colorWithRed:0.9725 green:0.9725 blue:0.9725 alpha:1.f];
     [self.view addSubview:topView];
     // [topView release];
-    
-    
+
+
     _textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     _textField.keyboardType = UIKeyboardTypeNumberPad;
     _textField.secureTextEntry = YES;
@@ -62,7 +61,7 @@
     if (_isAuth) {
         UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(rightButtonPressed:)];
         UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:@"Authenticate"];
-        
+
         item.rightBarButtonItem = rightButton;
         item.hidesBackButton = YES;
         [navBar pushNavigationItem:item animated:NO];
@@ -72,7 +71,7 @@
         UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
         dashContainerView.center = CGPointMake(CGRectGetMidX([UIScreen mainScreen].bounds),((_altView.frame.size.height-20)/2)+7);
         [_altView addSubview:dashContainerView];
-        
+
         NSMutableArray *overallAray = [[NSMutableArray alloc]init];
         NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
         for (int k = 1; k < 5; k++) {
@@ -82,14 +81,14 @@
             [pageArray addObject:dashView];
         }
         [overallAray addObject:[[NSArray alloc]initWithArray:pageArray]];
-        
-        
+
+
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
         UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_altView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_altView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
@@ -98,21 +97,21 @@
         // [labelArray release];
         _imageViews = [[NSArray alloc]initWithArray:overallAray];
         // [overallAray release];
-        
+
         [self.view addSubview:_altView];
-        
-        if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
+
+        if ([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
             NSDictionary *prefs=[[NSDictionary alloc]initWithContentsOfFile:prefpath];
-            if([prefs objectForKey:@"passcode"]) {
+            if ([prefs objectForKey:@"passcode"]) {
                 self.oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
             } else {
                 self.oldPasscode = @"";
             }
-        }else{
+        } else {
             self.oldPasscode = @"";
         }
 
-    } else if(_isSet) {
+    } else if (_isSet) {
         UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(rightButtonPressed:)];
         UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:@"Set Passcode"];
         item.rightBarButtonItem = rightButton;
@@ -127,7 +126,7 @@
         [_scrollView setPagingEnabled:YES];
         [_scrollView setDelegate:self];
         _currentPage = 1;
-        
+
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:8];
         for (int i = 1; i < 3; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
@@ -144,31 +143,31 @@
             [overallAray addObject:[[NSArray alloc]initWithArray:pageArray]];
             // [pageArray release];
         }
-        
-        
+
+
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
         UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Re-enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         [overallAray addObject:labelArray];
         // [labelArray release];
         _imageViews = [[NSArray alloc]initWithArray:overallAray];
         // [overallAray release];
-        
+
         [self.view addSubview:_scrollView];
-        
+
     } else {
         UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(rightButtonPressed:)];
         UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:@"Change Passcode"];
@@ -184,7 +183,7 @@
         [_scrollView setPagingEnabled : YES];
         [_scrollView setDelegate:self];
         _currentPage = 1;
-        
+
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:12];
         for (int i = 1; i < 4; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc]initWithCapacity:4];
@@ -201,58 +200,57 @@
             [overallAray addObject:[[NSArray alloc]initWithArray:pageArray]];
             // [pageArray release];
         }
-        
-        
+
+
         NSMutableArray *labelArray = [[NSMutableArray alloc]initWithCapacity:6];
         UILabel *label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your old passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(0, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth, ((_scrollView.frame.size.height-20)/2)+40, self.screenWidth, 20)];
         label.text = @"";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
+
         label = [[UILabel alloc]initWithFrame:CGRectMake(self.screenWidth*2, ((_scrollView.frame.size.height-20)/2)-60, self.screenWidth, 20)];
         label.text = @"Re-enter your new passcode";
         label.textAlignment = NSTextAlignmentCenter; label.font = [UIFont systemFontOfSize:15.f];
         [_scrollView addSubview:label]; [labelArray addObject:label];//[label release];
-        
-        
+
+
         [overallAray addObject:labelArray];
         // [labelArray release];
         _imageViews = [[NSArray alloc]initWithArray:overallAray];
         // [overallAray release];
-        
+
         [self.view addSubview:_scrollView];
-        
-        if([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
+
+        if ([[NSFileManager defaultManager]fileExistsAtPath:prefpath]){
             NSDictionary *prefs=[[NSDictionary alloc]initWithContentsOfFile:prefpath];
-            if([prefs objectForKey:@"passcode"]) {
+            if ([prefs objectForKey:@"passcode"]) {
                 self.oldPasscode = [NSString stringWithFormat:@"%@",[prefs objectForKey:@"passcode"]];
             } else {
                 self.oldPasscode = @"";
             }
-        }else{
+        } else {
             self.oldPasscode = @"";
         }
     }
-    
+
 }
-- (void)textFieldDidChange:(UITextField *)textField
-{
-    if(_isAuth) {
+- (void)textFieldDidChange:(UITextField *)textField {
+    if (_isAuth) {
         __block int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
             if (i <= textField.text.length) {
@@ -274,13 +272,13 @@
                     textField.text = @"";
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:0]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                 }
             });
         }
-    } else if(_isSet) {
+    } else if (_isSet) {
         int i = 1;
         for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
             if (i <= textField.text.length) {
@@ -358,7 +356,7 @@
                     textField.text = @"";
                     i = 1;
                     for (UIImageView *imageView in (NSArray *)[_imageViews objectAtIndex:(_currentPage-1)]) {
-                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]]; 
+                        [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/PreferenceBundles/AsphaleiaPrefs.bundle/dash.png"]];
                         i++;
                     }
                 }
@@ -399,44 +397,38 @@
     }
 }
 
--(id)initToAuthWithDelegate:(id)sender
-{
+- (id)initToAuthWithDelegate:(id)sender {
     _isAuth = 1;
     _delegate = sender;
     self = [super init];
     return self;
 }
--(id)initWithDelegate:(id)sender
-{
+- (id)initWithDelegate:(id)sender {
     _delegate = sender;
     self = [super init];
     return self;
 }
--(id)initToSetPasscode:(id)sender
-{
+- (id)initToSetPasscode:(id)sender {
     _isSet = 1;
     _delegate = sender;
     self = [super init];
     return self;
 }
--(id)initToSetPasscodeFirst:(id)sender
-{
+- (id)initToSetPasscodeFirst:(id)sender {
     _isSet = 1;
     _first = 1;
     _delegate = sender;
     self = [super init];
     return self;
 }
-- (void)scrollToPage:(int)page
-{
+- (void)scrollToPage:(int)page {
     CGRect frame = _scrollView.frame;
     frame.origin.x = frame.size.width * page;
     frame.origin.y = 0;
     [_scrollView scrollRectToVisible:frame animated:YES];
 }
 
-- (void)rightButtonPressed:(UIBarButtonItem *)sender
-{
+- (void)rightButtonPressed:(UIBarButtonItem *)sender {
     if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
         [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:YES];
     if (_isAuth || _first) {
@@ -447,11 +439,10 @@
         if ([_delegate respondsToSelector:@selector(setPasscodeViewIsTransitioning:)])
             [(AsphaleiaPrefsListController *)_delegate setPasscodeViewIsTransitioning:NO];
     }];
-    
+
 }
 
--(NSUInteger)supportedInterfaceOrientations
-{
+- (NSUInteger)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskPortrait;
 }
 @end

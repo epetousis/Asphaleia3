@@ -5,7 +5,7 @@
 #import "Asphaleia.h"
 
 @interface ASPasscodeHandler ()
-@property SBUIPasscodeLockViewSimpleFixedDigitKeypad *passcodeView;
+@property SBUIPasscodeLockViewWithKeypad *passcodeView;
 @property UIWindow *passcodeWindow;
 @property (nonatomic, strong) ASPasscodeHandlerEventBlock eventBlock;
 @end
@@ -46,7 +46,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 	self.passcodeWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	self.passcodeWindow.windowLevel = UIWindowLevelAlert;
 	[self.passcodeWindow _setSecure:YES];
-	self.passcodeView = [[objc_getClass("SBUIPasscodeLockViewSimpleFixedDigitKeypad") alloc] initWithLightStyle:NO numberOfDigits:4];
+	self.passcodeView = [[objc_getClass("SBUIPasscodeLockNumberPad") alloc] initWithLightStyle:NO];
 	[self.passcodeView setShowsEmergencyCallButton:NO];
 	[self.passcodeView setDelegate:(id)self];
 
@@ -67,8 +67,8 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
 	[self.passcodeView _layoutStatusView];
 	iconImageView.center = CGPointMake(CGRectGetMidX(self.passcodeWindow.bounds),self.passcodeView.statusTitleView.center.y/2-5);
 
-	self.passcodeView.luminosityBoost = 0.33;
-	[self.passcodeView _evaluateLuminance];
+	[self.passcodeView _setLuminosityBoost:0.33];
+	[self.passcodeView _luminanceBoostDidChange];
 
 	[self.passcodeWindow addSubview:iconImageView];
   [self.passcodeWindow addSubview:self.passcodeView];
@@ -81,7 +81,7 @@ void showPasscodeView(CFNotificationCenterRef center, void *observer, CFStringRe
                completion:nil];
 }
 
-- (void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewSimpleFixedDigitKeypad *)arg1 {
+- (void)passcodeLockViewPasscodeEntered:(SBUIPasscodeLockViewWithKeypad *)arg1 {
 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 		if (arg1.passcode.length == 4 && [arg1.passcode isEqual:self.passcode]) {
 				[UIView animateWithDuration:.15f delay:0.0
