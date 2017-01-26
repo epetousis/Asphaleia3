@@ -269,21 +269,15 @@
 -(UIImage *)customImage;
 @end
 
-@interface SBUIPasscodeLockViewSimpleFixedDigitKeypad : UIView
+@interface SBUIPasscodeLockViewBase : UIView
+@property (assign,setter=_setLuminosityBoost:,getter=_luminosityBoost,nonatomic) double luminosityBoost;
 @property (nonatomic,readonly) NSString * passcode;
-@property (nonatomic,readonly) unsigned long long numberOfDigits;              //@synthesize numberOfDigits=_numberOfDigits - In the implementation block
--(id)initWithLightStyle:(BOOL)arg1 numberOfDigits:(unsigned long long)arg2 ;
--(id)initWithLightStyle:(BOOL)arg1 ;
--(id)_newEntryField;
--(double)_entryFieldBottomYDistanceFromNumberPadTopButton;
--(unsigned long long)numberOfDigits;
+-(void)_evaluateLuminance;
 @end
 
-@interface SBUIPasscodeLockViewWithKeypad : UIView
-@property (nonatomic,readonly) NSString * passcode;
+@interface SBUIPasscodeLockViewWithKeypad : SBUIPasscodeLockViewBase
 @property (nonatomic,retain) UILabel * statusTitleView;
 -(void)setDelegate:(id)arg1 ;
--(void)_setLuminosityBoost:(double)arg1 ;
 -(id)initWithLightStyle:(BOOL)arg1 ;
 -(void)setShowsEmergencyCallButton:(BOOL)arg1 ;
 -(void)setBackgroundAlpha:(double)arg1 ;
@@ -291,4 +285,13 @@
 -(void)_luminanceBoostDidChange;
 -(void)updateStatusText:(id)arg1 subtitle:(id)arg2 animated:(BOOL)arg3 ;
 -(void)resetForFailedPasscode;
+@end
+
+@interface SBUIPasscodeLockViewSimpleFixedDigitKeypad : SBUIPasscodeLockViewWithKeypad
+@property (nonatomic,readonly) unsigned long long numberOfDigits;              //@synthesize numberOfDigits=_numberOfDigits - In the implementation block
+-(id)initWithLightStyle:(BOOL)arg1 numberOfDigits:(unsigned long long)arg2 ;
+-(id)initWithLightStyle:(BOOL)arg1 ;
+-(id)_newEntryField;
+-(double)_entryFieldBottomYDistanceFromNumberPadTopButton;
+-(unsigned long long)numberOfDigits;
 @end
