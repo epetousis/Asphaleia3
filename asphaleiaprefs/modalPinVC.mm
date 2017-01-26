@@ -131,7 +131,7 @@
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:8];
         for (int i = 1; i < 3; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc] initWithCapacity:4];
-            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
+            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,233,19)];
             dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen]._referenceBounds),((_scrollView.frame.size.height-20)/2)+7);
             [_scrollView addSubview:dashContainerView];
             for (int k = 1; k < 7; k++) {
@@ -188,7 +188,7 @@
         NSMutableArray *overallAray = [[NSMutableArray alloc]initWithCapacity:12];
         for (int i = 1; i < 4; i++) {
             NSMutableArray *pageArray = [[NSMutableArray alloc] initWithCapacity:4];
-            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,147,19)];
+            UIView *dashContainerView = [[UIView alloc] initWithFrame:CGRectMake(0,0,233,19)];
             dashContainerView.center = CGPointMake(((i-1)*self.screenWidth)+CGRectGetMidX([UIScreen mainScreen]._referenceBounds),((_scrollView.frame.size.height-20)/2)+7);
             [_scrollView addSubview:dashContainerView];
             for (int k = 1; k < 7; k++) {
