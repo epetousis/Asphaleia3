@@ -14,7 +14,7 @@
 @end
 
 %hook PrefsListController
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (![[ASPreferences sharedInstance] requiresSecurityForPanel:[[(PSTableCell *)[tableView cellForRowAtIndexPath:indexPath] specifier] identifier]]) {
 		%orig;
 		return;

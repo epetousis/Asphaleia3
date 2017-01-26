@@ -4,7 +4,7 @@
 
 @implementation ASCreatorsListController
 
-- (id)specifiers {
+- (NSArray *)specifiers {
     return nil;
 }
 
