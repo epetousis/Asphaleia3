@@ -26,7 +26,7 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 include $(THEOS)/makefiles/bundle.mk
 
 after-install::
-	install.exec "killall -9 backboardd"
+	install.exec "killall -9 SpringBoard"
 SUBPROJECTS += asphaleiaprefs
 SUBPROJECTS += asphaleiaphotosprotection
 SUBPROJECTS += asphaleiaflipswitch
