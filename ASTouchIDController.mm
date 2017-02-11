@@ -48,7 +48,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	return sharedInstance;
 }
 
-- (void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
+- (void)biometricKitInterface:(id)monitor handleEvent:(unsigned)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
 	if (!self.isMonitoring || ![ASPreferences isTouchIDDevice])
 		return;
@@ -153,7 +153,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 		}
 	}
 
-	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
+	SBUIBiometricResource *monitor = [objc_getClass("SBUIBiometricResource") sharedInstance];
 	previousMatchingSetting = [monitor isMatchingEnabled];
 
 	_oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
@@ -175,8 +175,8 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 	// Begin listening :D
 	[monitor addObserver:self];
-	[monitor _setMatchingEnabled:YES];
-	[monitor _startMatching];
+	//monitor.matchingEnabled = YES;
+	//[monitor _startMatching];
 
 	starting = NO;
 	self.isMonitoring = YES;
@@ -190,7 +190,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	}
 	stopping = YES;
 
-	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
+	SBUIBiometricResource *monitor = [objc_getClass("SBUIBiometricResource") sharedInstance];
 	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
 	if (observers && [observers containsObject:self]) {
 		[monitor removeObserver:self];
@@ -201,7 +201,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 		}
 	}
 	_oldObservers = nil;
-	[monitor _setMatchingEnabled:previousMatchingSetting];
+	//monitor.matchingEnabled = previousMatchingSetting;
 	notify_post(ENABLE_VH);
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
