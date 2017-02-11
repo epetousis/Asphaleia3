@@ -1,4 +1,4 @@
-ARCHS = armv7 armv7s arm64
+ARCHS = armv7 arm64
 TARGET = iphone:9.2
 GO_EASY_ON_ME = 1
 
