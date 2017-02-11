@@ -2,22 +2,22 @@
 https://github.com/Sassoty/BioTesting */
 #import "Asphaleia.h"
 @class ASTouchIDController;
-@protocol SBUIBiometricEventMonitorDelegate
+@protocol SBUIBiometricResource
 @required
-- (void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event;
+- (void)biometricKitInterface:(id)arg1 handleEvent:(unsigned)arg2;
 @end
 
 typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor, unsigned event);
 
 #define asphaleiaLogMsg(str) NSLog(@"[Asphaleia] %@",str)
 
-@interface SBUIBiometricEventMonitor : NSObject
+@interface SBUIBiometricResource : NSObject
++ (id)sharedInstance;
 - (void)addObserver:(id)arg1;
 - (void)removeObserver:(id)arg1;
 - (void)_startMatching;
-- (void)_setMatchingEnabled:(BOOL)arg1;
 - (BOOL)isMatchingEnabled;
-- (BOOL)hasEnrolledIdentities;
+- (BOOL)hasEnrolledFingers;
 @end
 
 #define TouchIDFingerDown  1
@@ -27,7 +27,7 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 #define TouchIDMaybeMatched 4
 #define TouchIDNotMatched  9
 
-@interface ASTouchIDController : NSObject <SBUIBiometricEventMonitorDelegate> {
+@interface ASTouchIDController : NSObject <SBUIBiometricResource> {
 	BOOL starting;
 	BOOL stopping;
 	BOOL previousMatchingSetting;
