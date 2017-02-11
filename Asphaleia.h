@@ -170,6 +170,7 @@
 @interface BiometricKit : NSObject
 +(id)manager;
 -(NSDictionary *)identities:(id)object;
+-(BOOL)isTouchIDCapable;
 @end
 
 @interface SBLockScreenManager : NSObject

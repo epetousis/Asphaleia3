@@ -11,9 +11,10 @@ static UITextField *wifiTextField;
 
 - (NSArray *)specifiers {
 	if (!_specifiers) {
-        _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions-AdvancedOptions" target:self] retain];
+      _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions-AdvancedOptions" target:self] retain];
   }
-  if (!isTouchIDDevice()) {
+	
+	if (!isTouchIDDevice()) {
 			NSMutableArray *mutableSpecifiers = [_specifiers mutableCopy];
       for (PSSpecifier *specifier in [_specifiers copy]) {
           if ([[specifier identifier] isEqualToString:@"fingerprintCell"] || [[specifier identifier] isEqualToString:@"fingerprintGroupCell"])
@@ -21,6 +22,7 @@ static UITextField *wifiTextField;
       }
 			_specifiers = [mutableSpecifiers copy];
   }
+
   return _specifiers;
 }
 

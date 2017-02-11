@@ -74,8 +74,8 @@ void preferencesChangedCallback(CFNotificationCenterRef center, void *observer, 
 }
 
 + (BOOL)isTouchIDDevice {
-	if (objc_getClass("SBUIBiometricEventMonitor")) {
-		return [[objc_getClass("SBUIBiometricEventMonitor") sharedInstance] hasEnrolledIdentities];
+	if (objc_getClass("BiometricKit")) {
+		return [[objc_getClass("BiometricKit") manager] isTouchIDCapable];
 	} else {
 		CPDistributedMessagingCenter *centre = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.a3tweaks.asphaleia.xpc"];
 		rocketbootstrap_distributedmessagingcenter_apply(centre);
