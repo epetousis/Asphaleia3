@@ -9,17 +9,19 @@
 
 @implementation ASPasscodeOptionsListController
 
-- (NSArray *)specifiers {
-	if (!_specifiers) {
-        _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions" target:self] retain];
-  }
-  dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
-  Class la = objc_getClass("LAActivator");
-  if (!la) {
-      [(PSSpecifier *)_specifiers[10] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
-      [(PSSpecifier *)_specifiers[11] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
-  }
-  if (!isTouchIDDevice()) {
+- (NSArray*)specifiers {
+		if (!_specifiers) {
+	      _specifiers = [[self loadSpecifiersFromPlistName:@"PasscodeOptions" target:self] retain];
+	  }
+		
+	  dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
+	  Class la = objc_getClass("LAActivator");
+	  if (!la) {
+	      [(PSSpecifier *)_specifiers[10] setProperty:@"Activator is required to use this feature." forKey:@"footerText"];
+	      [(PSSpecifier *)_specifiers[11] setProperty:[NSNumber numberWithBool:NO] forKey:@"enabled"];
+	  }
+
+		if (!isTouchIDDevice()) {
 			NSMutableArray *mutableSpecifiers = [_specifiers mutableCopy];
       for (PSSpecifier *specifier in [_specifiers copy]) {
           if ([[specifier identifier] isEqualToString:@"vibrateSwitchCell"] || [[specifier identifier] isEqualToString:@"touchIDSwitchCell"] || [[specifier identifier] isEqualToString:@"touchIDGroupCell"])
@@ -27,8 +29,9 @@
       }
 			_specifiers = [mutableSpecifiers copy];
   }
-  return _specifiers;
-}
+
+	  return _specifiers;
+	}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
@@ -83,7 +86,7 @@
     [defaults setObject:value forKey:specifier.properties[@"key"]];
     [defaults writeToFile:PreferencesPath atomically:YES];
     CFStringRef toPost = (CFStringRef)specifier.properties[@"PostNotification"];
-    if (toPost) CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), toPost, NULL, NULL, YES);
 
     if ([specifier.properties[@"key"] isEqualToString:@"simplePasscode"] && ![value boolValue] && isTouchIDDevice()) {
         PSSpecifier *touchIDSpecifier;

@@ -34,7 +34,7 @@
 - (void)loveMeh {
 	if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
 		SLComposeViewController *controller = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeTwitter];
-		[controller setInitialText:@"Securing my apps with #Asphaleia3 from @A3tweaks!"];
+		[controller setInitialText:@"Securing my apps with #AsphaleiaX from @ShadeZepheri!"];
 
 		[(UIViewController *)[[[[[UIApplication sharedApplication] keyWindow] subviews] objectAtIndex:0] nextResponder] presentViewController:controller animated:YES completion:NULL];
 	} else {
@@ -66,7 +66,7 @@
 
 - (void)presentAuthView {
 	// NSLog(@"================presentAuthView");
-	if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:kPreferencesPath] objectForKey:@"passcode"] length] == 4) {
+	if([[NSFileManager defaultManager]fileExistsAtPath:kPreferencesPath] && [(NSString *)[[NSDictionary dictionaryWithContentsOfFile:kPreferencesPath] objectForKey:@"passcode"] length] == 6) {
 		// NSLog(@"================presentAuthView def");
 		pinVC = [[modalPinVC alloc] initToAuthWithDelegate:self];
 		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
@@ -89,16 +89,16 @@
 	_enteredCorrectly = YES;
 }
 
--(void)showSecurity {
-	[self pushController:[[ASSecuredItemsListController alloc]init]];
+- (void)showSecurity {
+	[self pushController:[[ASSecuredItemsListController alloc] init]];
 }
 
--(void)showCreators {
-	[self pushController:[[ASCreatorsListController alloc]init]];
+- (void)showCreators {
+	[self pushController:[[ASCreatorsListController alloc] init]];
 }
 
--(void)showPasscodeOptions {
-	[self pushController:[[ASPasscodeOptionsListController alloc]init]];
+- (void)showPasscodeOptions {
+	[self pushController:[[ASPasscodeOptionsListController alloc] init]];
 }
 
 - (void)showMailDialog {
@@ -106,7 +106,7 @@
 	if ([MFMailComposeViewController canSendMail]) {
 		MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
 		mailViewController.mailComposeDelegate = (id<MFMailComposeViewControllerDelegate>)self;
-		[mailViewController setSubject:@"Asphaleia 3 Support"];
+		[mailViewController setSubject:@"Asphaleia X Support"];
 		[mailViewController setToRecipients:[NSArray arrayWithObject:@"ziroalpha@gmail.com"]];
 		size_t size;
 		sysctlbyname("hw.machine", NULL, &size, NULL, 0);

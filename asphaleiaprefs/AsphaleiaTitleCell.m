@@ -44,6 +44,8 @@
 		[self addSubview:tweakTitle];
 		[self addSubview:tweakSubtitle];
 		[self addSubview:tweakThankSubtitle];
+	}
+
 	return self;
 }
 
