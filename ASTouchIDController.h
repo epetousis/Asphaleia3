@@ -11,13 +11,13 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 
 #define asphaleiaLogMsg(str) NSLog(@"[Asphaleia] %@",str)
 
-@interface SBUIBiometricEventMonitor : NSObject
+@interface SBUIBiometricResource : NSObject
++ (id)sharedInstance;
 - (void)addObserver:(id)arg1;
 - (void)removeObserver:(id)arg1;
-- (void)_startMatching;
-- (void)_setMatchingEnabled:(BOOL)arg1;
+- (void)_reevaluateMatching;
 - (BOOL)isMatchingEnabled;
--(BOOL)hasEnrolledIdentities;
+- (BOOL)hasEnrolledIdentities;
 @end
 
 #define TouchIDFingerDown  1
