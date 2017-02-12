@@ -48,7 +48,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	return sharedInstance;
 }
 
-- (void)biometricKitInterface:(id)monitor handleEvent:(unsigned)event {
+- (void)biometricEventMonitor:(id)monitor handleBiometricEvent:(unsigned)event {
 	//[[objc_getClass("SBScreenFlash") mainScreenFlasher] flashWhiteWithCompletion:nil];
 	if (!self.isMonitoring || ![ASPreferences isTouchIDDevice])
 		return;
@@ -66,19 +66,18 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.fingerup"), NULL, NULL, YES);
 			break;
 		}
-		case TouchIDFingerHeld: {
+		case TouchIDFingerHeld:
 			asphaleiaLogMsg(@"Finger held");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.fingerheld" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.fingerheld"), NULL, NULL, YES);
 			break;
-			/*case TouchIDMatched:
+		/*case TouchIDMatched:
 			asphaleiaLogMsg(@"Finger matched");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authsuccess" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.authsuccess"), NULL, NULL, YES);
 			[self stopMonitoring];
 			_shouldBlockLockscreenMonitor = NO;
 			break;*/
-		}
 		case TouchIDNotMatched: {
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authfailed" object:self];
@@ -89,7 +88,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 			break;
 		}
 		// For the new iPhone
-		case 10:  {
+		case 10: {
 			asphaleiaLogMsg(@"Authentication failed");
 			[[NSNotificationCenter defaultCenter] postNotificationName:@"com.a3tweaks.asphaleia.authfailed" object:self];
 			CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.authfailed"), NULL, NULL, YES);
@@ -153,7 +152,9 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 		}
 	}
 
-	SBUIBiometricResource *monitor = [objc_getClass("SBUIBiometricResource") sharedInstance];
+	HBLogDebug(@"BiometricKit delegate: %@", NSStringFromClass([[objc_getClass("BiometricKit") manager] delegate]))
+
+	SBUIBiometricEventMonitor *monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	previousMatchingSetting = [monitor isMatchingEnabled];
 
 	_oldObservers = [MSHookIvar<NSHashTable*>(monitor, "_observers") copy];
@@ -175,8 +176,8 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 	// Begin listening :D
 	[monitor addObserver:self];
-	//monitor.matchingEnabled = YES;
-	//[monitor _startMatching];
+	[monitor _setMatchingEnabled:YES];
+	[monitor _startMatching];
 
 	starting = NO;
 	self.isMonitoring = YES;
@@ -190,23 +191,23 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	}
 	stopping = YES;
 
-	SBUIBiometricResource *monitor = [objc_getClass("SBUIBiometricResource") sharedInstance];
+	SBUIBiometricEventMonitor* monitor = [[objc_getClass("BiometricKit") manager] delegate];
 	NSHashTable *observers = MSHookIvar<NSHashTable*>(monitor, "_observers");
 	if (observers && [observers containsObject:self]) {
 		[monitor removeObserver:self];
 	}
 	if (_oldObservers && observers) {
 		for (id observer in _oldObservers) {
-			[monitor addObserver:observer];
+			[monitor addObserver:observer];					
 		}
 	}
 	_oldObservers = nil;
-	//monitor.matchingEnabled = previousMatchingSetting;
+	[monitor _setMatchingEnabled:previousMatchingSetting];
 	notify_post(ENABLE_VH);
 
 	id activator = [objc_getClass("LAActivator") sharedInstance];
-    if (activator && activatorListenerNames && activatorListenerNamesSpringBoard) {
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
+  if (activator && activatorListenerNames && activatorListenerNamesSpringBoard) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
 			id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
 			id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
 			id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
@@ -226,8 +227,8 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 					[activator addListenerAssignment:listenerName toEvent:eventLockscreen];
 				}
 			}
-      });
-    }
+		});
+	}
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");
