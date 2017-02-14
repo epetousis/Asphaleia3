@@ -94,7 +94,7 @@
 			<key>key</key>
 			<string>timeInterval</string>
 			<key>label</key>
-			<string>Require Authorisation</string>
+			<string>Require Authorization</string>
 			<key>validTitles</key>
 			<array>
 				<string>Immediately</string>
