@@ -1,4 +1,3 @@
-#import <SpringBoardUI/SBAlertItem.h>
 #import "Asphaleia.h"
 
 @class ASAuthenticationAlert;
@@ -19,7 +18,7 @@
 @property BOOL useSmallIcon;
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message icon:(UIView *)icon smallIcon:(BOOL)useSmallIcon delegate:(id<ASAuthenticationAlertDelegate>)delegate;
 - (instancetype)initWithApplication:(NSString *)identifier message:(NSString *)message delegate:(id<ASAuthenticationAlertDelegate>)delegate;
-- (id)alertController;
+- (_SBAlertController*)alertController;
 - (void)show;
 
 @end

@@ -296,3 +296,17 @@
 -(double)_entryFieldBottomYDistanceFromNumberPadTopButton;
 -(unsigned long long)numberOfDigits;
 @end
+
+@interface UIAlertController ()
+@end
+
+@interface _SBAlertController : UIAlertController
+@end
+
+@interface SBAlertItem : NSObject {
+	_SBAlertController* _alertController;
+}
+- (id)alertController;
+- (void)dismiss;
+- (void)configure:(BOOL)arg1 requirePasscodeForActions:(BOOL)arg2;
+@end
