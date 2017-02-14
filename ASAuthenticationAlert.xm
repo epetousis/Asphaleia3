@@ -72,15 +72,19 @@
 - (void)configure:(BOOL)configure requirePasscodeForActions:(BOOL)requirePasscode {
 	%orig;
 	if (self.useSmallIcon) {
-		self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
+		[self alertController].title = titleWithSpacingForSmallIcon(self.title);
 		self.icon.center = CGPointMake(270/2,34);
 	} else {
-		self.alertSheet.title = titleWithSpacingForIcon(self.title);
+		[self alertController].title = titleWithSpacingForIcon(self.title);
 		self.icon.center = CGPointMake(270/2,41);
 	}
-	self.alertSheet.message = self.message;
-	[self.alertSheet addButtonWithTitle:@"Cancel"];
-	[self.alertSheet addButtonWithTitle:@"Passcode"];
+	[self alertController].message = self.message;
+
+	UIAlertAction *cancelButton = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:nil];
+	UIAlertAction *passcodeButton = [UIAlertAction actionWithTitle:@"Passcode" style:UIAlertActionStyleDefault handler:nil];
+
+	[[self alertController] addAction:cancelButton];
+	[[self alertController] addAction:passcodeButton];
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[self addSubviewToAlert:self.icon];
 	});
@@ -161,15 +165,15 @@
 	NSString *name = [notification name];
 	if ([name isEqualToString:@"com.a3tweaks.asphaleia.fingerdown"]) {
 		if (self.useSmallIcon) {
-			self.alertSheet.title = titleWithSpacingForSmallIcon(@"Scanning finger...");
+			[self alertController].title = titleWithSpacingForSmallIcon(@"Scanning finger...");
 		} else {
-			self.alertSheet.title = titleWithSpacingForIcon(@"Scanning finger...");
+			[self alertController].title = titleWithSpacingForIcon(@"Scanning finger...");
 		}
 		self.resetFingerprintTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 block:^{
 			if (self.useSmallIcon) {
-				self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
+				[self alertController].title = titleWithSpacingForSmallIcon(self.title);
 			} else {
-				self.alertSheet.title = titleWithSpacingForIcon(self.title);
+				[self alertController].title = titleWithSpacingForIcon(self.title);
 			}
 		} repeats:NO];
 		if ([[ASAuthenticationController sharedInstance] fingerglyph]) {
@@ -189,9 +193,9 @@
 		}
 	} else if ([name isEqualToString:@"com.a3tweaks.asphaleia.authfailed"]) {
 		if (self.useSmallIcon) {
-			self.alertSheet.title = titleWithSpacingForSmallIcon(self.title);
+			[self alertController].title = titleWithSpacingForSmallIcon(self.title);
 		} else {
-			self.alertSheet.title = titleWithSpacingForIcon(self.title);
+			[self alertController].title = titleWithSpacingForIcon(self.title);
 		}
 		if ([[ASAuthenticationController sharedInstance] fingerglyph]) {
 			[[[ASAuthenticationController sharedInstance] fingerglyph] setState:0 animated:YES completionHandler:nil];
@@ -212,7 +216,7 @@
 %new
 - (void)setTitle:(NSString *)title {
 	objc_setAssociatedObject(self, @selector(title), title, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-	self.alertSheet.title = title;
+	[self alertController].title = title;
 }
 %new
 - (NSString *)title {
@@ -222,7 +226,7 @@
 %new
 - (void)setMessage:(NSString *)message {
 	objc_setAssociatedObject(self, @selector(message), message, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-	self.alertSheet.message = message;
+	[self alertController].message = message;
 }
 %new
 - (NSString *)message {
