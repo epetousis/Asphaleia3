@@ -4,21 +4,21 @@ https://github.com/Sassoty/BioTesting */
 @class ASTouchIDController;
 @protocol _SBUIBiometricKitInterfaceDelegate
 @required
-- (void)biometricKitInterface:(id)arg1 handleEvent:(unsigned long long)arg2;
+- (void)biometricKitInterface:(id)interface handleEvent:(unsigned long long)event;
 @end
 
 typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor, unsigned event);
 
 #define asphaleiaLogMsg(str) NSLog(@"[Asphaleia] %@",str)
 
-@interface SBUIBiometricResource : NSObject
-+ (id)sharedInstance;
-- (void)addObserver:(id)arg1;
-- (void)removeObserver:(id)arg1;
-- (void)_reevaluateMatching;
-- (BOOL)isMatchingEnabled;
-- (BOOL)hasEnrolledIdentities;
+@interface _SBUIBiometricKitInterface : NSObject
+@property (assign,nonatomic) id<_SBUIBiometricKitInterfaceDelegate> delegate;
+- (void)cancel;
+- (void)setDelegate:(id<_SBUIBiometricKitInterfaceDelegate>)arg1;
+- (int)detectFingerWithOptions:(id)arg1 ;
+- (int)matchWithMode:(unsigned long long)arg1 andCredentialSet:(id)arg2;
 @end
+
 
 #define TouchIDFingerDown  1
 #define TouchIDFingerUp    0
@@ -30,14 +30,13 @@ typedef void (^BTTouchIDEventBlock) (ASTouchIDController *controller, id monitor
 @interface ASTouchIDController : NSObject <_SBUIBiometricKitInterfaceDelegate> {
 	BOOL starting;
 	BOOL stopping;
-	BOOL previousMatchingSetting;
 	NSArray *activatorListenerNames;
 	NSArray *activatorListenerNamesSpringBoard;
 	NSArray *activatorListenerNamesLS;
 }
 @property (nonatomic, strong) BTTouchIDEventBlock biometricEventBlock;
 @property (readonly) BOOL isMonitoring;
-@property (readonly) NSHashTable *oldObservers;
+@property (readonly) id oldDelegate;
 @property (readonly) id lastMatchedFingerprint;
 @property BOOL shouldBlockLockscreenMonitor;
 + (instancetype)sharedInstance;
