@@ -317,11 +317,11 @@ static BOOL searchControllerAuthenticating;
 }
 %end
 
-%hook SBControlCenterController
+%hook CCUIControlCenterViewController
 static BOOL controlCentreAuthenticating;
 static BOOL controlCentreHasAuthenticated;
 
-- (void)presentAnimated:(BOOL)animated completion:(id)completion {
+- (void)controlCenterWillPresent {
 	if (controlCentreAuthenticating) {
 		return;
 	}
@@ -334,34 +334,16 @@ static BOOL controlCentreHasAuthenticated;
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
-	controlCentreAuthenticating = NO;
-	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
-	if (!wasCancelled) {
-		controlCentreHasAuthenticated = YES;
-		%orig;
-	}
+		controlCentreAuthenticating = NO;
+		[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+		if (!wasCancelled) {
+			controlCentreHasAuthenticated = YES;
+			%orig;
+		}
 	}];
 }
 
-- (void)beginTransitionWithTouchLocation:(CGPoint)touchLocation {
-	if (![[ASPreferences sharedInstance] secureControlCentre] || controlCentreHasAuthenticated || controlCentreAuthenticating) {
-		%orig;
-		return;
-	}
-
-	controlCentreAuthenticating = YES;
-	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
-	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
-	controlCentreAuthenticating = NO;
-	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
-	if (!wasCancelled) {
-		controlCentreHasAuthenticated = YES;
-		[self presentAnimated:YES];
-	}
-	}];
-}
-
-- (void)_endPresentation {
+- (void)controlCenterDidDismiss {
 	controlCentreHasAuthenticated = NO;
 	controlCentreAuthenticating = NO;
 	%orig;
