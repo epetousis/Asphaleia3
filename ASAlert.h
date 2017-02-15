@@ -1,4 +1,4 @@
-#import <SpringBoardUI/SBAlertItem.h>
+#import "Asphaleia.h"
 
 @class ASAlert;
 

@@ -80,35 +80,38 @@
 	}
 	[self alertController].message = self.message;
 
-	UIAlertAction *cancelButton = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:nil];
-	UIAlertAction *passcodeButton = [UIAlertAction actionWithTitle:@"Passcode" style:UIAlertActionStyleDefault handler:nil];
+	UIAlertAction *cancelButton = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
+		[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
+		if (self.delegate) {
+			[self.delegate authAlertView:self dismissed:YES authorised:NO fingerprint:nil];
+		}
+
+		[self dismiss];
+	}];
+
+	UIAlertAction *passcodeButton = [UIAlertAction actionWithTitle:@"Passcode" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
+		[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
+		if (self.delegate) {
+			SBIconView *icon = [self.icon isKindOfClass:%c(SBIconView)] ? (SBIconView *)self.icon : nil;
+
+			id delegateReference = self.delegate;
+			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
+				if (authenticated) {
+					[delegateReference authAlertView:self dismissed:YES authorised:YES fingerprint:nil];
+				}
+			}];
+		}
+
+		[self dismiss];
+	}];
 
 	[[self alertController] addAction:cancelButton];
 	[[self alertController] addAction:passcodeButton];
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[self addSubviewToAlert:self.icon];
 	});
-}
-
-- (void)alertView:(id)arg1 clickedButtonAtIndex:(int)arg2 {
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.a3tweaks.asphaleia.stopmonitoring"), NULL, NULL, YES);
-	[[ASAuthenticationController sharedInstance] setCurrentAuthAlert:nil];
-	if (self.delegate) {
-		if (arg2 == 0) {
-			[self.delegate authAlertView:arg1 dismissed:YES authorised:NO fingerprint:nil];
-		} else if (arg2 == 1) {
-			SBIconView *icon = [self.icon isKindOfClass:%c(SBIconView)] ? (SBIconView *)self.icon : nil;
-
-			id delegateReference = self.delegate;
-			[[ASPasscodeHandler sharedInstance] showInKeyWindowWithPasscode:[[ASPreferences sharedInstance] getPasscode] iconView:icon eventBlock:^void(BOOL authenticated){
-			if (authenticated) {
-				[delegateReference authAlertView:arg1 dismissed:YES authorised:YES fingerprint:nil];
-			}
-			}];
-		}
-	}
-
-	[self dismiss];
 }
 
 - (BOOL)shouldShowInLockScreen {

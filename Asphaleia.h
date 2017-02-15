@@ -139,11 +139,11 @@
 -(void)asphaleia_updateLabelWithText:(NSString *)text;
 @end
 
-@interface SBSearchViewController : UIViewController
-+(SBSearchViewController *)sharedInstance;
--(void)cancelButtonPressed;
--(void)_setShowingKeyboard:(BOOL)keyboard;
--(void)dismiss;
+@interface SPUISearchHeader : UIView
+-(void)cancelButtonClicked:(id)arg1;
+-(BOOL)textFieldShouldReturn:(id)arg1 ;
+-(void)focusSearchField;
+-(void)unfocusSearchField;
 @end
 
 @interface SBUIController : NSObject
@@ -151,10 +151,13 @@
 +(id)sharedInstance;
 -(BOOL)isAppSwitcherShowing;
 -(BOOL)clickedMenuButton;
+-(BOOL)handleHomeButtonDoublePressDown;
 @end
 
 @interface SpringBoard : NSObject
 -(void)_revealSpotlight;
+-(void)_runHomeScreenIconPullToSpotlight;
+-(void)_runHomeScreenIconPullToSpotlightDismiss;
 -(SBApplication *)_accessibilityFrontMostApplication;
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result;
 -(BOOL)_requestPermissionToOpenURL:(id)openURL withApplication:(id)application sender:(id)sender;
