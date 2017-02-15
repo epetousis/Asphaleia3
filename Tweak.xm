@@ -58,7 +58,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 		%orig;
 }
 
-- (void)iconHandleLongPress:(SBIconView *)iconView {
+- (void)iconHandleLongPress:(SBIconView *)iconView withFeedbackBehavior:(id)arg2 {
 	if (self.isEditing || ![[ASPreferences sharedInstance] secureAppArrangement]) {
 		%orig;
 		return;
@@ -282,19 +282,10 @@ static BOOL searchControllerAuthenticating;
 - (void)focusSearchField {
 	%orig;
 	if (!searchControllerHasAuthenticated && !searchControllerAuthenticating && [[ASPreferences sharedInstance] secureSpotlight]) {
-		HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
-		HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
-
 		[self unfocusSearchField];
-
-		HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
-		HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
-
 		[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertSpotlight dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
-			HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
-			HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
 			searchControllerHasAuthenticated = YES;
 			[self focusSearchField];
 		}
