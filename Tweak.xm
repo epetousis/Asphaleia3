@@ -169,7 +169,7 @@ void DeregisterForTouchIDNotifications(id observer) {
 %hook SBUIController
 BOOL switcherAuthenticating;
 
-- (void)_toggleSwitcher {
+- (void)_accessibilityWillBeginAppSwitcherRevealAnimation {
 	asphaleiaLog();
 	if (![[ASPreferences sharedInstance] secureSwitcher]) {
 		%orig;
@@ -193,7 +193,7 @@ BOOL switcherAuthenticating;
 	}
 }
 
-- (BOOL)clickedMenuButton {
+- (BOOL)handleHomeButtonSinglePressUp {
 	if (![[ASAuthenticationController sharedInstance] currentAuthAlert]) {
 		return %orig;
 	}
@@ -275,33 +275,35 @@ UIWindow *blurredWindow;
 }
 %end
 
-%hook SBSearchViewController
+%hook SPUISearchHeader
 static BOOL searchControllerHasAuthenticated;
 static BOOL searchControllerAuthenticating;
 
-- (void)_setShowingKeyboard:(BOOL)keyboard {
+- (void)focusSearchField {
 	%orig;
-	if (keyboard && !searchControllerHasAuthenticated && !searchControllerAuthenticating && [[ASPreferences sharedInstance] secureSpotlight]) {
-		[self cancelButtonPressed];
+	if (!searchControllerHasAuthenticated && !searchControllerAuthenticating && [[ASPreferences sharedInstance] secureSpotlight]) {
+		HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
+		HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
+
+		[self unfocusSearchField];
+
+		HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
+		HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
+
 		[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertSpotlight dismissedHandler:^(BOOL wasCancelled) {
 		searchControllerAuthenticating = NO;
 		if (!wasCancelled) {
+			HBLogDebug(searchControllerHasAuthenticated ? @"YES" : @"NO");
+			HBLogDebug(searchControllerAuthenticating ? @"YES" : @"NO");
 			searchControllerHasAuthenticated = YES;
-			[(SpringBoard *)[UIApplication sharedApplication] _revealSpotlight];
-			[self _setShowingKeyboard:YES];
+			[self focusSearchField];
 		}
 		}];
 		searchControllerAuthenticating = YES;
 	}
 }
 
-- (void)_handleDismissGesture {
-	searchControllerHasAuthenticated = NO;
-	searchControllerAuthenticating = NO;
-	%orig;
-}
-
-- (void)dismiss {
+-(void)unfocusSearchField {
 	searchControllerHasAuthenticated = NO;
 	searchControllerAuthenticating = NO;
 	%orig;
@@ -644,40 +646,6 @@ BOOL currentBannerAuthenticated;
 			%orig;
 		}
 	}];
-}
-%end
-
-%hook SBUIBiometricEventMonitor
-
-/*- (void)_setMatchingEnabled:(BOOL)arg1 {
-	BOOL deviceLocked = MSHookIvar<BOOL>(self, "_deviceLocked");
-	BOOL screenOn = MSHookIvar<BOOL>(self, "_screenIsOn");
-	if (!arg1 && !deviceLocked && screenOn)
-		return;
-	else
-		%orig;
-}*/
-
-- (void)removeObserver:(id)arg1 {
-	NSHashTable *currentObservers = MSHookIvar<NSHashTable*>(self, "_observers");
-	if ([[ASTouchIDController sharedInstance] isMonitoring] && [currentObservers containsObject:[ASTouchIDController sharedInstance]]) {
-		[[[ASTouchIDController sharedInstance] oldObservers] removeObject:arg1];
-		if ([currentObservers containsObject:arg1]) {
-			[currentObservers removeObject:arg1];
-		}
-	} else {
-		%orig;
-	}
-}
-
-- (void)matchResult:(id)result withDetails:(id)details {
-	%orig;
-	NSHashTable *currentObservers = [MSHookIvar<NSHashTable*>(self, "_observers") copy];
-	for (id observer in currentObservers) {
-		if ([observer respondsToSelector:@selector(matchResult:withDetails:)]) {
-			[observer matchResult:result withDetails:details];
-		}
-	}
 }
 %end
 

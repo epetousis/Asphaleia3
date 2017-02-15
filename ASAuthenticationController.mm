@@ -287,7 +287,7 @@ static ASAuthenticationController *sharedCommonObj;
 
 - (void)receivedNotificationOfName:(NSString *)name fingerprint:(id)fingerprint {
     if (self.currentHSIconView) {
-        if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+        if ([fingerprint isKindOfClass:objc_getClass("BiometricKitIdentity")]) {
             if (![[ASPreferences sharedInstance] fingerprintProtectsSecureItems:[fingerprint name]]) {
               name = @"com.a3tweaks.asphaleia.authfailed";
             }
@@ -360,7 +360,7 @@ static ASAuthenticationController *sharedCommonObj;
 // ASAuthenticationAlert delegate methods
 - (void)authAlertView:(ASAuthenticationAlert *)alertView dismissed:(BOOL)dismissed authorised:(BOOL)authorised fingerprint:(BiometricKitIdentity *)fingerprint {
     BOOL correctFingerUsed = YES;
-    if ([fingerprint isKindOfClass:NSClassFromString(@"BiometricKitIdentity")]) {
+    if ([fingerprint isKindOfClass:objc_getClass("BiometricKitIdentity")]) {
         correctFingerUsed = NO;
         switch (self.currentAuthAlert.tag) {
             case ASAuthenticationItem:
