@@ -118,13 +118,10 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	}
 	starting = YES;
 
-	notify_post(DISABLE_VH);
-
-	id activator = [objc_getClass("LAActivator") sharedInstance];
+/*
+	LAActivator *activator = [objc_getClass("LAActivator") sharedInstance];
 	if (activator) {
-		id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
-		id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
-		id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
+		LAEvent *event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:activator.currentEventMode];
 		if (event) {
 			activatorListenerNames = [activator assignedListenerNamesForEvent:event];
 			if (activatorListenerNames) {
@@ -133,25 +130,8 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 				}
 			}
 		}
-
-		if (eventSpringBoard) {
-			activatorListenerNamesSpringBoard = [activator assignedListenerNamesForEvent:eventSpringBoard];
-			if (activatorListenerNamesSpringBoard) {
-				for (NSString *listenerName in activatorListenerNamesSpringBoard) {
-					[activator removeListenerAssignment:listenerName fromEvent:eventSpringBoard];
-				}
-			}
-		}
-
-		if (eventLockscreen) {
-			activatorListenerNamesLS = [activator assignedListenerNamesForEvent:eventLockscreen];
-			if (activatorListenerNamesLS) {
-				for (NSString *listenerName in activatorListenerNamesLS) {
-					[activator removeListenerAssignment:listenerName fromEvent:eventLockscreen];
-				}
-			}
-		}
 	}
+*/
 
 	_SBUIBiometricKitInterface *interface = [[objc_getClass("BiometricKit") manager] delegate];
 	_oldDelegate = interface.delegate;
@@ -178,7 +158,7 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 	asphaleiaLogMsg(@"Touch ID monitoring began");
 }
 
--(void)stopMonitoring {
+- (void)stopMonitoring {
 	if (!self.isMonitoring || stopping || ![ASPreferences isTouchIDDevice]) {
 		return;
 	}
@@ -191,32 +171,19 @@ void stopMonitoringNotification(CFNotificationCenterRef center, void *observer, 
 
 	_oldDelegate = nil;
 
-	notify_post(ENABLE_VH);
-
-	id activator = [objc_getClass("LAActivator") sharedInstance];
-  if (activator && activatorListenerNames && activatorListenerNamesSpringBoard) {
+/*
+	LAActivator *activator = [objc_getClass("LAActivator") sharedInstance];
+  if (activator && activatorListenerNames) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^(void){
-			id event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"application"]; // LAEventNameFingerprintSensorPressSingle
-			id eventSpringBoard = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"springboard"];
-			id eventLockscreen = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:@"lockscreen"];
+			LAEvent *event = [objc_getClass("LAEvent") eventWithName:@"libactivator.fingerprint-sensor.press.single" mode:activator.currentEventMode];
 			if (event) {
 				for (NSString *listenerName in activatorListenerNames) {
 					[activator addListenerAssignment:listenerName toEvent:event];
 				}
 			}
-			if (eventSpringBoard) {
-				for (NSString *listenerName in activatorListenerNamesSpringBoard) {
-					[activator addListenerAssignment:listenerName toEvent:eventSpringBoard];
-				}
-			}
-
-			if (eventLockscreen) {
-				for (NSString *listenerName in activatorListenerNamesLS) {
-					[activator addListenerAssignment:listenerName toEvent:eventLockscreen];
-				}
-			}
 		});
 	}
+*/
 
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 	Class la = objc_getClass("LASharedActivator");

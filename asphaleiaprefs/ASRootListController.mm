@@ -76,15 +76,14 @@
 		[(UIViewController *)self presentViewController:pinVC animated:YES completion:NULL];
 	}
 }
-/*
+
 - (void)goBack {
 	_enteredCorrectly = NO;
 	self.alreadyAnimatedOnce = NO;
 	self.passcodeViewIsTransitioning = NO;
-	//[[[self parentController] navigationController] popViewControllerAnimated:YES];
-	[[self rootController] dismissPopoverAnimated:YES];
+	[[[self rootController] navigationController] popToRootViewControllerAnimated:YES];
 }
-*/
+
 - (void)authenticated {
 	_enteredCorrectly = YES;
 }
