@@ -220,6 +220,8 @@ UIWindow *blurredWindow;
 
 - (void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
+	HBLogDebug(@"_finishUIUnlockFromSource");
+
 	if ([[ASPreferences sharedInstance] delayAppSecurity]) {
 		[ASPreferences sharedInstance].itemSecurityDisabled = YES;
 		currentTempGlobalDisableTimer = [NSTimer scheduledTimerWithTimeInterval:[[ASPreferences sharedInstance] appSecurityDelayTime] block:^{
@@ -254,9 +256,10 @@ UIWindow *blurredWindow;
 }
 %end
 
-%hook SBLockScreenViewController
+%hook SBDashBoardViewController
 - (void)viewDidDisappear:(BOOL)animated {
 	%orig;
+	HBLogDebug(@"viewDidDisappear");
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 	if ([[ASPreferences sharedInstance] requiresSecurityForApp:[frontmostApp bundleIdentifier]] && ![[ASPreferences sharedInstance] unlockToAppUnsecurely] && frontmostApp && ![ASAuthenticationController sharedInstance].catchAllIgnoreRequest) {
@@ -268,7 +271,7 @@ UIWindow *blurredWindow;
 			}
 
 			if (wasCancelled) {
-				[(SpringBoard *)[UIApplication sharedApplication] handleGotoHomeScreenShortcut:nil];
+				[(SpringBoard *)[UIApplication sharedApplication] _handleGotoHomeScreenShortcut:nil];
 			}
 		}];
 	}

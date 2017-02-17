@@ -162,7 +162,7 @@
 -(void)_applicationOpenURL:(id)url withApplication:(id)application sender:(id)sender publicURLsOnly:(BOOL)only animating:(BOOL)animating activationSettings:(id)settings withResult:(id)result;
 -(BOOL)_requestPermissionToOpenURL:(id)openURL withApplication:(id)application sender:(id)sender;
 -(void)applicationOpenURL:(id)url;
-- (void)handleGotoHomeScreenShortcut:(id)arg1;
+-(void)_handleGotoHomeScreenShortcut:(id)arg1 ;
 @end
 
 @interface SBBannerController : NSObject
