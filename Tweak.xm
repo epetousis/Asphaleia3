@@ -220,8 +220,6 @@ UIWindow *blurredWindow;
 
 - (void)_finishUIUnlockFromSource:(int)source withOptions:(id)options {
 	%orig;
-	HBLogDebug(@"_finishUIUnlockFromSource");
-
 	if ([[ASPreferences sharedInstance] delayAppSecurity]) {
 		[ASPreferences sharedInstance].itemSecurityDisabled = YES;
 		currentTempGlobalDisableTimer = [NSTimer scheduledTimerWithTimeInterval:[[ASPreferences sharedInstance] appSecurityDelayTime] block:^{
@@ -259,7 +257,6 @@ UIWindow *blurredWindow;
 %hook SBDashBoardViewController
 - (void)viewDidDisappear:(BOOL)animated {
 	%orig;
-	HBLogDebug(@"viewDidDisappear");
 
 	SBApplication *frontmostApp = [(SpringBoard *)[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 	if ([[ASPreferences sharedInstance] requiresSecurityForApp:[frontmostApp bundleIdentifier]] && ![[ASPreferences sharedInstance] unlockToAppUnsecurely] && frontmostApp && ![ASAuthenticationController sharedInstance].catchAllIgnoreRequest) {
@@ -320,11 +317,11 @@ static BOOL searchControllerAuthenticating;
 }
 %end
 
-%hook CCUIControlCenterViewController
+%hook SBControlCenterController
 static BOOL controlCentreAuthenticating;
 static BOOL controlCentreHasAuthenticated;
 
-- (void)controlCenterWillPresent {
+- (void)presentAnimated:(BOOL)animated completion:(id)completion {
 	if (controlCentreAuthenticating) {
 		return;
 	}
@@ -337,16 +334,34 @@ static BOOL controlCentreHasAuthenticated;
 	controlCentreAuthenticating = YES;
 	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
 	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
-		controlCentreAuthenticating = NO;
-		[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
-		if (!wasCancelled) {
-			controlCentreHasAuthenticated = YES;
-			%orig;
-		}
+	controlCentreAuthenticating = NO;
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+	if (!wasCancelled) {
+		controlCentreHasAuthenticated = YES;
+		%orig;
+	}
 	}];
 }
 
-- (void)controlCenterDidDismiss {
+- (void)_beginTransitionWithTouchLocation:(CGPoint)touchLocation {
+	if (![[ASPreferences sharedInstance] secureControlCentre] || controlCentreHasAuthenticated || controlCentreAuthenticating) {
+		%orig;
+		return;
+	}
+
+	controlCentreAuthenticating = YES;
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:YES];
+	[[ASAuthenticationController sharedInstance] authenticateFunction:ASAuthenticationAlertControlCentre dismissedHandler:^(BOOL wasCancelled) {
+	controlCentreAuthenticating = NO;
+	[[ASTouchIDController sharedInstance] setShouldBlockLockscreenMonitor:NO];
+	if (!wasCancelled) {
+		controlCentreHasAuthenticated = YES;
+		[self presentAnimated:YES];
+	}
+	}];
+}
+
+- (void)_endPresentation {
 	controlCentreHasAuthenticated = NO;
 	controlCentreAuthenticating = NO;
 	%orig;
